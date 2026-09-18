@@ -1,17 +1,16 @@
-export type CellType =
-  | "empty"
-  | "placed"
-  | "obstacle"
-  | "item"
-  | "glowing";
+export type CellType = "empty" | "placed" | "obstacle" | "star";
 
 export type SkillType = "bomb" | "freeze" | "heal";
 
 export interface Cell {
   type: CellType;
   color?: string;
-  itemType?: SkillType;
-  isGlow?: boolean;
+  // STARTラインから隣接接続されているか
+  isConnected?: boolean;
+  // ウイルスに感染して黒く変化しているか
+  isInfected?: boolean;
+  // 回路パスの最前線（白く光る最上部ミノ）か
+  isTopCircuit?: boolean;
 }
 
 export type TetrominoType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";
@@ -24,20 +23,20 @@ export interface Tetromino {
   color: string;
 }
 
-export interface SkillItem {
-  id: string;
-  type: SkillType;
-  name: string;
-  description: string;
-  iconName: string;
-}
-
 export type GameStatus =
   | "ready"
   | "playing"
   | "paused"
   | "cleared"
   | "gameover";
+
+export interface CharacterPosition {
+  x: number; // グリッド列 (col)
+  y: number; // グリッド行 (row)
+  targetX: number;
+  targetY: number;
+  isClimbing: boolean;
+}
 
 export interface StageData {
   id: number;
@@ -46,19 +45,21 @@ export interface StageData {
   subtitle: string;
   description: string;
   isUnlocked: boolean;
-  virusRiseIntervalMs: number; // ウイルスが1行上昇するミリ秒
-  damagePerSecondInVirus: number; // 侵食エリア内のミノによるHP減少速度
+  // ウイルスが回路を1マス感染侵食するインターバル（ミリ秒）
+  infectionIntervalMs: number;
   initialObstacles: [number, number][]; // [row, col]
-  initialItems: {
-    pos: [number, number]; // [row, col]
-    skill: SkillType;
-  }[];
+  initialStars: [number, number][]; // [row, col]
+  startCols: number[]; // 最下部START地点の列番号
+  goalRow: number; // 最上部GOALラインの行番号
 }
 
 export interface GameStats {
   score: number;
-  linesConnected: number;
-  itemsCollected: number;
   clearTimeSeconds: number;
-  highestRow: number;
+  clearTimeMs: number;
+  minoCount: number; // 置いたミノの数
+  bonusStars: number; // 回収した星の数
+  totalStars: number; // ステージ内の総星数
+  stageNumber: number;
+  bestScore: number;
 }

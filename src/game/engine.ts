@@ -1,6 +1,7 @@
 import { sounds } from "../audio/soundSystem";
 import type {
   Cell,
+  CharacterPosition,
   GameStats,
   GameStatus,
   SkillType,
@@ -8,7 +9,14 @@ import type {
   Tetromino,
   TetrominoType,
 } from "../types/game";
-import { GOAL_ROW, GRID_HEIGHT, GRID_WIDTH } from "./constants";
+import {
+  BONUS_GOAL_COLS,
+  GOAL_ROW,
+  GRID_HEIGHT,
+  GRID_WIDTH,
+  START_COLS,
+  START_ROW,
+} from "./constants";
 import {
   TetrominoBag,
   calculateGhostY,
@@ -17,23 +25,14 @@ import {
   tryRotate,
 } from "./tetromino";
 
-export interface BombEffect {
-  x: number;
-  y: number;
-  radius: number;
-  maxRadius: number;
-  progress: number;
-}
-
 export interface EngineCallbacks {
   onStatusChange: (status: GameStatus) => void;
   onStatsChange: (stats: GameStats) => void;
-  onHpChange: (hp: number) => void;
-  onVirusRowChange: (row: number) => void;
-  onSkillsChange: (skills: SkillType[]) => void;
+  onHeartsChange: (hearts: number) => void;
+  onCharacterMove: (pos: CharacterPosition) => void;
   onHoldChange: (hold: TetrominoType | null) => void;
   onNextChange: (next: TetrominoType[]) => void;
-  onStageClear: (stats: GameStats) => void;
+  onStageClear: (isBonusClear: boolean, stats: GameStats) => void;
   onGameOver: (reason: string, stats: GameStats) => void;
 }
 
@@ -43,13 +42,18 @@ export class GameEngine {
   public holdPiece: TetrominoType | null = null;
   public canHold = true;
   public nextPieces: TetrominoType[] = [];
-  public skills: SkillType[] = [];
+  public skills: SkillType[] = ["bomb"]; // 初期ボム1回所持
 
-  public hp = 100;
-  public maxHp = 100;
-  // ウイルス侵食ライン (行インデックス。20から始まり、0へ向かって上昇)
-  public virusRow: number = GRID_HEIGHT;
-  public virusFreezeTimerMs = 0;
+  public hearts = 5; // ハート5つ
+  public maxHearts = 5;
+
+  public characterPos: CharacterPosition = {
+    x: 5.5,
+    y: START_ROW,
+    targetX: 5.5,
+    targetY: START_ROW,
+    isClimbing: false,
+  };
 
   public status: GameStatus = "ready";
   public stage: StageData;
@@ -58,29 +62,34 @@ export class GameEngine {
   private bag: TetrominoBag;
   private lastFrameTime = 0;
   private dropTimerMs = 0;
-  private dropIntervalMs = 900; // 通常落下間隔
+  private dropIntervalMs = 900;
   private lockDelayTimerMs = 0;
   private isLocking = false;
-  private alertSoundTimer = 0;
+
+  // ウイルス感染タイマー
+  private infectionTimerMs = 0;
 
   // 統計
   public score = 0;
-  public linesConnected = 0;
-  public itemsCollected = 0;
+  public minoCount = 0;
+  public bonusStars = 0;
+  public totalStars = 0;
   public startTimeMs = 0;
   public elapsedTimeMs = 0;
+  public bestScore = 987654;
 
-  // 爆発エフェクト演出用
-  public activeBombs: BombEffect[] = [];
+  // 接続された回路パス（STARTから昇順）
+  public connectedPath: [number, number][] = [];
 
   constructor(stage: StageData, callbacks: EngineCallbacks) {
     this.stage = stage;
     this.callbacks = callbacks;
     this.bag = new TetrominoBag();
+    this.totalStars = stage.initialStars.length;
     this.initGrid();
   }
 
-  // グリッドの初期化
+  // グリッド初期化
   public initGrid() {
     this.grid = [];
     for (let r = 0; r < GRID_HEIGHT; r++) {
@@ -90,31 +99,36 @@ export class GameEngine {
       }
     }
 
-    // ステージ障害物の配置
+    // 障害物の配置
     for (const [r, c] of this.stage.initialObstacles) {
       if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
         this.grid[r][c] = { type: "obstacle" };
       }
     }
 
-    // ステージアイテム（スキルカプセル）の配置
-    for (const item of this.stage.initialItems) {
-      const [r, c] = item.pos;
+    // 星（★）の配置
+    for (const [r, c] of this.stage.initialStars) {
       if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
-        this.grid[r][c] = { type: "item", itemType: item.skill };
+        this.grid[r][c] = { type: "star" };
       }
     }
 
-    this.virusRow = GRID_HEIGHT;
-    this.hp = 100;
+    this.characterPos = {
+      x: 5.5,
+      y: START_ROW,
+      targetX: 5.5,
+      targetY: START_ROW,
+      isClimbing: false,
+    };
+
+    this.hearts = 5;
     this.score = 0;
-    this.linesConnected = 0;
-    this.itemsCollected = 0;
-    this.skills = [];
+    this.minoCount = 0;
+    this.bonusStars = 0;
     this.holdPiece = null;
     this.canHold = true;
-    this.virusFreezeTimerMs = 0;
-    this.activeBombs = [];
+    this.connectedPath = [];
+    this.infectionTimerMs = 0;
   }
 
   // ゲーム開始
@@ -127,15 +141,14 @@ export class GameEngine {
     this.spawnNextPiece();
 
     this.callbacks.onStatusChange(this.status);
-    this.callbacks.onHpChange(this.hp);
-    this.callbacks.onVirusRowChange(this.virusRow);
-    this.callbacks.onSkillsChange(this.skills);
+    this.callbacks.onHeartsChange(this.hearts);
+    this.callbacks.onCharacterMove(this.characterPos);
     this.callbacks.onHoldChange(this.holdPiece);
     this.callbacks.onNextChange(this.nextPieces);
     this.updateStats();
   }
 
-  // 一時停止切り替え
+  // 一時停止
   public togglePause() {
     if (this.status === "playing") {
       this.status = "paused";
@@ -147,7 +160,7 @@ export class GameEngine {
     }
   }
 
-  // 新しいミノを出現させる
+  // ミノ出現
   private spawnNextPiece() {
     const nextType = this.bag.getNext();
     this.currentPiece = createTetromino(nextType);
@@ -157,67 +170,46 @@ export class GameEngine {
     this.lockDelayTimerMs = 0;
     this.dropTimerMs = 0;
 
-    // 出現時に既に衝突している場合＝窒息ゲームオーバー
+    // 出現位置で衝突＝進行不能ゲームオーバー
     if (checkCollision(this.currentPiece, this.grid)) {
-      this.triggerGameOver("回路の閉塞：ミノの出現口が塞がれました！");
+      this.triggerGameOver(
+        "ミノ上部に障害物があり置けない進行不能状態になりました",
+      );
       return;
     }
 
     this.callbacks.onNextChange(this.nextPieces);
   }
 
-  // メインゲームループ更新（60fps requestAnimationFrameから呼ばれる）
+  // 毎フレーム更新（60fps）
   public update(now: number) {
     if (this.status !== "playing") return;
 
-    const deltaMs = Math.min(now - this.lastFrameTime, 100); // 極端なラグ防止
+    const deltaMs = Math.min(now - this.lastFrameTime, 100);
     this.lastFrameTime = now;
     this.elapsedTimeMs = now - this.startTimeMs;
 
-    // 1. ウイルスのフリーズタイマーまたは上昇処理
-    if (this.virusFreezeTimerMs > 0) {
-      this.virusFreezeTimerMs -= deltaMs;
-    } else {
-      // 一定間隔で1マス上昇
-      const speed = 1 / (this.stage.virusRiseIntervalMs / deltaMs);
-      this.virusRow = Math.max(0, this.virusRow - speed);
-    }
-    this.callbacks.onVirusRowChange(this.virusRow);
-
-    // 2. ウイルス侵食エリア内のミノによるライフ減少
-    let submergedBlocks = 0;
-    const virusLineFloor = Math.floor(this.virusRow);
-    for (let r = virusLineFloor; r < GRID_HEIGHT; r++) {
-      for (let c = 0; c < GRID_WIDTH; c++) {
-        if (this.grid[r][c].type === "placed") {
-          submergedBlocks++;
-        }
+    // 1. ウイルス感染進行（STARTから繋がった回路を順に黒く染める）
+    if (this.connectedPath.length > 0) {
+      this.infectionTimerMs += deltaMs;
+      if (this.infectionTimerMs >= this.stage.infectionIntervalMs) {
+        this.infectionTimerMs = 0;
+        this.advanceInfection();
       }
     }
 
-    // 侵食エリア内にブロックがあればHP減少
-    if (submergedBlocks > 0) {
-      const damage =
-        (this.stage.damagePerSecondInVirus / 1000) *
-        deltaMs *
-        (1 + submergedBlocks * 0.05);
-      this.hp = Math.max(0, this.hp - damage);
-      this.callbacks.onHpChange(this.hp);
-
-      // アラート音（1秒間隔）
-      this.alertSoundTimer += deltaMs;
-      if (this.alertSoundTimer > 1000) {
-        sounds.playAlert();
-        this.alertSoundTimer = 0;
-      }
+    // 2. イティエルの移動補間（なめらかに登る）
+    const dx = this.characterPos.targetX - this.characterPos.x;
+    const dy = this.characterPos.targetY - this.characterPos.y;
+    if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+      this.characterPos.x += dx * 0.15;
+      this.characterPos.y += dy * 0.15;
+      this.characterPos.isClimbing = true;
+      this.callbacks.onCharacterMove({ ...this.characterPos });
     } else {
-      this.alertSoundTimer = 0;
-    }
-
-    // HPゼロでゲームオーバー
-    if (this.hp <= 0) {
-      this.triggerGameOver("ウイルス侵食：システムのライフが尽きました！");
-      return;
+      this.characterPos.x = this.characterPos.targetX;
+      this.characterPos.y = this.characterPos.targetY;
+      this.characterPos.isClimbing = false;
     }
 
     // 3. ミノの自動落下
@@ -230,12 +222,10 @@ export class GameEngine {
           this.isLocking = false;
           this.lockDelayTimerMs = 0;
         } else {
-          // 接地中
           this.isLocking = true;
         }
       }
 
-      // 接地後のロックディレイ（約500ms猶予）
       if (this.isLocking) {
         this.lockDelayTimerMs += deltaMs;
         if (this.lockDelayTimerMs >= 500) {
@@ -244,17 +234,37 @@ export class GameEngine {
       }
     }
 
-    // 4. 爆発エフェクトの更新
-    for (let i = this.activeBombs.length - 1; i >= 0; i--) {
-      const bomb = this.activeBombs[i];
-      bomb.progress += deltaMs / 400; // 400msのアニメーション
-      bomb.radius = bomb.maxRadius * bomb.progress;
-      if (bomb.progress >= 1) {
-        this.activeBombs.splice(i, 1);
+    this.updateStats();
+  }
+
+  // ウイルス感染を一歩進める
+  private advanceInfection() {
+    // connectedPath は START から最上部に向かって並んでいる
+    for (const [r, c] of this.connectedPath) {
+      const cell = this.grid[r][c];
+      if (!cell.isInfected) {
+        cell.isInfected = true;
+
+        // もし感染したマスが、イティエルがいる最上部ミノ（またはイティエルの現在地）だった場合
+        if (
+          cell.isTopCircuit ||
+          (Math.round(this.characterPos.y) === r &&
+            Math.round(this.characterPos.x) === c)
+        ) {
+          sounds.playAlert();
+          this.hearts = Math.max(0, this.hearts - 1);
+          this.callbacks.onHeartsChange(this.hearts);
+
+          if (this.hearts <= 0) {
+            this.triggerGameOver(
+              "最上部のミノがウイルスに追いつかれました！",
+            );
+            return;
+          }
+        }
+        break;
       }
     }
-
-    this.updateStats();
   }
 
   // ミノをグリッドに固定する
@@ -263,9 +273,8 @@ export class GameEngine {
 
     sounds.playLock();
     const { matrix, x, y, color } = this.currentPiece;
-    let reachedGoal = false;
+    this.minoCount++;
 
-    // グリッドへの書き込み & アイテム取得判定
     for (let r = 0; r < matrix.length; r++) {
       for (let c = 0; c < matrix[r].length; c++) {
         if (matrix[r][c] !== 0) {
@@ -278,172 +287,127 @@ export class GameEngine {
             targetX >= 0 &&
             targetX < GRID_WIDTH
           ) {
-            // アイテムの上に重ねた（接続した）場合
-            if (this.grid[targetY][targetX].type === "item") {
-              const itemType =
-                this.grid[targetY][targetX].itemType || "bomb";
-              this.collectItem(itemType);
+            // 星（★）を回収
+            if (this.grid[targetY][targetX].type === "star") {
+              sounds.playItemGet();
+              this.bonusStars++;
+              this.score += 800;
             }
 
             this.grid[targetY][targetX] = {
               type: "placed",
               color: color,
+              isConnected: false,
+              isInfected: false,
+              isTopCircuit: false,
             };
-
-            // ゴールライン判定（最上部到達）
-            if (targetY <= GOAL_ROW) {
-              reachedGoal = true;
-            }
           }
         }
       }
     }
 
     this.currentPiece = null;
-    this.score += 20;
+    this.score += 50;
 
-    // 回路フル接続（ライン揃え）の判定（消去はせずボーナス発動）
-    this.checkLineBonuses();
+    // 回路接続の再計算（STARTからBFS探索）
+    this.recalculateCircuit();
 
-    // ゴール到達判定
-    if (reachedGoal) {
-      this.triggerStageClear();
-      return;
-    }
-
-    // 次のミノを出現
+    // 次のミノ出現
     this.spawnNextPiece();
   }
 
-  // アイテム回収
-  private collectItem(type: SkillType) {
-    sounds.playItemGet();
-    this.itemsCollected++;
-    this.score += 150;
-
-    // スキルスロットに追加（最大3個）
-    if (this.skills.length < 3) {
-      this.skills.push(type);
-      this.callbacks.onSkillsChange([...this.skills]);
-    }
-  }
-
-  // 横1列フル接続（ライン揃えボーナス）
-  private checkLineBonuses() {
-    let connectedLines = 0;
-
+  // STARTから繋がる回路の再計算
+  private recalculateCircuit() {
+    // 既存のフラグをリセット（感染済みフラグは維持）
     for (let r = 0; r < GRID_HEIGHT; r++) {
-      let isFull = true;
       for (let c = 0; c < GRID_WIDTH; c++) {
-        const cellType = this.grid[r][c].type;
-        if (cellType !== "placed" && cellType !== "glowing") {
-          isFull = false;
-          break;
-        }
-      }
-
-      if (isFull) {
-        // 初めて揃ったラインを通電状態（glowing）にする
-        let isNewLine = false;
-        for (let c = 0; c < GRID_WIDTH; c++) {
-          if (this.grid[r][c].type === "placed") {
-            this.grid[r][c].type = "glowing";
-            this.grid[r][c].isGlow = true;
-            isNewLine = true;
-          }
-        }
-        if (isNewLine) {
-          connectedLines++;
+        if (this.grid[r][c].type === "placed") {
+          this.grid[r][c].isConnected = false;
+          this.grid[r][c].isTopCircuit = false;
         }
       }
     }
 
-    if (connectedLines > 0) {
-      sounds.playLineBonus();
-      this.linesConnected += connectedLines;
-      this.score += connectedLines * 300;
+    // BFSでSTART地点から隣接しているplacedブロックを探索
+    const queue: [number, number][] = [];
+    const visited = new Set<string>();
 
-      // ウイルス一時フリーズ（1ラインにつき3.5秒）
-      this.virusFreezeTimerMs += connectedLines * 3500;
-
-      // HP微回復 (+15% × ライン数)
-      this.hp = Math.min(this.maxHp, this.hp + connectedLines * 15);
-      this.callbacks.onHpChange(this.hp);
-    }
-  }
-
-  // スキル発動
-  public useSkill(index: number) {
-    if (index < 0 || index >= this.skills.length) return;
-    const skill = this.skills[index];
-    this.skills.splice(index, 1);
-    this.callbacks.onSkillsChange([...this.skills]);
-
-    if (skill === "bomb") {
-      this.executeBomb();
-    } else if (skill === "freeze") {
-      sounds.playItemGet();
-      this.virusFreezeTimerMs += 6000; // 6秒停止
-    } else if (skill === "heal") {
-      sounds.playItemGet();
-      this.hp = Math.min(this.maxHp, this.hp + 40);
-      this.callbacks.onHpChange(this.hp);
-    }
-  }
-
-  // ボムスキル実行：現在操作中ミノの周囲3x3マスの障害物とブロックを消去
-  private executeBomb() {
-    sounds.playBomb();
-
-    let centerX = 5;
-    let centerY = 10;
-    if (this.currentPiece) {
-      centerX =
-        this.currentPiece.x +
-        Math.floor(this.currentPiece.matrix[0].length / 2);
-      centerY =
-        this.currentPiece.y +
-        Math.floor(this.currentPiece.matrix.length / 2);
-    }
-
-    // 爆発エフェクト追加
-    this.activeBombs.push({
-      x: centerX,
-      y: centerY,
-      radius: 0,
-      maxRadius: 3.5,
-      progress: 0,
-    });
-
-    // 周囲3x3（-1〜+1）の範囲を破壊
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        const targetR = centerY + dr;
-        const targetC = centerX + dc;
-        if (
-          targetR >= 0 &&
-          targetR < GRID_HEIGHT &&
-          targetC >= 0 &&
-          targetC < GRID_WIDTH
-        ) {
-          if (
-            this.grid[targetR][targetC].type === "obstacle" ||
-            this.grid[targetR][targetC].type === "placed" ||
-            this.grid[targetR][targetC].type === "glowing"
-          ) {
-            this.grid[targetR][targetC] = { type: "empty" };
-            this.score += 50;
+    // 最下部START地点のブロックをシードにする
+    for (const startCol of START_COLS) {
+      // START行直上またはSTART行にミノがあるか
+      for (let r = START_ROW; r >= START_ROW - 1; r--) {
+        if (this.grid[r][startCol].type === "placed") {
+          const key = `${r},${startCol}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push([r, startCol]);
           }
         }
       }
     }
 
-    // ボム発動後、ミノが空中に浮いて落下可能になったかチェック
-    this.isLocking = false;
-    this.lockDelayTimerMs = 0;
+    const path: [number, number][] = [];
+    let topRow = GRID_HEIGHT;
+    let topCell: [number, number] | null = null;
+
+    const dirs = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ];
+
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      if (!curr) break;
+      const [cr, cc] = curr;
+      path.push([cr, cc]);
+      this.grid[cr][cc].isConnected = true;
+
+      if (cr < topRow) {
+        topRow = cr;
+        topCell = [cr, cc];
+      }
+
+      for (const [dr, dc] of dirs) {
+        const nr = cr + dr;
+        const nc = cc + dc;
+        if (nr >= 0 && nr < GRID_HEIGHT && nc >= 0 && nc < GRID_WIDTH) {
+          if (this.grid[nr][nc].type === "placed") {
+            const key = `${nr},${nc}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              queue.push([nr, nc]);
+            }
+          }
+        }
+      }
+    }
+
+    // 最下部から上に向かう順序でソート
+    path.sort((a, b) => b[0] - a[0]);
+    this.connectedPath = path;
+
+    // 最上部ブロックの特定＆イティエルの目標位置
+    if (topCell) {
+      const [tr, tc] = topCell;
+      this.grid[tr][tc].isTopCircuit = true;
+
+      // イティエルが登る目標座標
+      this.characterPos.targetX = tc + 0.5;
+      this.characterPos.targetY = tr;
+
+      // GOAL判定（行2以下のGOALラインに到達したか）
+      if (tr <= GOAL_ROW) {
+        // BONUSゴール判定（列10〜11に到達したか）
+        const isBonus = BONUS_GOAL_COLS.includes(tc);
+        this.triggerStageClear(isBonus);
+        return;
+      }
+    }
   }
 
-  // 操作：左移動
+  // 操作系
   public moveLeft() {
     if (this.status !== "playing" || !this.currentPiece) return;
     if (!checkCollision(this.currentPiece, this.grid, -1, 0)) {
@@ -453,7 +417,6 @@ export class GameEngine {
     }
   }
 
-  // 操作：右移動
   public moveRight() {
     if (this.status !== "playing" || !this.currentPiece) return;
     if (!checkCollision(this.currentPiece, this.grid, 1, 0)) {
@@ -463,7 +426,6 @@ export class GameEngine {
     }
   }
 
-  // 操作：回転
   public rotate() {
     if (this.status !== "playing" || !this.currentPiece) return;
     const result = tryRotate(this.currentPiece, this.grid);
@@ -476,7 +438,6 @@ export class GameEngine {
     }
   }
 
-  // 操作：ソフトドロップ
   public softDrop() {
     if (this.status !== "playing" || !this.currentPiece) return;
     if (!checkCollision(this.currentPiece, this.grid, 0, 1)) {
@@ -488,18 +449,15 @@ export class GameEngine {
     }
   }
 
-  // 操作：ハードドロップ
   public hardDrop() {
     if (this.status !== "playing" || !this.currentPiece) return;
     const ghostY = calculateGhostY(this.currentPiece, this.grid);
-    const dropDistance = ghostY - this.currentPiece.y;
-    this.score += dropDistance * 2;
+    this.score += (ghostY - this.currentPiece.y) * 2;
     this.currentPiece.y = ghostY;
     sounds.playHardDrop();
     this.lockPiece();
   }
 
-  // 操作：ホールド
   public hold() {
     if (this.status !== "playing" || !this.currentPiece || !this.canHold)
       return;
@@ -522,50 +480,76 @@ export class GameEngine {
     this.callbacks.onHoldChange(this.holdPiece);
   }
 
+  public useBomb() {
+    if (this.skills.length === 0) return;
+    this.skills.pop();
+    sounds.playBomb();
+
+    // イティエルの現在位置または操作ミノの周囲2マスを破壊
+    const cx = this.currentPiece
+      ? this.currentPiece.x + 1
+      : Math.round(this.characterPos.x);
+    const cy = this.currentPiece
+      ? this.currentPiece.y + 1
+      : Math.round(this.characterPos.y);
+
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        const tr = cy + dr;
+        const tc = cx + dc;
+        if (tr >= 0 && tr < GRID_HEIGHT && tc >= 0 && tc < GRID_WIDTH) {
+          if (
+            this.grid[tr][tc].type === "obstacle" ||
+            this.grid[tr][tc].type === "placed"
+          ) {
+            this.grid[tr][tc] = { type: "empty" };
+          }
+        }
+      }
+    }
+
+    this.recalculateCircuit();
+  }
+
   private resetLockDelay() {
     if (this.isLocking) {
       this.lockDelayTimerMs = 0;
     }
   }
 
-  // 最高到達点を計算
-  private getHighestRow(): number {
-    for (let r = 0; r < GRID_HEIGHT; r++) {
-      for (let c = 0; c < GRID_WIDTH; c++) {
-        if (
-          this.grid[r][c].type === "placed" ||
-          this.grid[r][c].type === "glowing"
-        ) {
-          return r;
-        }
-      }
-    }
-    return GRID_HEIGHT;
-  }
-
   private updateStats() {
     const stats: GameStats = {
       score: this.score,
-      linesConnected: this.linesConnected,
-      itemsCollected: this.itemsCollected,
       clearTimeSeconds: Math.floor(this.elapsedTimeMs / 1000),
-      highestRow: this.getHighestRow(),
+      clearTimeMs: this.elapsedTimeMs,
+      minoCount: this.minoCount,
+      bonusStars: this.bonusStars,
+      totalStars: this.totalStars,
+      stageNumber: this.stage.id,
+      bestScore: this.bestScore,
     };
     this.callbacks.onStatsChange(stats);
   }
 
-  private triggerStageClear() {
+  private triggerStageClear(isBonusClear: boolean) {
     this.status = "cleared";
     sounds.playClear();
+    this.score += isBonusClear ? 10000 : 5000;
+    this.score += this.bonusStars * 1000;
+    this.score += this.hearts * 500;
+
     const stats: GameStats = {
-      score: this.score + Math.floor(this.hp) * 10,
-      linesConnected: this.linesConnected,
-      itemsCollected: this.itemsCollected,
+      score: this.score,
       clearTimeSeconds: Math.floor(this.elapsedTimeMs / 1000),
-      highestRow: this.getHighestRow(),
+      clearTimeMs: this.elapsedTimeMs,
+      minoCount: this.minoCount,
+      bonusStars: this.bonusStars,
+      totalStars: this.totalStars,
+      stageNumber: this.stage.id,
+      bestScore: Math.max(this.bestScore, this.score),
     };
     this.callbacks.onStatusChange(this.status);
-    this.callbacks.onStageClear(stats);
+    this.callbacks.onStageClear(isBonusClear, stats);
   }
 
   private triggerGameOver(reason: string) {
@@ -573,10 +557,13 @@ export class GameEngine {
     sounds.playGameOver();
     const stats: GameStats = {
       score: this.score,
-      linesConnected: this.linesConnected,
-      itemsCollected: this.itemsCollected,
       clearTimeSeconds: Math.floor(this.elapsedTimeMs / 1000),
-      highestRow: this.getHighestRow(),
+      clearTimeMs: this.elapsedTimeMs,
+      minoCount: this.minoCount,
+      bonusStars: this.bonusStars,
+      totalStars: this.totalStars,
+      stageNumber: this.stage.id,
+      bestScore: this.bestScore,
     };
     this.callbacks.onStatusChange(this.status);
     this.callbacks.onGameOver(reason, stats);

@@ -10,7 +10,6 @@ import { GameEngine } from "./game/engine";
 import type {
   GameStats,
   GameStatus,
-  SkillType,
   StageData,
   TetrominoType,
 } from "./types/game";
@@ -24,17 +23,19 @@ export function App() {
 
   // ゲームステート
   const [gameStatus, setGameStatus] = useState<GameStatus>("ready");
-  const [hp, setHp] = useState<number>(100);
-  const [virusRow, setVirusRow] = useState<number>(20);
-  const [skills, setSkills] = useState<SkillType[]>([]);
+  const [hearts, setHearts] = useState<number>(5);
   const [holdPiece, setHoldPiece] = useState<TetrominoType | null>(null);
   const [nextPieces, setNextPieces] = useState<TetrominoType[]>([]);
+  const [isBonusClear, setIsBonusClear] = useState<boolean>(false);
   const [stats, setStats] = useState<GameStats>({
     score: 0,
-    linesConnected: 0,
-    itemsCollected: 0,
     clearTimeSeconds: 0,
-    highestRow: 20,
+    clearTimeMs: 0,
+    minoCount: 0,
+    bonusStars: 0,
+    totalStars: 5,
+    stageNumber: 1,
+    bestScore: 987654,
   });
   const [gameOverReason, setGameOverReason] = useState<string>("");
 
@@ -42,13 +43,13 @@ export function App() {
   const engine = useMemo(() => {
     return new GameEngine(selectedStage, {
       onStatusChange: (status) => setGameStatus(status),
-      onHpChange: (newHp) => setHp(newHp),
-      onVirusRowChange: (row) => setVirusRow(row),
-      onSkillsChange: (newSkills) => setSkills(newSkills),
+      onHeartsChange: (newHearts) => setHearts(newHearts),
+      onCharacterMove: () => {},
       onHoldChange: (piece) => setHoldPiece(piece),
       onNextChange: (next) => setNextPieces(next),
       onStatsChange: (newStats) => setStats(newStats),
-      onStageClear: () => {
+      onStageClear: (isBonus) => {
+        setIsBonusClear(isBonus);
         setScreen("result");
       },
       onGameOver: (reason) => {
@@ -58,7 +59,7 @@ export function App() {
     });
   }, [selectedStage]);
 
-  // サウンドミュート切り替え
+  // サウンド切り替え
   const handleToggleMute = useCallback(() => {
     const muted = sounds.toggleMute();
     setIsMuted(muted);
@@ -82,12 +83,12 @@ export function App() {
     engine.start();
   }, [engine]);
 
-  // タイトル・ステージ選択へ戻る
+  // タイトルへ戻る
   const handleBackToTitle = useCallback(() => {
     setScreen("title");
   }, []);
 
-  // キーボード操作リスナー
+  // キーボード操作
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (screen !== "game" || engine.status !== "playing") {
@@ -136,16 +137,10 @@ export function App() {
           engine.hold();
           break;
         case "1":
+        case "b":
+        case "B":
           e.preventDefault();
-          engine.useSkill(0);
-          break;
-        case "2":
-          e.preventDefault();
-          engine.useSkill(1);
-          break;
-        case "3":
-          e.preventDefault();
-          engine.useSkill(2);
+          engine.useBomb();
           break;
         case "p":
         case "P":
@@ -161,8 +156,7 @@ export function App() {
   }, [screen, engine]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-3 md:p-6 select-none overflow-x-hidden">
-      {/* 画面ルーティング */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-2 sm:p-4 select-none overflow-x-hidden">
       {screen === "title" && (
         <TitleScreen
           onSelectStage={handleSelectStage}
@@ -180,33 +174,28 @@ export function App() {
       )}
 
       {screen === "game" && (
-        <div className="w-full flex flex-col items-center gap-4">
-          <GameUI
-            engine={engine}
-            hp={hp}
-            virusRow={virusRow}
-            skills={skills}
-            holdPiece={holdPiece}
-            nextPieces={nextPieces}
-            stats={stats}
-            isMuted={isMuted}
-            onToggleMute={handleToggleMute}
-            onExitGame={handleBackToTitle}
-          />
-          {/* 中央キャンバス */}
-          <div className="flex justify-center -mt-2">
-            <GameCanvas engine={engine} />
-          </div>
-        </div>
+        <GameUI
+          engine={engine}
+          hearts={hearts}
+          holdPiece={holdPiece}
+          nextPieces={nextPieces}
+          stats={stats}
+          isMuted={isMuted}
+          onToggleMute={handleToggleMute}
+          onExitGame={handleBackToTitle}
+        >
+          <GameCanvas engine={engine} />
+        </GameUI>
       )}
 
       {screen === "result" && (
         <ResultScreen
           isCleared={gameStatus === "cleared"}
+          isBonusClear={isBonusClear}
           gameOverReason={gameOverReason}
           stage={selectedStage}
           stats={stats}
-          hp={hp}
+          hearts={hearts}
           onRetry={handleRetry}
           onSelectStage={handleBackToTitle}
         />

@@ -1,8 +1,11 @@
 import type { StageData, TetrominoType } from "../types/game";
 
-export const GRID_WIDTH = 10;
-export const GRID_HEIGHT = 20;
-export const GOAL_ROW = 1; // 行0〜1にミノが設置されたらゴール到達
+export const GRID_WIDTH = 12; // PDF 5pに合わせたマス幅
+export const GRID_HEIGHT = 22; // PDF 5pに合わせたマス高
+export const GOAL_ROW = 2; // 行0〜2がGOALエリア
+export const START_ROW = 21; // 最下部START行
+export const START_COLS = [5, 6]; // START地点（中央下部）
+export const BONUS_GOAL_COLS = [10, 11]; // 右上のBONUSゴール列
 
 // サイバーネオン調カラーパレット
 export const TETROMINO_SHAPES: Record<
@@ -51,7 +54,7 @@ export const TETROMINO_SHAPES: Record<
       [0, 1, 1],
       [0, 0, 0],
     ],
-    color: "#ff2a6d", // ネオンピンク/レッド
+    color: "#ff2a6d", // ネオンピンク
     glowColor: "rgba(255, 42, 109, 0.6)",
   },
   J: {
@@ -76,50 +79,77 @@ export const TETROMINO_SHAPES: Record<
 
 export const COLORS = {
   background: "#080c18",
-  gridLine: "rgba(0, 240, 255, 0.08)",
+  fieldBg: "#0d1326",
+  gridLine: "rgba(0, 240, 255, 0.07)",
   obstacle: "#475569",
   obstacleBorder: "#94a3b8",
-  goalArea: "rgba(0, 255, 200, 0.15)",
-  goalBorder: "#00ffc8",
-  virusArea: "rgba(255, 0, 80, 0.35)",
-  virusLine: "#ff0055",
-  itemBomb: "#ff3366",
-  itemFreeze: "#00d4ff",
-  itemHeal: "#10b981",
-  connectedGlow: "#00ffff",
+  goalArea: "#00e5ff",
+  goalBonusArea: "#ff007f",
+  startArea: "#00ff88",
+  circuitLine: "#ffffff",
+  circuitGlow: "rgba(0, 255, 200, 0.8)",
+  infectedBlack: "#05070d",
+  infectedBorder: "#ff0055",
+  star: "#ffdd00",
+  starGlow: "rgba(255, 221, 0, 0.8)",
 };
 
-// ステージデータ定義
+// ステージデータ定義（PDF 5pの配置を忠実に反映）
 export const STAGES: StageData[] = [
   {
     id: 1,
     name: "STAGE 1",
-    codeName: "FIREWALL GATEWAY",
-    subtitle: "市ヶ谷外郭ファイアウォール",
+    codeName: "CAMPUS FIREWALL",
+    subtitle: "市ヶ谷外郭回線防衛",
     description:
-      "侵入したウイルスがキャンパス回線を圧迫中。障害物を突破して回線をサーバーへ接続せよ！",
+      "START地点から回路を繋ぎ、ウイルスに追いつかれる前にGOALへイティエルを導け！",
     isUnlocked: true,
-    virusRiseIntervalMs: 4500, // 4.5秒ごとに1マス上昇
-    damagePerSecondInVirus: 15,
+    infectionIntervalMs: 1400, // 1.4秒ごとに回路を1マス黒く感染
+    goalRow: GOAL_ROW,
+    startCols: START_COLS,
     initialObstacles: [
-      // 行11・12の中央付近に壁。左右に抜け道あり。
-      [11, 3],
-      [11, 4],
-      [11, 5],
-      [11, 6],
-      [12, 3],
-      [12, 4],
+      // PDF 5p の階段状・浮遊障害物の配置
+      // 右側中段の階段壁
+      [8, 11],
+      [9, 10],
+      [9, 11],
+      [10, 9],
+      [10, 10],
+      [10, 11],
+      // 左側中段の浮遊壁
+      [9, 2],
+      [9, 3],
+      [10, 2],
+      [10, 3],
+      // 中央の壁
       [12, 5],
       [12, 6],
-      // 行6の左寄りに壁
-      [6, 1],
-      [6, 2],
-      [6, 3],
+      [13, 4],
+      [13, 5],
+      [13, 6],
+      [14, 6],
+      [14, 7],
+      // 下部の壁
+      [18, 1],
+      [18, 2],
+      [19, 1],
+      [19, 2],
+      [17, 9],
+      [17, 10],
+      [18, 8],
+      [18, 9],
+      [18, 10],
+      [19, 8],
+      [19, 9],
+      [19, 10],
     ],
-    initialItems: [
-      { pos: [14, 2], skill: "bomb" }, // 下部の拾いやすい位置にボム
-      { pos: [9, 7], skill: "bomb" }, // 中盤の右ルートにボム
-      { pos: [4, 8], skill: "heal" }, // ゴール手前に回復
+    initialStars: [
+      // PDF 5p の★配置
+      [5, 6],
+      [11, 1],
+      [13, 8],
+      [15, 11],
+      [7, 10],
     ],
   },
   {
@@ -128,24 +158,25 @@ export const STAGES: StageData[] = [
     codeName: "COMMUNICATION HUB",
     subtitle: "通信ハブ回線の迂回路",
     description:
-      "多重プロキシで迂回を強いられる難関ルート。巧妙にブロックを繋いで突破せよ。（Coming Soon）",
+      "多重プロキシで迂回を強いられる難関ルート。（Coming Soon）",
     isUnlocked: false,
-    virusRiseIntervalMs: 3800,
-    damagePerSecondInVirus: 20,
+    infectionIntervalMs: 1100,
+    goalRow: GOAL_ROW,
+    startCols: START_COLS,
     initialObstacles: [],
-    initialItems: [],
+    initialStars: [],
   },
   {
     id: 3,
     name: "STAGE 3",
     codeName: "MAIN SERVER CORE",
     subtitle: "市ヶ谷田町メインサーバー中枢",
-    description:
-      "ウイルス本体との最終決戦。あらゆるスキルを駆使してキャンパス全域を防衛せよ！（Coming Soon）",
+    description: "高速ウイルスとの最終決戦。（Coming Soon）",
     isUnlocked: false,
-    virusRiseIntervalMs: 3000,
-    damagePerSecondInVirus: 25,
+    infectionIntervalMs: 800,
+    goalRow: GOAL_ROW,
+    startCols: START_COLS,
     initialObstacles: [],
-    initialItems: [],
+    initialStars: [],
   },
 ];
