@@ -124,7 +124,6 @@ export const TitleScreen = ({
           <div>・ソフトドロップ: [↓] または [S]</div>
           <div>・ハードドロップ: [SPACE]</div>
           <div>・ホールド: [C] キー</div>
-          <div>・ボム発動: [1]〜[3] キー または タップ</div>
         </div>
         <div className="text-[11px] text-cyan-300 pt-1 border-t border-slate-800">
           ★ルール：横一列揃えても消えません！回路が通電してウイルスが一時停止＋HPが回復します！

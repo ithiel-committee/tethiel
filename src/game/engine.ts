@@ -42,7 +42,7 @@ export class GameEngine {
   public holdPiece: TetrominoType | null = null;
   public canHold = true;
   public nextPieces: TetrominoType[] = [];
-  public skills: SkillType[] = ["bomb"]; // 初期ボム1回所持
+  public skills: SkillType[] = [];
 
   public hearts = 5; // ハート5つ
   public maxHearts = 5;
