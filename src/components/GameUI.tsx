@@ -41,7 +41,13 @@ export const GameUI = ({
     { id: number; text: string }[]
   >([]);
   const [isScoreBumping, setIsScoreBumping] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
+  const [damagePopups, setDamagePopups] = useState<
+    { id: number; text: string }[]
+  >([]);
+  const [brokenHeartIndices, setBrokenHeartIndices] = useState<number[]>([]);
   const prevStarsRef = useRef(stats.bonusStars);
+  const prevHeartsRef = useRef(hearts);
 
   useEffect(() => {
     setIsPaused(engine.status === "paused");
@@ -67,6 +73,39 @@ export const GameUI = ({
     }
     prevStarsRef.current = stats.bonusStars;
   }, [stats.bonusStars]);
+
+  // ハート減少時の被弾アニメーション（画面振動・ハート破裂・♡-1表示）
+  useEffect(() => {
+    if (hearts < prevHeartsRef.current) {
+      const diff = prevHeartsRef.current - hearts;
+      setIsShaking(true);
+      const shakeTimer = setTimeout(() => setIsShaking(false), 450);
+
+      const lostIndices: number[] = [];
+      for (let i = hearts; i < prevHeartsRef.current; i++) {
+        lostIndices.push(i);
+      }
+      setBrokenHeartIndices((prev) => [...prev, ...lostIndices]);
+      const brokenTimer = setTimeout(() => {
+        setBrokenHeartIndices((prev) =>
+          prev.filter((idx) => !lostIndices.includes(idx)),
+        );
+      }, 650);
+
+      const newId = Date.now() + Math.random();
+      setDamagePopups((prev) => [...prev, { id: newId, text: `♡ -${diff}` }]);
+      const popupTimer = setTimeout(() => {
+        setDamagePopups((prev) => prev.filter((item) => item.id !== newId));
+      }, 1000);
+
+      return () => {
+        clearTimeout(shakeTimer);
+        clearTimeout(brokenTimer);
+        clearTimeout(popupTimer);
+      };
+    }
+    prevHeartsRef.current = hearts;
+  }, [hearts]);
 
   // タイムフォーマット mm:ss.SS
   const formatTime = (ms: number) => {
@@ -120,22 +159,53 @@ export const GameUI = ({
       </div>
 
       {/* 3カラムメインレイアウト (PDF 5, 6p 完全準拠) */}
-      <div className="w-full flex flex-col lg:flex-row justify-center items-center lg:items-start gap-4">
+      <div
+        className={`w-full flex flex-col lg:flex-row justify-center items-center lg:items-start gap-4 ${
+          isShaking ? "animate-screen-shake" : ""
+        }`}
+      >
         {/* ================= 左パネル ================= */}
         <div className="w-full lg:w-[220px] flex flex-col gap-3">
           {/* 1. 残りライフ（ハート5つ） */}
-          <div className="flex items-center justify-center lg:justify-start gap-2 px-3 py-2 bg-slate-900/90 border border-cyan-500/40 rounded-xl shadow-[0_0_10px_rgba(0,240,255,0.1)]">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <Heart
-                key={`heart-${i}`}
-                size={22}
-                className={`transition-all ${
-                  i < hearts
-                    ? "text-rose-400 fill-rose-500 filter drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]"
-                    : "text-slate-700 fill-slate-800"
-                }`}
-              />
-            ))}
+          <div className="relative flex items-center justify-center lg:justify-start gap-2 px-3 py-2 bg-slate-900/90 border border-cyan-500/40 rounded-xl shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+            {[0, 1, 2, 3, 4].map((i) => {
+              const isBroken = brokenHeartIndices.includes(i);
+              const isAlive = i < hearts;
+
+              return (
+                <div key={`heart-${i}`} className="relative">
+                  <Heart
+                    size={22}
+                    className={`transition-colors duration-300 ${
+                      isAlive
+                        ? "text-rose-400 fill-rose-500 filter drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]"
+                        : "text-slate-700 fill-slate-800"
+                    }`}
+                  />
+                  {/* 消える瞬間の破裂アニメーション */}
+                  {isBroken && (
+                    <div className="absolute inset-0 animate-heart-break pointer-events-none">
+                      <Heart
+                        size={22}
+                        className="text-rose-300 fill-rose-500 filter drop-shadow-[0_0_14px_rgba(255,0,85,1)]"
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* ♡ -1 ダメージポップアップ */}
+            <div className="absolute left-full ml-2 flex flex-col gap-1 pointer-events-none">
+              {damagePopups.map((item) => (
+                <span
+                  key={item.id}
+                  className="font-pixel-en text-xs font-bold text-rose-400 animate-damage-popup drop-shadow-[0_0_8px_rgba(244,63,94,0.9)] whitespace-nowrap"
+                >
+                  {item.text}
+                </span>
+              ))}
+            </div>
           </div>
 
 
