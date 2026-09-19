@@ -14,6 +14,8 @@ import type {
   TetrominoType,
 } from "./types/game";
 
+type Screen = "title" | "story" | "game" | "result";
+
 // URLから直接開始するステージを判定 (/play/stage-1, #/play/stage-1, ?stage=1 など)
 function parseStageFromUrl(): StageData | null {
   if (typeof window === "undefined") return null;
