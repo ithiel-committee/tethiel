@@ -343,28 +343,45 @@ export const GameUI = ({
   );
 };
 
-// NEXTやHOLDのミニミノ描画
+// NEXTやHOLDのミニミノ描画（SVGによる確実なピクセル描画）
 function MiniPieceView({ type }: { type: TetrominoType }) {
   const shape = TETROMINO_SHAPES[type];
   const matrix = shape.matrix;
+  const blockSize = 11;
+  const gap = 2;
+
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+  const width = cols * blockSize + (cols - 1) * gap;
+  const height = rows * blockSize + (rows - 1) * gap;
 
   return (
-    <div
-      className="grid gap-[2px]"
-      style={{ gridTemplateColumns: `repeat(${matrix[0].length}, 9px)` }}
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      style={{ display: "block" }}
     >
       {matrix.map((row, r) =>
-        row.map((val, c) => (
-          <div
-            key={`mini-${type}-${r * 10 + c}`}
-            className="w-[9px] h-[9px] rounded-[1px]"
-            style={{
-              backgroundColor: val ? shape.color : "transparent",
-              boxShadow: val ? `0 0 3px ${shape.color}` : "none",
-            }}
-          />
-        )),
+        row.map((val, c) => {
+          if (!val) return null;
+          const x = c * (blockSize + gap);
+          const y = r * (blockSize + gap);
+          return (
+            <rect
+              key={`mini-${type}-${r * 10 + c}`}
+              x={x}
+              y={y}
+              width={blockSize}
+              height={blockSize}
+              rx={1.5}
+              fill={shape.color}
+              stroke="rgba(255, 255, 255, 0.4)"
+              strokeWidth="0.8"
+            />
+          );
+        }),
       )}
-    </div>
+    </svg>
   );
 }
