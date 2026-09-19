@@ -58,11 +58,6 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.stroke();
       }
 
-      // 3. 上部ミノ落下ゾーン表示（矢印マーク「ミノ上から」）
-      ctx.fillStyle = "rgba(255, 100, 150, 0.5)";
-      ctx.font = '8px "Press Start 2P", monospace';
-      ctx.textAlign = "center";
-      ctx.fillText("↓ ミノ上から ↓", CANVAS_WIDTH / 2, 16);
 
       // 4. GOALライン描画（行2）
       const goalY = GOAL_ROW * BLOCK_SIZE;

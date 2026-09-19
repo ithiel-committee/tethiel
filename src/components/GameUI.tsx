@@ -55,8 +55,7 @@ export const GameUI = ({
     <div className="w-full max-w-5xl flex flex-col items-center gap-3 font-['DotGothic16',sans-serif]">
       {/* トップコントロールバー（一時停止・ミュート・終了） */}
       <div className="w-full flex items-center justify-between px-3 py-1.5 bg-slate-900/80 border border-cyan-500/30 rounded-lg text-xs">
-        <div className="flex items-center gap-2 text-cyan-400 font-['Press_Start_2P']">
-          <span>tethiel</span>
+        <div className="flex items-center gap-2 text-cyan-400 font-pixel-en">
           <span className="text-slate-400 text-xs font-['DotGothic16']">
             {`// STAGE ${stats.stageNumber.toString().padStart(2, "0")}`}
           </span>
@@ -111,16 +110,6 @@ export const GameUI = ({
                 }`}
               />
             ))}
-          </div>
-
-          {/* 2. ゲームタイトル枠 */}
-          <div className="px-3 py-2 bg-slate-900/90 border border-cyan-500/40 rounded-xl text-center shadow-[0_0_10px_rgba(0,240,255,0.1)]">
-            <div className="text-[10px] text-slate-500 font-bold tracking-widest">
-              GAME TITLE
-            </div>
-            <div className="font-['Press_Start_2P'] text-cyan-300 text-sm tracking-wider mt-0.5">
-              tethiel
-            </div>
           </div>
 
           <div className="bg-slate-900/95 border-2 border-cyan-500/50 rounded-xl p-3 space-y-2.5 shadow-[0_0_15px_rgba(0,240,255,0.15)] text-left">
