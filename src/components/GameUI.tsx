@@ -4,6 +4,7 @@ import {
   Pause,
   Play,
   RotateCw,
+  User,
   Volume2,
   VolumeX,
 } from "lucide-react";
@@ -122,13 +123,9 @@ export const GameUI = ({
             </div>
           </div>
 
-          {/* 3. スコア・ステータスパネル (PDF 5p忠実再現) */}
           <div className="bg-slate-900/95 border-2 border-cyan-500/50 rounded-xl p-3 space-y-2.5 shadow-[0_0_15px_rgba(0,240,255,0.15)] text-left">
-            <div className="text-[10px] text-slate-400 border-b border-slate-800 pb-1 flex justify-between items-center">
-              <span>スコア・ステータス</span>
-              <span className="font-['Press_Start_2P'] text-[9px] text-cyan-400">
-                STATUS
-              </span>
+            <div className="font-['Press_Start_2P'] text-[10px] text-cyan-400 border-b border-slate-800 pb-1">
+              STATUS
             </div>
 
             {/* SCORE */}
@@ -224,33 +221,16 @@ export const GameUI = ({
             {/* サイバー背景エフェクト */}
             <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#00f0ff_1px,transparent_1px)] [background-size:12px_12px]" />
 
-            {/* イティエルのサイバーアートワーク */}
+            {/* イティエルのサイバーアートワーク（無機質な白い人形シルエット） */}
             <div className="relative z-10 flex flex-col items-center">
               {/* キャラクターアイコン */}
-              <div className="w-20 h-20 rounded-full border-2 border-cyan-400/80 bg-slate-950/80 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.4)] overflow-hidden">
-                <div className="relative flex flex-col items-center">
-                  {/* 黒髪＋赤メッシュ */}
-                  <div className="w-12 h-10 bg-slate-800 rounded-t-full relative">
-                    <div className="absolute right-1 top-2 w-3 h-6 bg-rose-500 rounded" />
-                  </div>
-                  {/* 顔 */}
-                  <div className="w-9 h-7 bg-amber-200 -mt-3 rounded-b-md flex justify-around items-center px-1">
-                    <div className="w-1.5 h-1.5 bg-slate-900 rounded-full" />
-                    <div className="w-1.5 h-1.5 bg-slate-900 rounded-full" />
-                  </div>
-                  {/* 制服 */}
-                  <div className="w-11 h-6 bg-slate-900 rounded-t flex justify-center">
-                    <div className="w-1.5 h-4 bg-red-600" />
-                  </div>
-                </div>
+              <div className="w-20 h-20 rounded-full border-2 border-slate-600 bg-slate-950/80 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.1)] overflow-hidden">
+                <User size={44} className="text-white" />
               </div>
 
               <div className="mt-2 text-center">
-                <span className="font-['Press_Start_2P'] text-[10px] text-cyan-300 block">
-                  ITHIEL
-                </span>
-                <span className="text-[10px] text-slate-400">
-                  iTL Cyber Navigator
+                <span className="font-bold text-xs text-slate-200 block">
+                  イティエル
                 </span>
               </div>
             </div>
@@ -269,47 +249,47 @@ export const GameUI = ({
               <div>・ホールド: [C] キー</div>
             </div>
 
-            {/* 展示PC用タッチ/マウスクリックボタン */}
-            <div className="pt-2 border-t border-slate-800 flex flex-wrap gap-1.5 justify-center">
+            {/* 展示PC用タッチ/マウスクリックボタン（統一デザイン） */}
+            <div className="pt-2 border-t border-slate-800 grid grid-cols-3 gap-1.5">
               <button
                 type="button"
                 onClick={() => engine.moveLeft()}
-                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-cyan-600 border border-slate-600 rounded text-xs text-cyan-200 cursor-pointer font-bold"
+                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
                 ◀ LEFT
               </button>
               <button
                 type="button"
                 onClick={() => engine.rotate()}
-                className="px-2.5 py-1.5 bg-cyan-950 hover:bg-cyan-800 active:bg-cyan-600 border border-cyan-500 rounded text-xs text-cyan-200 cursor-pointer font-bold flex items-center gap-1"
+                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
                 <RotateCw size={12} /> ROTATE
               </button>
               <button
                 type="button"
                 onClick={() => engine.moveRight()}
-                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-cyan-600 border border-slate-600 rounded text-xs text-cyan-200 cursor-pointer font-bold"
+                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
                 RIGHT ▶
               </button>
               <button
                 type="button"
                 onClick={() => engine.softDrop()}
-                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-cyan-600 border border-slate-600 rounded text-xs text-cyan-200 cursor-pointer font-bold"
+                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
                 ▼ DOWN
               </button>
               <button
                 type="button"
                 onClick={() => engine.hardDrop()}
-                className="px-2.5 py-1.5 bg-amber-900/70 hover:bg-amber-800 active:bg-amber-600 border border-amber-500 rounded text-xs text-amber-200 cursor-pointer font-bold"
+                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
                 ⚡ DROP
               </button>
               <button
                 type="button"
                 onClick={() => engine.hold()}
-                className="px-2.5 py-1.5 bg-purple-900/70 hover:bg-purple-800 active:bg-purple-600 border border-purple-500 rounded text-xs text-purple-200 cursor-pointer font-bold"
+                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
                 HOLD [C]
               </button>
@@ -317,7 +297,7 @@ export const GameUI = ({
                 <button
                   type="button"
                   onClick={() => engine.useBomb()}
-                  className="px-3 py-1.5 bg-rose-900 hover:bg-rose-800 active:bg-rose-600 border border-rose-500 rounded text-xs text-rose-100 cursor-pointer font-bold flex items-center gap-1 shadow-[0_0_10px_rgba(244,63,94,0.5)]"
+                  className="col-span-3 py-2 px-2 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1.5"
                 >
                   <Bomb size={12} /> BOMB!
                 </button>
