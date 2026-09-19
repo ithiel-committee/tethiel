@@ -77,6 +77,8 @@ export class GameEngine {
 
   // ウイルス感染タイマー
   private infectionTimerMs = 0;
+  // 感染ブロック上の継続ダメージタイマー（1秒おき）
+  private infectedDamageTimerMs = 0;
 
   // 統計
   public score = 0;
@@ -153,6 +155,7 @@ export class GameEngine {
     this.isGoalCelebration = false;
     this.goalReachedTimerMs = 0;
     this.infectionTimerMs = 0;
+    this.infectedDamageTimerMs = 0;
   }
 
   // ゲーム開始
@@ -220,6 +223,27 @@ export class GameEngine {
         this.infectionTimerMs = 0;
         this.advanceInfection();
       }
+    }
+
+    // 2. 足元が感染している間の継続ダメージ（1秒おきにハート-1）
+    const footR = Math.round(this.characterPos.y);
+    const footC = Math.floor(this.characterPos.x);
+    const isFootInfected =
+      footR >= 0 &&
+      footR < GRID_HEIGHT &&
+      footC >= 0 &&
+      footC < GRID_WIDTH &&
+      this.grid[footR][footC]?.isInfected;
+
+    if (isFootInfected) {
+      this.infectedDamageTimerMs += deltaMs;
+      if (this.infectedDamageTimerMs >= 1000) {
+        this.infectedDamageTimerMs = 0;
+        this.takeDamage("最上部のミノがウイルスに追いつかれました！");
+        if (this.status !== "playing") return;
+      }
+    } else {
+      this.infectedDamageTimerMs = 0;
     }
 
     // 2. イティエルの移動（ミノをたどる動き）
@@ -304,21 +328,24 @@ export class GameEngine {
         if (
           cell.isTopCircuit ||
           (Math.round(this.characterPos.y) === r &&
-            Math.round(this.characterPos.x) === c)
+            Math.floor(this.characterPos.x) === c)
         ) {
-          sounds.playAlert();
-          this.hearts = Math.max(0, this.hearts - 1);
-          this.callbacks.onHeartsChange(this.hearts);
-
-          if (this.hearts <= 0) {
-            this.triggerGameOver(
-              "最上部のミノがウイルスに追いつかれました！",
-            );
-            return;
-          }
+          this.takeDamage("最上部のミノがウイルスに追いつかれました！");
+          this.infectedDamageTimerMs = 0;
         }
         break;
       }
+    }
+  }
+
+  // ダメージ処理（ハート-1、SE、ゲームオーバー判定）
+  private takeDamage(reason = "最上部のミノがウイルスに追いつかれました！") {
+    sounds.playAlert();
+    this.hearts = Math.max(0, this.hearts - 1);
+    this.callbacks.onHeartsChange(this.hearts);
+
+    if (this.hearts <= 0) {
+      this.triggerGameOver(reason);
     }
   }
 
