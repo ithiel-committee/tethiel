@@ -1,4 +1,4 @@
-export type CellType = "empty" | "placed" | "obstacle" | "star";
+export type CellType = "empty" | "placed" | "obstacle" | "star" | "glitched";
 
 export type SkillType = "bomb" | "freeze" | "heal";
 
@@ -11,6 +11,8 @@ export interface Cell {
   isInfected?: boolean;
   // 回路パスの最前線（白く光る最上部ミノ）か
   isTopCircuit?: boolean;
+  // グリッチ演出用シード値
+  glitchSeed?: number;
 }
 
 export type TetrominoType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";

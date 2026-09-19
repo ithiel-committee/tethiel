@@ -101,24 +101,19 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         goalY + 16,
       );
 
-      // 5. 最下部 START ライン描画（行21）
+      // 5. スタート台座（立っている位置にミノと同質の白いブロックを配置）
       const startY = START_ROW * BLOCK_SIZE;
-      ctx.fillStyle = "rgba(0, 255, 136, 0.85)";
-      ctx.fillRect(0, startY, CANVAS_WIDTH, BLOCK_SIZE);
-      ctx.fillStyle = "#020617";
-      ctx.font = '10px "Press Start 2P", monospace';
-      ctx.textAlign = "center";
-      ctx.fillText("S  T  A  R  T", CANVAS_WIDTH / 2, startY + 17);
-
-      // START接続口の枠マーク（列5〜6）
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(
-        START_COLS[0] * BLOCK_SIZE,
-        startY,
-        START_COLS.length * BLOCK_SIZE,
-        BLOCK_SIZE,
-      );
+      for (const col of START_COLS) {
+        drawMinoBlock(
+          ctx,
+          col * BLOCK_SIZE,
+          startY,
+          "#ffffff",
+          false,
+          false,
+          time,
+        );
+      }
 
       // 6. フィールドセル描画（設置ミノ、障害物、星）
       for (let r = 0; r < GRID_HEIGHT; r++) {
@@ -141,6 +136,15 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
             drawObstacleBlock(ctx, px, py);
           } else if (cell.type === "star") {
             drawStarItem(ctx, px, py, time);
+          } else if (cell.type === "glitched") {
+            drawGlitchedBlock(
+              ctx,
+              px,
+              py,
+              cell.color || "#00f0ff",
+              time,
+              cell.glitchSeed ?? 0,
+            );
           }
         }
       }
@@ -214,6 +218,37 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         time,
         engine.characterPos.isClimbing,
       );
+
+      // 10.5 ゴール到達時のセレブレーション演出（キャラクターが到着した瞬間に発動）
+      if (engine.isGoalCelebration) {
+        const cx = engine.characterPos.x * BLOCK_SIZE;
+        const cy = engine.characterPos.y * BLOCK_SIZE;
+
+        // ゴール到達時の光る放射オーラ
+        const auraRadius = 24 + Math.sin(time / 80) * 6;
+        const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, auraRadius);
+        grad.addColorStop(0, "rgba(255, 230, 0, 0.9)");
+        grad.addColorStop(0.5, "rgba(0, 240, 255, 0.6)");
+        grad.addColorStop(1, "rgba(0, 240, 255, 0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, auraRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 頭上に浮かぶ「GOAL!!」テキスト
+        ctx.save();
+        ctx.shadowColor = engine.isBonusGoal ? "#ff007f" : "#ffdd00";
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = engine.isBonusGoal ? "#ff007f" : "#ffe600";
+        ctx.font = '12px "Press Start 2P", monospace';
+        ctx.textAlign = "center";
+        ctx.fillText(
+          engine.isBonusGoal ? "★ BONUS GOAL! ★" : "★ GOAL! ★",
+          cx,
+          cy - 22,
+        );
+        ctx.restore();
+      }
 
       // 11. 一時停止画面
       if (engine.status === "paused") {
@@ -315,6 +350,65 @@ function drawObstacleBlock(
   ctx.strokeRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
 }
 
+// グリッチ状態のブロック描画（消えるのではなく実態を残したまま数msおきに激しくグリッチ）
+function drawGlitchedBlock(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  baseColor: string,
+  time: number,
+  seed: number,
+) {
+  // 数ms（約45ms）おきにグリッチのフレームを切り替える
+  const glitchFrame = Math.floor(time / 45 + seed * 19);
+  const isJitter = glitchFrame % 2 === 0;
+
+  // 基本の実態（半透明のサイバーノイズベース）
+  ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+  ctx.fillRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+
+  // スライスごとの横ズレグリッチ（3分割）
+  const sliceCount = 3;
+  const sliceH = (BLOCK_SIZE - 2) / sliceCount;
+
+  for (let i = 0; i < sliceCount; i++) {
+    const sliceY = y + 1 + i * sliceH;
+    // スライスごとの擬似ランダムズレ（-4px 〜 +4px）
+    const shift = isJitter ? (((glitchFrame * (i + 1) * 7) % 9) - 4) : 0;
+
+    // 赤色（マゼンタ）色ズレ（RGB split）
+    ctx.fillStyle = "rgba(255, 0, 85, 0.6)";
+    ctx.fillRect(x + 1 + shift + 1.5, sliceY, BLOCK_SIZE - 2, sliceH);
+
+    // シアン色ズレ（RGB split）
+    ctx.fillStyle = "rgba(0, 240, 255, 0.6)";
+    ctx.fillRect(x + 1 + shift - 1.5, sliceY, BLOCK_SIZE - 2, sliceH);
+
+    // 元ブロックの色のグリッチコア
+    ctx.fillStyle = baseColor;
+    ctx.globalAlpha = 0.45;
+    ctx.fillRect(x + 1 + shift, sliceY, BLOCK_SIZE - 2, sliceH);
+    ctx.globalAlpha = 1.0;
+  }
+
+  // デジタル走査線・ノイズバー
+  if (isJitter) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    const lineY = y + 1 + ((glitchFrame * 11) % (BLOCK_SIZE - 4));
+    ctx.fillRect(x + 1, lineY, BLOCK_SIZE - 2, 1.5);
+  }
+
+  // グリッチした崩れ枠線
+  ctx.strokeStyle = isJitter ? "#00ffff" : "rgba(255, 0, 85, 0.8)";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(
+    x + 1 + (isJitter ? ((glitchFrame % 5) - 2) : 0),
+    y + 1,
+    BLOCK_SIZE - 2,
+    BLOCK_SIZE - 2,
+  );
+}
+
 // 星（★）ボーナスアイテムの描画
 function drawStarItem(
   ctx: CanvasRenderingContext2D,
@@ -336,7 +430,7 @@ function drawStarItem(
   ctx.shadowBlur = 0;
 }
 
-// イティエルのミニドットキャラ描画
+// イティエルのミニドットキャラ描画（無機質な白い人形シルエット）
 function drawIthielCharacter(
   ctx: CanvasRenderingContext2D,
   px: number,
@@ -356,29 +450,19 @@ function drawIthielCharacter(
   ctx.ellipse(cx, cy + 12, 10, 4, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // イティエルドットミニキャラ（黒髪・赤いアクセント・制服）
-  // 髪（黒）
-  ctx.fillStyle = "#1e293b";
-  ctx.fillRect(cx - 6, cy - 8, 12, 10);
-  // 赤いアクセント（メッシュ）
-  ctx.fillStyle = "#ff2a6d";
-  ctx.fillRect(cx + 2, cy - 6, 3, 8);
-  // 顔（肌色）
-  ctx.fillStyle = "#fde047";
-  ctx.fillRect(cx - 4, cy - 4, 8, 7);
-  // 目（つぶらな瞳）
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(cx - 3, cy - 2, 2, 2);
-  ctx.fillRect(cx + 1, cy - 2, 2, 2);
-  // 制服（ジャケット＋赤タイ）
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(cx - 5, cy + 3, 10, 8);
-  ctx.fillStyle = "#ef4444";
-  ctx.fillRect(cx - 1, cy + 4, 2, 5);
+  // 無機質な白い人形シルエット (ドット調)
+  ctx.fillStyle = "#ffffff";
+  // 頭 (6x6)
+  ctx.fillRect(cx - 3, cy - 5, 6, 6);
+  // 首・肩・胴体 (8x8)
+  ctx.fillRect(cx - 4, cy + 2, 8, 8);
+  // 足 (左右)
+  ctx.fillRect(cx - 3, cy + 10, 2, 3);
+  ctx.fillRect(cx + 1, cy + 10, 2, 3);
 
-  // 頭上のネームラベル「ITHIEL」
-  ctx.fillStyle = "#00ffff";
-  ctx.font = '6px "Press Start 2P", monospace';
+  // 頭上のネームラベル「イティエル」
+  ctx.fillStyle = "#ffffff";
+  ctx.font = '9px "DotGothic16", monospace';
   ctx.textAlign = "center";
-  ctx.fillText("iTL", cx, cy - 12);
+  ctx.fillText("イティエル", cx, cy - 10);
 }

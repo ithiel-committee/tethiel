@@ -55,6 +55,13 @@ export class GameEngine {
     isClimbing: false,
   };
 
+  // ミノをたどるウェイポイント列
+  public waypoints: { x: number; y: number }[] = [];
+  public isGoalPending = false;
+  public isBonusGoal = false;
+  public isGoalCelebration = false;
+  private goalReachedTimerMs = 0;
+
   public status: GameStatus = "ready";
   public stage: StageData;
   public callbacks: EngineCallbacks;
@@ -99,6 +106,15 @@ export class GameEngine {
       }
     }
 
+    // スタート台座（立っている位置に白いブロックを初期配置）
+    for (const sc of START_COLS) {
+      this.grid[START_ROW][sc] = {
+        type: "placed",
+        color: "#ffffff",
+        isConnected: true,
+      };
+    }
+
     // 障害物の配置
     for (const [r, c] of this.stage.initialObstacles) {
       if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
@@ -128,6 +144,11 @@ export class GameEngine {
     this.holdPiece = null;
     this.canHold = true;
     this.connectedPath = [];
+    this.waypoints = [];
+    this.isGoalPending = false;
+    this.isBonusGoal = false;
+    this.isGoalCelebration = false;
+    this.goalReachedTimerMs = 0;
     this.infectionTimerMs = 0;
   }
 
@@ -198,18 +219,49 @@ export class GameEngine {
       }
     }
 
-    // 2. イティエルの移動補間（なめらかに登る）
-    const dx = this.characterPos.targetX - this.characterPos.x;
-    const dy = this.characterPos.targetY - this.characterPos.y;
-    if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
-      this.characterPos.x += dx * 0.15;
-      this.characterPos.y += dy * 0.15;
-      this.characterPos.isClimbing = true;
+    // 2. イティエルの移動（ミノをたどる動き）
+    if (this.waypoints.length > 0) {
+      const target = this.waypoints[0];
+      const dx = target.x - this.characterPos.x;
+      const dy = target.y - this.characterPos.y;
+      const dist = Math.hypot(dx, dy);
+
+      // 移動速度（ブロック/秒）
+      const speed = this.isGoalPending ? 12.0 : 9.0;
+      const step = (speed * deltaMs) / 1000;
+
+      if (dist <= step) {
+        this.characterPos.x = target.x;
+        this.characterPos.y = target.y;
+        this.waypoints.shift();
+
+        if (this.waypoints.length === 0) {
+          this.characterPos.isClimbing = false;
+          // ゴールマスに到着した瞬間
+          if (this.isGoalPending && this.characterPos.y <= GOAL_ROW) {
+            this.isGoalCelebration = true;
+            sounds.playClear();
+          }
+        } else {
+          this.characterPos.isClimbing = true;
+        }
+      } else {
+        this.characterPos.x += (dx / dist) * step;
+        this.characterPos.y += (dy / dist) * step;
+        this.characterPos.isClimbing = true;
+      }
       this.callbacks.onCharacterMove({ ...this.characterPos });
     } else {
-      this.characterPos.x = this.characterPos.targetX;
-      this.characterPos.y = this.characterPos.targetY;
       this.characterPos.isClimbing = false;
+
+      // ゴールマスに到着後のセレブレーション待機（1秒後にリザルト画面へ遷移）
+      if (this.isGoalCelebration) {
+        this.goalReachedTimerMs += deltaMs;
+        if (this.goalReachedTimerMs >= 1000) {
+          this.triggerStageClear(this.isBonusGoal);
+          return;
+        }
+      }
     }
 
     // 3. ミノの自動落下
@@ -392,19 +444,149 @@ export class GameEngine {
     if (topCell) {
       const [tr, tc] = topCell;
       this.grid[tr][tc].isTopCircuit = true;
-
-      // イティエルが登る目標座標
       this.characterPos.targetX = tc + 0.5;
       this.characterPos.targetY = tr;
 
-      // GOAL判定（行2以下のGOALラインに到達したか）
+      // キャラクター現在位置から最上部ブロックまで、ミノをたどるルート（最短経路）をBFSで探索
+      this.calculateWaypointsTo(tr, tc);
+
+      // GOAL判定の準備（キャラクターがミノをたどって登りきった時にクリア）
       if (tr <= GOAL_ROW) {
-        // BONUSゴール判定（列10〜11に到達したか）
-        const isBonus = BONUS_GOAL_COLS.includes(tc);
-        this.triggerStageClear(isBonus);
-        return;
+        this.isGoalPending = true;
+        this.isBonusGoal = BONUS_GOAL_COLS.includes(tc);
+        this.currentPiece = null; // ゴール達成時はミノの落下を止めて登頂を見届ける
+      } else {
+        this.isGoalPending = false;
+      }
+    } else {
+      this.waypoints = [];
+      this.isGoalPending = false;
+      this.characterPos.isClimbing = false;
+    }
+  }
+
+  // キャラクター現在位置から目標地点まで、接続されたミノをたどるウェイポイント列を計算
+  private calculateWaypointsTo(tr: number, tc: number) {
+    const curR = Math.round(this.characterPos.y);
+    const curC = Math.floor(this.characterPos.x);
+
+    // すでに目標にいる場合
+    if (curR === tr && curC === tc) {
+      this.waypoints = [];
+      return;
+    }
+
+    // 探索の始点ノードを決定
+    let startNode: [number, number] | null = null;
+
+    if (
+      curR >= 0 &&
+      curR < GRID_HEIGHT &&
+      curC >= 0 &&
+      curC < GRID_WIDTH &&
+      this.grid[curR][curC].isConnected
+    ) {
+      // 現在地が接続済みブロック上にある場合
+      startNode = [curR, curC];
+    } else if (curR >= START_ROW) {
+      // START地点にいる場合、START列の接続済みブロックを探す
+      for (const sc of START_COLS) {
+        for (let r = START_ROW; r >= START_ROW - 1; r--) {
+          if (r >= 0 && r < GRID_HEIGHT && this.grid[r][sc].isConnected) {
+            startNode = [r, sc];
+            break;
+          }
+        }
+        if (startNode) break;
       }
     }
+
+    // 上記で見つからない場合、接続された回路の中で現在地に最も近いブロックを始点にする
+    if (!startNode && this.connectedPath.length > 0) {
+      let minDist = Infinity;
+      for (const [r, c] of this.connectedPath) {
+        const d = Math.hypot(
+          c + 0.5 - this.characterPos.x,
+          r - this.characterPos.y,
+        );
+        if (d < minDist) {
+          minDist = d;
+          startNode = [r, c];
+        }
+      }
+    }
+
+    if (!startNode) {
+      this.waypoints = [];
+      return;
+    }
+
+    // BFSでstartNodeから[tr, tc]までの接続ブロックをたどる最短経路を探索
+    const dirs = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ];
+    const queue: [number, number][] = [[startNode[0], startNode[1]]];
+    const visited = new Set<string>([`${startNode[0]},${startNode[1]}`]);
+    const parent = new Map<string, [number, number]>();
+    let found = false;
+
+    while (queue.length > 0) {
+      const [cr, cc] = queue.shift()!;
+      if (cr === tr && cc === tc) {
+        found = true;
+        break;
+      }
+      for (const [dr, dc] of dirs) {
+        const nr = cr + dr;
+        const nc = cc + dc;
+        if (nr >= 0 && nr < GRID_HEIGHT && nc >= 0 && nc < GRID_WIDTH) {
+          if (this.grid[nr][nc].isConnected) {
+            const key = `${nr},${nc}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              parent.set(key, [cr, cc]);
+              queue.push([nr, nc]);
+            }
+          }
+        }
+      }
+    }
+
+    if (!found) {
+      this.waypoints = [];
+      return;
+    }
+
+    // 経路復元
+    const steps: [number, number][] = [];
+    let curr: [number, number] | undefined = [tr, tc];
+    while (curr) {
+      steps.unshift(curr);
+      const key = `${curr[0]},${curr[1]}`;
+      curr = parent.get(key);
+    }
+
+    // ウェイポイント列に変換（ブロック中央: c + 0.5, r）
+    const newWaypoints = steps.map(([r, c]) => ({
+      x: c + 0.5,
+      y: r,
+    }));
+
+    // 現在位置とほぼ一致する先頭ウェイポイントはスキップ
+    while (
+      newWaypoints.length > 0 &&
+      Math.hypot(
+        newWaypoints[0].x - this.characterPos.x,
+        newWaypoints[0].y - this.characterPos.y,
+      ) < 0.2
+    ) {
+      newWaypoints.shift();
+    }
+
+    this.waypoints = newWaypoints;
   }
 
   // 操作系
@@ -497,12 +679,24 @@ export class GameEngine {
       for (let dc = -1; dc <= 1; dc++) {
         const tr = cy + dr;
         const tc = cx + dc;
-        if (tr >= 0 && tr < GRID_HEIGHT && tc >= 0 && tc < GRID_WIDTH) {
+        if (
+          tr >= 0 &&
+          tr < GRID_HEIGHT &&
+          tc >= 0 &&
+          tc < GRID_WIDTH &&
+          !(tr === START_ROW && START_COLS.includes(tc))
+        ) {
           if (
             this.grid[tr][tc].type === "obstacle" ||
             this.grid[tr][tc].type === "placed"
           ) {
-            this.grid[tr][tc] = { type: "empty" };
+            const oldColor = this.grid[tr][tc].color || "#00f0ff";
+            this.grid[tr][tc] = {
+              type: "glitched",
+              color: oldColor,
+              glitchSeed: Math.random() * 100,
+            };
+            this.score += 50;
           }
         }
       }
