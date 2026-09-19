@@ -1,8 +1,8 @@
-@import url("https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DotGothic16&family=Silkscreen:wght@400;700&display=swap");
 
 :root {
   --font-pixel-jp: "DotGothic16", monospace, sans-serif;
-  --font-pixel-en: "Press Start 2P", monospace, cursive;
+  --font-pixel-en: "Silkscreen", monospace, sans-serif;
   --bg-dark: #070a14;
   --bg-card: rgba(13, 20, 38, 0.85);
   --cyan-main: #00f0ff;
@@ -49,9 +49,10 @@ body {
 
 /* ユーティリティクラス */
 .font-pixel-en,
+[class*="Silkscreen"],
 [class*="Press_Start_2P"] {
   font-family: var(--font-pixel-en);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .font-pixel-jp,
