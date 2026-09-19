@@ -99,8 +99,8 @@ export const STAGES: StageData[] = [
   {
     id: 1,
     name: "STAGE 1",
-    codeName: "CAMPUS FIREWALL",
-    subtitle: "市ヶ谷外郭回線防衛",
+    codeName: "STAGE 1",
+    subtitle: "",
     description:
       "START地点から回路を繋ぎ、ウイルスに追いつかれる前にGOALへイティエルを導け！",
     isUnlocked: true,
@@ -108,38 +108,30 @@ export const STAGES: StageData[] = [
     goalRow: GOAL_ROW,
     startCols: START_COLS,
     initialObstacles: [
-      // PDF 5p の階段状・浮遊障害物の配置
-      // 右側中段の階段壁
-      [8, 11],
+      // 1〜4ブロック程度の小型障害物クラスター配置
+      // 左上小型ブロック (1ブロック)
+      [6, 3],
+      // 右上L字障害物 (3ブロック)
       [9, 10],
       [9, 11],
-      [10, 9],
-      [10, 10],
       [10, 11],
-      // 左側中段の浮遊壁
+      // 左側中段L字障害物 (3ブロック)
       [9, 2],
       [9, 3],
       [10, 2],
-      [10, 3],
-      // 中央の壁
-      [12, 5],
-      [12, 6],
-      [13, 4],
+      // 中央浮遊障害物 (3ブロック)
       [13, 5],
       [13, 6],
       [14, 6],
-      [14, 7],
-      // 下部の壁
-      [18, 1],
+      // 中下段ステップ (2ブロック)
+      [16, 4],
+      [16, 5],
+      // 左下壁 (3ブロック)
       [18, 2],
       [19, 1],
       [19, 2],
-      [17, 9],
-      [17, 10],
-      [18, 8],
-      [18, 9],
+      // 右下壁 (3ブロック)
       [18, 10],
-      [19, 8],
       [19, 9],
       [19, 10],
     ],
@@ -155,8 +147,8 @@ export const STAGES: StageData[] = [
   {
     id: 2,
     name: "STAGE 2",
-    codeName: "COMMUNICATION HUB",
-    subtitle: "通信ハブ回線の迂回路",
+    codeName: "STAGE 2",
+    subtitle: "",
     description:
       "多重プロキシで迂回を強いられる難関ルート。（Coming Soon）",
     isUnlocked: false,
@@ -169,8 +161,8 @@ export const STAGES: StageData[] = [
   {
     id: 3,
     name: "STAGE 3",
-    codeName: "MAIN SERVER CORE",
-    subtitle: "市ヶ谷田町メインサーバー中枢",
+    codeName: "STAGE 3",
+    subtitle: "",
     description: "高速ウイルスとの最終決戦。（Coming Soon）",
     isUnlocked: false,
     infectionIntervalMs: 800,
