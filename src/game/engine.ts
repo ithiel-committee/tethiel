@@ -57,6 +57,8 @@ export class GameEngine {
 
   // ミノをたどるウェイポイント列
   public waypoints: { x: number; y: number }[] = [];
+  // STARTから最先端への一本の回路ルート（描画用）
+  public circuitRoute: [number, number][] = [];
   public isGoalPending = false;
   public isBonusGoal = false;
   public isGoalCelebration = false;
@@ -145,6 +147,7 @@ export class GameEngine {
     this.canHold = true;
     this.connectedPath = [];
     this.waypoints = [];
+    this.circuitRoute = [];
     this.isGoalPending = false;
     this.isBonusGoal = false;
     this.isGoalCelebration = false;
@@ -401,6 +404,7 @@ export class GameEngine {
     const path: [number, number][] = [];
     let topRow = GRID_HEIGHT;
     let topCell: [number, number] | null = null;
+    const parent = new Map<string, [number, number]>();
 
     const dirs = [
       [-1, 0],
@@ -429,6 +433,7 @@ export class GameEngine {
             const key = `${nr},${nc}`;
             if (!visited.has(key)) {
               visited.add(key);
+              parent.set(key, [cr, cc]);
               queue.push([nr, nc]);
             }
           }
@@ -447,6 +452,16 @@ export class GameEngine {
       this.characterPos.targetX = tc + 0.5;
       this.characterPos.targetY = tr;
 
+      // STARTから最上部ブロックまでの一本の接続ルートを復元
+      const route: [number, number][] = [];
+      let curr: [number, number] | undefined = topCell;
+      while (curr) {
+        route.unshift(curr);
+        const key = `${curr[0]},${curr[1]}`;
+        curr = parent.get(key);
+      }
+      this.circuitRoute = route;
+
       // キャラクター現在位置から最上部ブロックまで、ミノをたどるルート（最短経路）をBFSで探索
       this.calculateWaypointsTo(tr, tc);
 
@@ -460,6 +475,7 @@ export class GameEngine {
       }
     } else {
       this.waypoints = [];
+      this.circuitRoute = [];
       this.isGoalPending = false;
       this.characterPos.isClimbing = false;
     }

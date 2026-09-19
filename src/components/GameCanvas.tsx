@@ -75,7 +75,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         BLOCK_SIZE,
       );
       ctx.fillStyle = "#020617";
-      ctx.font = '10px "Press Start 2P", monospace';
+      ctx.font = '10px "Silkscreen", monospace';
       ctx.textAlign = "center";
       ctx.fillText(
         "G  O  A  L",
@@ -94,7 +94,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         BLOCK_SIZE,
       );
       ctx.fillStyle = "#ffffff";
-      ctx.font = '7px "Press Start 2P", monospace';
+      ctx.font = '8px "Silkscreen", monospace';
       ctx.fillText(
         "BONUS",
         bonusStartX + (BONUS_GOAL_COLS.length * BLOCK_SIZE) / 2,
@@ -149,19 +149,20 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         }
       }
 
-      // 7. 回路パス（通電ライン）の描画
-      if (engine.connectedPath.length > 0) {
+      // 7. 回路パス（通電ライン）の描画（キャラクターの移動ルートに合わせる）
+      if (engine.circuitRoute.length > 0) {
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 3;
         ctx.shadowColor = "#00ffff";
         ctx.shadowBlur = 10;
         ctx.beginPath();
-        // START中央から開始
+        const [firstR, firstC] = engine.circuitRoute[0];
         ctx.moveTo(
-          (START_COLS[0] + 1) * BLOCK_SIZE,
-          START_ROW * BLOCK_SIZE + BLOCK_SIZE / 2,
+          firstC * BLOCK_SIZE + BLOCK_SIZE / 2,
+          firstR * BLOCK_SIZE + BLOCK_SIZE / 2,
         );
-        for (const [r, c] of engine.connectedPath) {
+        for (let i = 1; i < engine.circuitRoute.length; i++) {
+          const [r, c] = engine.circuitRoute[i];
           ctx.lineTo(
             c * BLOCK_SIZE + BLOCK_SIZE / 2,
             r * BLOCK_SIZE + BLOCK_SIZE / 2,
@@ -240,7 +241,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.shadowColor = engine.isBonusGoal ? "#ff007f" : "#ffdd00";
         ctx.shadowBlur = 12;
         ctx.fillStyle = engine.isBonusGoal ? "#ff007f" : "#ffe600";
-        ctx.font = '12px "Press Start 2P", monospace';
+        ctx.font = '12px "Silkscreen", monospace';
         ctx.textAlign = "center";
         ctx.fillText(
           engine.isBonusGoal ? "★ BONUS GOAL! ★" : "★ GOAL! ★",
@@ -255,7 +256,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         ctx.fillStyle = "#00f0ff";
-        ctx.font = '16px "Press Start 2P", monospace';
+        ctx.font = '16px "Silkscreen", monospace';
         ctx.textAlign = "center";
         ctx.fillText("PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
       }
@@ -423,7 +424,7 @@ function drawStarItem(
   ctx.fillStyle = "#ffdd00";
   ctx.shadowColor = "#ffdd00";
   ctx.shadowBlur = 8;
-  ctx.font = '14px "Press Start 2P", monospace';
+  ctx.font = '14px "Silkscreen", monospace';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("★", cx, cy);
