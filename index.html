@@ -12,6 +12,22 @@
       href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Silkscreen:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // 404.html からの SPA リダイレクト復元
+      (function (l) {
+        if (l.search[1] === "/" || l.search.indexOf("?p=/") !== -1 || l.search.indexOf("&p=/") !== -1) {
+          var pMatch = l.search.match(/[?&]p=([^&]+)/);
+          if (pMatch) {
+            var decoded = decodeURIComponent(pMatch[1]);
+            window.history.replaceState(
+              null,
+              null,
+              l.pathname.replace(/\/$/, "") + decoded + l.hash,
+            );
+          }
+        }
+      })(window.location);
+    </script>
   </head>
   <body>
     <div id="root"></div>

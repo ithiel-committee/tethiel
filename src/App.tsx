@@ -14,11 +14,25 @@ import type {
   TetrominoType,
 } from "./types/game";
 
-type Screen = "title" | "story" | "game" | "result";
+// URLから直接開始するステージを判定 (/play/stage-1, #/play/stage-1, ?stage=1 など)
+function parseStageFromUrl(): StageData | null {
+  if (typeof window === "undefined") return null;
+  const url = `${window.location.pathname}${window.location.search}${window.location.hash}`.toLowerCase();
+  const match = url.match(/(?:play\/stage-|play\/stage|stage-|stage=)(\d+)/);
+  if (match) {
+    const stageId = parseInt(match[1], 10);
+    const found = STAGES.find((s) => s.id === stageId);
+    if (found) return found;
+  }
+  return null;
+}
 
 export function App() {
-  const [screen, setScreen] = useState<Screen>("title");
-  const [selectedStage, setSelectedStage] = useState<StageData>(STAGES[0]);
+  const directStage = useMemo(() => parseStageFromUrl(), []);
+  const [screen, setScreen] = useState<Screen>(directStage ? "game" : "title");
+  const [selectedStage, setSelectedStage] = useState<StageData>(
+    directStage ?? STAGES[0],
+  );
   const [isMuted, setIsMuted] = useState<boolean>(sounds.isMuted());
 
   // ゲームステート
@@ -34,7 +48,7 @@ export function App() {
     minoCount: 0,
     bonusStars: 0,
     totalStars: 5,
-    stageNumber: 1,
+    stageNumber: directStage?.id ?? 1,
     bestScore: 987654,
   });
   const [gameOverReason, setGameOverReason] = useState<string>("");
@@ -58,6 +72,13 @@ export function App() {
       },
     });
   }, [selectedStage]);
+
+  // URL直接指定で直接ゲーム画面に入った場合の自動開始
+  useEffect(() => {
+    if (directStage && engine.status === "ready") {
+      engine.start();
+    }
+  }, [directStage, engine]);
 
   // サウンド切り替え
   const handleToggleMute = useCallback(() => {
@@ -85,6 +106,14 @@ export function App() {
 
   // タイトルへ戻る
   const handleBackToTitle = useCallback(() => {
+    if (
+      window.location.pathname.includes("/play/") ||
+      window.location.hash ||
+      window.location.search.includes("stage=")
+    ) {
+      const cleanPath = window.location.pathname.replace(/\/play\/.*$/, "/");
+      window.history.replaceState(null, "", cleanPath || "/");
+    }
     setScreen("title");
   }, []);
 
