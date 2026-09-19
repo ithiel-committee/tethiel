@@ -39,9 +39,9 @@ export const TitleScreen = ({
 
       {/* 2. ゲーム目的・イントロ */}
       <div className="w-full bg-slate-900/80 border border-cyan-500/30 rounded-xl p-4 text-left text-xs md:text-sm text-slate-300 space-y-2">
-        <div className="flex items-center gap-2 text-pink-400 font-bold">
+        <div className="flex items-center gap-2 text-cyan-400 font-bold">
           <ShieldAlert size={16} />
-          <span>EMERGENCY MISSION: 市ヶ谷田町キャンパス防衛</span>
+          <span>MISSION: STAGE 1</span>
         </div>
         <p className="leading-relaxed">
           突如としてキャンパスのネットワークを襲ったサイバー攻撃！
@@ -79,9 +79,11 @@ export const TitleScreen = ({
                     <span className="font-['Press_Start_2P'] text-xs text-cyan-400">
                       {stage.name}
                     </span>
-                    <span className="text-slate-400 text-xs font-bold">
-                      {stage.subtitle}
-                    </span>
+                    {stage.subtitle && (
+                      <span className="text-slate-400 text-xs font-bold">
+                        {stage.subtitle}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-300 line-clamp-2">
                     {stage.description}

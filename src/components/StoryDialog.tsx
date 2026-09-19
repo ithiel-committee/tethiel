@@ -58,7 +58,7 @@ export const StoryDialog = ({
       <div className="text-left space-y-0.5">
         <div className="text-xs text-slate-400">MISSION TARGET:</div>
         <div className="text-lg font-bold text-cyan-200">
-          {stage.name}: {stage.subtitle}
+          {stage.subtitle ? `${stage.name}: ${stage.subtitle}` : stage.name}
         </div>
       </div>
 

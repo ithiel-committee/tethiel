@@ -90,7 +90,7 @@ export const ResultScreen = ({
       </div>
 
       <div className="text-xs text-slate-400">
-        {`// ${stage.name}: ${stage.subtitle}`}
+        {stage.subtitle ? `// ${stage.name}: ${stage.subtitle}` : `// ${stage.name}`}
       </div>
 
       <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 text-left space-y-3">
