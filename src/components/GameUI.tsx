@@ -8,7 +8,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TETROMINO_SHAPES } from "../game/constants";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
@@ -37,10 +37,36 @@ export const GameUI = ({
   children,
 }: GameUIProps) => {
   const [isPaused, setIsPaused] = useState(engine.status === "paused");
+  const [floatingScores, setFloatingScores] = useState<
+    { id: number; text: string }[]
+  >([]);
+  const [isScoreBumping, setIsScoreBumping] = useState(false);
+  const prevStarsRef = useRef(stats.bonusStars);
 
   useEffect(() => {
     setIsPaused(engine.status === "paused");
   }, [engine.status]);
+
+  // 星獲得時の +スコア ポップアップ演出
+  useEffect(() => {
+    if (stats.bonusStars > prevStarsRef.current) {
+      const diff = stats.bonusStars - prevStarsRef.current;
+      const addedScore = diff * 800;
+      const id = Date.now() + Math.random();
+      setFloatingScores((prev) => [...prev, { id, text: `+${addedScore}` }]);
+      setIsScoreBumping(true);
+      const bumpTimer = setTimeout(() => setIsScoreBumping(false), 400);
+      const popupTimer = setTimeout(() => {
+        setFloatingScores((prev) => prev.filter((item) => item.id !== id));
+      }, 1000);
+
+      return () => {
+        clearTimeout(bumpTimer);
+        clearTimeout(popupTimer);
+      };
+    }
+    prevStarsRef.current = stats.bonusStars;
+  }, [stats.bonusStars]);
 
   // タイムフォーマット mm:ss.SS
   const formatTime = (ms: number) => {
@@ -112,16 +138,34 @@ export const GameUI = ({
             ))}
           </div>
 
+
           <div className="bg-slate-900/95 border-2 border-cyan-500/50 rounded-xl p-3 space-y-2.5 shadow-[0_0_15px_rgba(0,240,255,0.15)] text-left">
-            <div className="font-['Press_Start_2P'] text-[10px] text-cyan-400 border-b border-slate-800 pb-1">
+            <div className="font-pixel-en text-[10px] text-cyan-400 border-b border-slate-800 pb-1">
               STATUS
             </div>
 
             {/* SCORE */}
-            <div>
+            <div className="relative">
               <div className="text-slate-400 text-[11px]">SCORE</div>
-              <div className="font-['Press_Start_2P'] text-yellow-400 text-sm tracking-wider">
-                {stats.score.toLocaleString()}
+              <div className="relative flex items-center gap-2">
+                <div
+                  className={`font-pixel-en text-yellow-400 text-sm tracking-wider transition-transform ${
+                    isScoreBumping ? "animate-score-bump text-yellow-300" : ""
+                  }`}
+                >
+                  {stats.score.toLocaleString()}
+                </div>
+                {/* 星獲得時の浮き上がる+スコアアニメーション */}
+                <div className="absolute left-full ml-1.5 flex flex-col gap-1 pointer-events-none">
+                  {floatingScores.map((item) => (
+                    <span
+                      key={item.id}
+                      className="font-pixel-en text-xs font-bold text-amber-300 animate-score-popup drop-shadow-[0_0_8px_rgba(251,191,36,0.9)] whitespace-nowrap"
+                    >
+                      {item.text}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -177,7 +221,7 @@ export const GameUI = ({
           <div className="grid grid-cols-2 gap-2">
             {/* NEXT */}
             <div className="bg-slate-900/90 border-2 border-cyan-500/50 rounded-xl p-2 text-center">
-              <div className="font-['Press_Start_2P'] text-[10px] text-cyan-400 mb-1.5">
+              <div className="font-pixel-en text-[10px] text-cyan-400 mb-1.5">
                 NEXT
               </div>
               <div className="w-full h-14 bg-slate-950 rounded flex items-center justify-center border border-slate-800">
@@ -191,7 +235,7 @@ export const GameUI = ({
 
             {/* HOLD */}
             <div className="bg-slate-900/90 border-2 border-cyan-500/50 rounded-xl p-2 text-center">
-              <div className="font-['Press_Start_2P'] text-[10px] text-rose-400 mb-1.5 flex justify-between px-1">
+              <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex justify-between px-1">
                 <span>HOLD</span>
                 <span className="text-[8px] text-slate-500">[C]</span>
               </div>
