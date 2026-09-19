@@ -37,6 +37,7 @@ body {
   background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
   color: #e2e8f0;
   font-family: var(--font-pixel-jp);
+  letter-spacing: 0.05em;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -47,12 +48,16 @@ body {
 }
 
 /* ユーティリティクラス */
-.font-pixel-en {
+.font-pixel-en,
+[class*="Press_Start_2P"] {
   font-family: var(--font-pixel-en);
+  letter-spacing: 0.06em;
 }
 
-.font-pixel-jp {
+.font-pixel-jp,
+[class*="DotGothic16"] {
   font-family: var(--font-pixel-jp);
+  letter-spacing: 0.05em;
 }
 
 /* アニメーション */
@@ -165,6 +170,12 @@ button:active {
 }
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.col-span-3 {
+  grid-column: span 3 / span 3;
 }
 
 @media (min-width: 768px) {
