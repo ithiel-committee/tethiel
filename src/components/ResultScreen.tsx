@@ -90,7 +90,9 @@ export const ResultScreen = ({
       </div>
 
       <div className="text-xs text-slate-400">
-        {stage.subtitle ? `// ${stage.name}: ${stage.subtitle}` : `// ${stage.name}`}
+        {stage.subtitle
+          ? `// ${stage.name}: ${stage.subtitle}`
+          : `// ${stage.name}`}
       </div>
 
       <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 text-left space-y-3">
@@ -139,6 +141,23 @@ export const ResultScreen = ({
             </span>
           </div>
         </div>
+
+        {isCleared && (
+          <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 space-y-1">
+            <div className="flex justify-between items-center">
+              <span>・タイム減点補正:</span>
+              <span className="text-rose-400 font-['Press_Start_2P'] text-[10px]">
+                -{stats.timePenalty?.toLocaleString() ?? 0} pts
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>・ミノ節約ボーナス:</span>
+              <span className="text-emerald-400 font-['Press_Start_2P'] text-[10px]">
+                +{(stats.minoBonus ?? 0).toLocaleString()} pts
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">

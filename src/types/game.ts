@@ -1,4 +1,9 @@
-export type CellType = "empty" | "placed" | "obstacle" | "star" | "glitched";
+export type CellType =
+  | "empty"
+  | "placed"
+  | "obstacle"
+  | "star"
+  | "glitched";
 
 export type SkillType = "bomb" | "freeze" | "heal";
 
@@ -64,4 +69,6 @@ export interface GameStats {
   totalStars: number; // ステージ内の総星数
   stageNumber: number;
   bestScore: number;
+  timePenalty?: number;
+  minoBonus?: number;
 }

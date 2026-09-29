@@ -91,9 +91,6 @@ export class GameEngine {
 
   // 接続された回路パス（STARTから昇順）
   public connectedPath: [number, number][] = [];
-  public magmaRow: number = GRID_HEIGHT;
-  // ウイルス感染モード ("rising_magma": マグマ横一列せりあがり / "circuit_path": 従来の回路辿り)
-  public infectionMode: "rising_magma" | "circuit_path" = "rising_magma";
   // トゲトラップ接触時の爆砕エフェクト情報
   public spikeHitEffects: {
     x: number;
@@ -101,6 +98,15 @@ export class GameEngine {
     color: string;
     createdAt: number;
   }[] = [];
+
+  // マグマせりあがり型ウイルス（横一列感染）の現在進行行（初期値は最下部の外側）
+  public magmaRow: number = GRID_HEIGHT;
+  // ウイルス感染モード ("rising_magma": マグマ横一列せりあがり / "circuit_path": 従来の回路辿り)
+  public infectionMode: "rising_magma" | "circuit_path" = "rising_magma";
+
+  // スコア内訳用
+  public timePenalty = 0;
+  public minoBonus = 0;
 
   constructor(stage: StageData, callbacks: EngineCallbacks) {
     this.stage = stage;
@@ -160,6 +166,10 @@ export class GameEngine {
     this.connectedPath = [];
     this.waypoints = [];
     this.circuitRoute = [];
+    this.spikeHitEffects = [];
+    this.magmaRow = GRID_HEIGHT;
+    this.timePenalty = 0;
+    this.minoBonus = 0;
     this.isGoalPending = false;
     this.isBonusGoal = false;
     this.isGoalCelebration = false;
@@ -226,8 +236,13 @@ export class GameEngine {
     this.lastFrameTime = now;
     this.elapsedTimeMs = now - this.startTimeMs;
 
-    // 1. ウイルス感染進行（STARTから繋がった回路を順に黒く染める）
-    if (this.connectedPath.length > 0) {
+    // 1. ウイルス感染進行（マグマせりあがり または 従来の回路感染）
+    const shouldInfect =
+      this.infectionMode === "rising_magma"
+        ? this.connectedPath.length > 0 || this.minoCount > 0
+        : this.connectedPath.length > 0;
+
+    if (shouldInfect) {
       this.infectionTimerMs += deltaMs;
       if (this.infectionTimerMs >= this.stage.infectionIntervalMs) {
         this.infectionTimerMs = 0;
@@ -235,21 +250,24 @@ export class GameEngine {
       }
     }
 
-    // 2. 足元が感染している間の継続ダメージ（1秒おきにハート-1）
+    // 2. ウイルス領域滞在中の継続ダメージ（1秒おきにハート-1）
     const footR = Math.round(this.characterPos.y);
     const footC = Math.floor(this.characterPos.x);
     const isFootInfected =
-      footR >= 0 &&
-      footR < GRID_HEIGHT &&
-      footC >= 0 &&
-      footC < GRID_WIDTH &&
-      this.grid[footR][footC]?.isInfected;
+      (footR >= 0 &&
+        footR < GRID_HEIGHT &&
+        footC >= 0 &&
+        footC < GRID_WIDTH &&
+        this.grid[footR][footC]?.isInfected) ||
+      (this.infectionMode === "rising_magma" && footR >= this.magmaRow);
 
     if (isFootInfected) {
       this.infectedDamageTimerMs += deltaMs;
       if (this.infectedDamageTimerMs >= 1000) {
         this.infectedDamageTimerMs = 0;
-        this.takeDamage("最上部のミノがウイルスに追いつかれました！");
+        this.takeDamage(
+          "ウイルス（マグマ）の感染領域内に留まり続けています！",
+        );
         if (this.status !== "playing") return;
       }
     } else {
@@ -326,7 +344,6 @@ export class GameEngine {
     this.updateStats();
   }
 
-  // ウイルス感染を一歩進める
   // ウイルス感染を一歩進める
   private advanceInfection() {
     if (this.infectionMode === "rising_magma") {
@@ -411,8 +428,9 @@ export class GameEngine {
     for (let r = 0; r < matrix.length; r++) {
       for (let c = 0; c < matrix[r].length; c++) {
         if (matrix[r][c] !== 0) {
-          const targetX = x + c;
           const targetY = y + r;
+          const targetX = x + c;
+
           if (
             targetY >= 0 &&
             targetY < GRID_HEIGHT &&
@@ -421,18 +439,19 @@ export class GameEngine {
           ) {
             placedCoords.push([targetY, targetX]);
 
-            // 星（★）を回収
+            // 星（★）を回収（スピーディなプレイを促すためスコアを控えめに調整）
             if (this.grid[targetY][targetX].type === "star") {
               sounds.playItemGet();
               this.bonusStars++;
-              this.score += 800;
+              this.score += 100;
             }
 
             this.grid[targetY][targetX] = {
               type: "placed",
               color: color,
-              isInfected: false,
               isConnected: false,
+              isInfected: false,
+              isTopCircuit: false,
             };
           }
         }
@@ -440,13 +459,14 @@ export class GameEngine {
     }
 
     this.currentPiece = null;
-    this.score += 50;
+    this.score += 10;
 
     // 回路接続の再計算（STARTからBFS探索）
     this.recalculateCircuit();
 
     // 障害物接触判定：
     // 「障害物に触れる、かつイティエルのいるミノ群に触れていない、時にライフdown&ミノ破壊」
+    // 1. 今回置かれたミノのセルのいずれかが障害物（obstacle）と上下左右4近傍で隣接しているか
     const dirs = [
       [-1, 0],
       [1, 0],
@@ -468,6 +488,8 @@ export class GameEngine {
       if (touchesObstacle) break;
     }
 
+    // 2. 「イティエルのいるミノ群に触れていない」
+    // 回路再計算後、STARTから繋がったミノ群（イティエルがいる回路）は isConnected === true になっている
     const isConnectedToCircuit = placedCoords.some(
       ([pr, pc]) => this.grid[pr][pc].isConnected,
     );
@@ -492,7 +514,10 @@ export class GameEngine {
       this.recalculateCircuit();
     }
 
-    this.spawnNextPiece();
+    // イティミノ群がゴール地点の高さに達したタイミングで新規ミノの出現を停止する
+    if (!this.isGoalPending) {
+      this.spawnNextPiece();
+    }
   }
 
   // STARTから繋がる回路の再計算
@@ -870,19 +895,37 @@ export class GameEngine {
   private triggerStageClear(isBonusClear: boolean) {
     this.status = "cleared";
     sounds.playClear();
-    this.score += isBonusClear ? 10000 : 5000;
-    this.score += this.bonusStars * 1000;
-    this.score += this.hearts * 500;
+
+    // 1. クリア基本ボーナス
+    const clearBonus = isBonusClear ? 10000 : 5000;
+    this.score += clearBonus;
+
+    // 2. 時間によるマイナス補正（1秒ごとに -30点のタイムペナルティ）
+    const clearSec = Math.floor(this.elapsedTimeMs / 1000);
+    this.timePenalty = clearSec * 30;
+    this.score = Math.max(0, this.score - this.timePenalty);
+
+    // 3. ミノ数評価（少ない方がプラス評価：基準20ミノに対し少ないほどボーナス加算）
+    this.minoBonus = Math.max(0, (20 - this.minoCount) * 200);
+    this.score += this.minoBonus;
+
+    // 4. 星ボーナス（スピーディなプレイを促すため星への固執度を下げる控えめ設定: 1個200点）
+    this.score += this.bonusStars * 200;
+
+    // 5. 残りハートボーナス
+    this.score += this.hearts * 300;
 
     const stats: GameStats = {
       score: this.score,
-      clearTimeSeconds: Math.floor(this.elapsedTimeMs / 1000),
+      clearTimeSeconds: clearSec,
       clearTimeMs: this.elapsedTimeMs,
       minoCount: this.minoCount,
       bonusStars: this.bonusStars,
       totalStars: this.totalStars,
       stageNumber: this.stage.id,
       bestScore: Math.max(this.bestScore, this.score),
+      timePenalty: this.timePenalty,
+      minoBonus: this.minoBonus,
     };
     this.callbacks.onStatusChange(this.status);
     this.callbacks.onStageClear(isBonusClear, stats);
