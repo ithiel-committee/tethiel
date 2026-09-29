@@ -119,14 +119,14 @@ export const TitleScreen = ({
           {"// HOW TO PLAY (操作ガイド)"}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+          <div>・即置き: [↑] または [SPACE]</div>
+          <div>・回転: [Z] (左) / [X] [W] (右)</div>
           <div>・左右移動: [←] [→] または [A] [D]</div>
-          <div>・回転: [↑] [W] [Z] [X]</div>
           <div>・ソフトドロップ: [↓] または [S]</div>
-          <div>・ハードドロップ: [SPACE]</div>
           <div>・ホールド: [C] キー</div>
         </div>
         <div className="text-[11px] text-cyan-300 pt-1 border-t border-slate-800">
-          ★ルール：横一列揃えても消えません！回路が通電してウイルスが一時停止＋HPが回復します！
+          ★ルール：下から上へ回路を繋げ！回路から外れたトゲに触れるとミノが破壊されハート減少！
         </div>
       </div>
 

@@ -15,9 +15,9 @@ interface GameCanvasProps {
   engine: GameEngine;
 }
 
-const BLOCK_SIZE = 25;
-const CANVAS_WIDTH = GRID_WIDTH * BLOCK_SIZE; // 300px
-const CANVAS_HEIGHT = GRID_HEIGHT * BLOCK_SIZE; // 550px
+const BLOCK_SIZE = 28;
+const CANVAS_WIDTH = GRID_WIDTH * BLOCK_SIZE; // 336px
+const CANVAS_HEIGHT = GRID_HEIGHT * BLOCK_SIZE; // 616px
 
 export const GameCanvas = ({ engine }: GameCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -295,6 +295,58 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.restore();
       }
 
+      // 10.5. トゲ障害物接触・ミノ破壊エフェクト
+      if (engine.spikeHitEffects.length > 0) {
+        const now = performance.now();
+        engine.spikeHitEffects = engine.spikeHitEffects.filter((fx) => {
+          const age = now - fx.createdAt;
+          if (age > 600) return false;
+
+          const progress = age / 600; // 0 -> 1
+          const alpha = 1 - progress;
+          const radius = (1 - (1 - progress) ** 2) * BLOCK_SIZE * 1.5;
+          const px = fx.x * BLOCK_SIZE;
+          const py = fx.y * BLOCK_SIZE;
+
+          ctx.save();
+          // 衝撃波リング
+          ctx.strokeStyle = `rgba(255, 23, 68, ${alpha * 0.9})`;
+          ctx.lineWidth = 2.5 * (1 - progress);
+          ctx.beginPath();
+          ctx.arc(px, py, radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 破片パーティクル
+          const count = 8;
+          for (let i = 0; i < count; i++) {
+            const angle = (i * Math.PI * 2) / count + fx.createdAt * 0.01;
+            const dist = progress * BLOCK_SIZE * 1.6;
+            const pX = px + Math.cos(angle) * dist;
+            const pY = py + Math.sin(angle) * dist;
+            const pSize = Math.max(1, (1 - progress) * 4);
+
+            ctx.fillStyle =
+              i % 2 === 0 ? "#ff1744" : fx.color || "#ffdd00";
+            ctx.shadowColor = "#ff1744";
+            ctx.shadowBlur = 4;
+            ctx.fillRect(pX - pSize / 2, pY - pSize / 2, pSize, pSize);
+          }
+
+          // "BREAK!" ワーニングテキスト
+          if (progress < 0.85) {
+            ctx.font = 'bold 10px "DotGothic16", monospace';
+            ctx.fillStyle = `rgba(255, 60, 90, ${alpha})`;
+            ctx.shadowColor = "#ff0055";
+            ctx.shadowBlur = 6;
+            ctx.textAlign = "center";
+            ctx.fillText("TRAP!", px, py - radius * 0.6 - 4);
+          }
+          ctx.restore();
+
+          return true;
+        });
+      }
+
       // 11. 一時停止画面
       if (engine.status === "paused") {
         ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
@@ -375,7 +427,7 @@ function drawMinoBlock(
   ctx.strokeRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
 }
 
-// 障害物ブロックの描画
+// 障害物ブロックの描画（トゲトゲ・危険サイバースパイク）
 function drawObstacleBlock(
   ctx: CanvasRenderingContext2D,
   x: number,
