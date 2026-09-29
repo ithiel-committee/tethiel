@@ -58,7 +58,6 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.stroke();
       }
 
-
       // 4. GOALライン描画（行2）
       const goalY = GOAL_ROW * BLOCK_SIZE;
       // 通常GOALエリア
@@ -128,7 +127,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
               time,
             );
           } else if (cell.type === "obstacle") {
-            drawObstacleBlock(ctx, px, py);
+            drawObstacleBlock(ctx, px, py, time);
           } else if (cell.type === "star") {
             drawStarItem(ctx, px, py, time);
           } else if (cell.type === "glitched") {
@@ -222,7 +221,14 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
 
         // ゴール到達時の光る放射オーラ
         const auraRadius = 24 + Math.sin(time / 80) * 6;
-        const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, auraRadius);
+        const grad = ctx.createRadialGradient(
+          cx,
+          cy,
+          4,
+          cx,
+          cy,
+          auraRadius,
+        );
         grad.addColorStop(0, "rgba(255, 230, 0, 0.9)");
         grad.addColorStop(0.5, "rgba(0, 240, 255, 0.6)");
         grad.addColorStop(1, "rgba(0, 240, 255, 0)");
@@ -331,19 +337,71 @@ function drawObstacleBlock(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
+  time: number,
 ) {
-  ctx.fillStyle = "#334155";
-  ctx.fillRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+  const pad = 1;
+  const bx = x + pad;
+  const by = y + pad;
+  const bs = BLOCK_SIZE - pad * 2;
+  const coreMargin = 5;
+  const cx = bx + coreMargin;
+  const cy = by + coreMargin;
+  const cw = bs - coreMargin * 2;
+  const ch = bs - coreMargin * 2;
 
-  ctx.strokeStyle = "#64748b";
-  ctx.lineWidth = 1.5;
+  // 1. 暗い土台
+  ctx.fillStyle = "#161b26";
+  ctx.fillRect(bx, by, bs, bs);
+
+  // 2. トゲ（スパイク）の描画：上・右・下・左にそれぞれ鋭利な三角形のトゲ
+  const spikeW = cw / 2;
+  const pulse = (Math.sin(time / 200) + 1) / 2;
+
+  ctx.fillStyle = "#ff1744";
+  ctx.strokeStyle = "#ff5252";
+  ctx.lineWidth = 1;
+
   ctx.beginPath();
-  ctx.moveTo(x + 3, y + BLOCK_SIZE - 3);
-  ctx.lineTo(x + BLOCK_SIZE - 3, y + 3);
+  // 上のトゲ（2本）
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + spikeW * 0.5, by);
+  ctx.lineTo(cx + spikeW, cy);
+  ctx.lineTo(cx + spikeW * 1.5, by);
+  ctx.lineTo(cx + cw, cy);
+
+  // 右のトゲ（2本）
+  ctx.lineTo(bx + bs, cy + spikeW * 0.5);
+  ctx.lineTo(cx + cw, cy + spikeW);
+  ctx.lineTo(bx + bs, cy + spikeW * 1.5);
+  ctx.lineTo(cx + cw, cy + ch);
+
+  // 下のトゲ（2本）
+  ctx.lineTo(cx + spikeW * 1.5, by + bs);
+  ctx.lineTo(cx + spikeW, cy + ch);
+  ctx.lineTo(cx + spikeW * 0.5, by + bs);
+  ctx.lineTo(cx, cy + ch);
+
+  // 左のトゲ（2本）
+  ctx.lineTo(bx, cy + spikeW * 1.5);
+  ctx.lineTo(cx, cy + spikeW);
+  ctx.lineTo(bx, cy + spikeW * 0.5);
+  ctx.closePath();
+  ctx.fill();
   ctx.stroke();
 
-  ctx.strokeStyle = "#94a3b8";
-  ctx.strokeRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+  // 3. 中央の金属コアプレート
+  ctx.fillStyle = "#0f172a";
+  ctx.fillRect(cx, cy, cw, ch);
+  ctx.strokeStyle = "#475569";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx, cy, cw, ch);
+
+  // 4. 中央の危険警告インジケータ（明滅する赤いパルスアイ）
+  ctx.fillStyle = `rgba(255, 23, 68, ${0.7 + pulse * 0.3})`;
+  ctx.shadowColor = "#ff1744";
+  ctx.shadowBlur = 4 + pulse * 4;
+  ctx.fillRect(bx + bs / 2 - 2, by + bs / 2 - 2, 4, 4);
+  ctx.shadowBlur = 0;
 }
 
 // グリッチ状態のブロック描画（消えるのではなく実態を残したまま数msおきに激しくグリッチ）
@@ -370,7 +428,7 @@ function drawGlitchedBlock(
   for (let i = 0; i < sliceCount; i++) {
     const sliceY = y + 1 + i * sliceH;
     // スライスごとの擬似ランダムズレ（-4px 〜 +4px）
-    const shift = isJitter ? (((glitchFrame * (i + 1) * 7) % 9) - 4) : 0;
+    const shift = isJitter ? ((glitchFrame * (i + 1) * 7) % 9) - 4 : 0;
 
     // 赤色（マゼンタ）色ズレ（RGB split）
     ctx.fillStyle = "rgba(255, 0, 85, 0.6)";
@@ -398,7 +456,7 @@ function drawGlitchedBlock(
   ctx.strokeStyle = isJitter ? "#00ffff" : "rgba(255, 0, 85, 0.8)";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(
-    x + 1 + (isJitter ? ((glitchFrame % 5) - 2) : 0),
+    x + 1 + (isJitter ? (glitchFrame % 5) - 2 : 0),
     y + 1,
     BLOCK_SIZE - 2,
     BLOCK_SIZE - 2,

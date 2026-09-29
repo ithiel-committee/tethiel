@@ -287,6 +287,62 @@ class SoundSystem {
     } catch {}
   }
 
+  // トゲ障害物接触・ミノ破壊音（金属衝突＋激しい破砕ノイズ）
+  public playSpikeTrap() {
+    if (this.muted) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+
+      // 鋭い衝撃音
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(
+        40,
+        this.ctx.currentTime + 0.25,
+      );
+
+      gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        this.ctx.currentTime + 0.25,
+      );
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.25);
+
+      // クラッシュノイズ
+      const bufferSize = Math.floor(this.ctx.sampleRate * 0.2);
+      const buffer = this.ctx.createBuffer(
+        1,
+        bufferSize,
+        this.ctx.sampleRate,
+      );
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+      }
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(
+        0.001,
+        this.ctx.currentTime + 0.2,
+      );
+
+      noise.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noise.start();
+      noise.stop(this.ctx.currentTime + 0.2);
+    } catch {}
+  }
+
   // 警告アラート音
   public playAlert() {
     if (this.muted) return;

@@ -91,6 +91,13 @@ export class GameEngine {
 
   // 接続された回路パス（STARTから昇順）
   public connectedPath: [number, number][] = [];
+  // トゲトラップ接触時の爆砕エフェクト情報
+  public spikeHitEffects: {
+    x: number;
+    y: number;
+    color: string;
+    createdAt: number;
+  }[] = [];
 
   constructor(stage: StageData, callbacks: EngineCallbacks) {
     this.stage = stage;
@@ -359,18 +366,21 @@ export class GameEngine {
     const { matrix, x, y, color } = this.currentPiece;
     this.minoCount++;
 
+    const placedCoords: [number, number][] = [];
+
     for (let r = 0; r < matrix.length; r++) {
       for (let c = 0; c < matrix[r].length; c++) {
         if (matrix[r][c] !== 0) {
-          const targetY = y + r;
           const targetX = x + c;
-
+          const targetY = y + r;
           if (
             targetY >= 0 &&
             targetY < GRID_HEIGHT &&
             targetX >= 0 &&
             targetX < GRID_WIDTH
           ) {
+            placedCoords.push([targetY, targetX]);
+
             // 星（★）を回収
             if (this.grid[targetY][targetX].type === "star") {
               sounds.playItemGet();
@@ -381,9 +391,8 @@ export class GameEngine {
             this.grid[targetY][targetX] = {
               type: "placed",
               color: color,
-              isConnected: false,
               isInfected: false,
-              isTopCircuit: false,
+              isConnected: false,
             };
           }
         }
@@ -396,7 +405,53 @@ export class GameEngine {
     // 回路接続の再計算（STARTからBFS探索）
     this.recalculateCircuit();
 
-    // 次のミノ出現
+    // 障害物接触判定：
+    // 「障害物に触れる、かつイティエルのいるミノ群に触れていない、時にライフdown&ミノ破壊」
+    const dirs = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ];
+    let touchesObstacle = false;
+    for (const [pr, pc] of placedCoords) {
+      for (const [dr, dc] of dirs) {
+        const nr = pr + dr;
+        const nc = pc + dc;
+        if (nr >= 0 && nr < GRID_HEIGHT && nc >= 0 && nc < GRID_WIDTH) {
+          if (this.grid[nr][nc].type === "obstacle") {
+            touchesObstacle = true;
+            break;
+          }
+        }
+      }
+      if (touchesObstacle) break;
+    }
+
+    const isConnectedToCircuit = placedCoords.some(
+      ([pr, pc]) => this.grid[pr][pc].isConnected,
+    );
+
+    if (touchesObstacle && !isConnectedToCircuit) {
+      // トゲ障害物トラップ発動！
+      sounds.playSpikeTrap();
+      this.takeDamage("トゲ障害物に接触してミノが破壊されました！");
+
+      // 破壊エフェクト登録 & グリッドから消去
+      for (const [pr, pc] of placedCoords) {
+        this.spikeHitEffects.push({
+          x: pc + 0.5,
+          y: pr + 0.5,
+          color: color,
+          createdAt: performance.now(),
+        });
+        this.grid[pr][pc] = { type: "empty" };
+      }
+
+      // 破壊されたため回路を再計算
+      this.recalculateCircuit();
+    }
+
     this.spawnNextPiece();
   }
 
