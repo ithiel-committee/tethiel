@@ -284,6 +284,20 @@ export const GameUI = ({
               </div>
             </div>
 
+            {/* VIRUS STATUS */}
+            <div>
+              <div className="text-slate-400 text-[11px]">VIRUS</div>
+              {engine.minosUntilInfection > 0 ? (
+                <div className="text-cyan-300 text-xs font-bold animate-pulse">
+                  待機中 (あと{engine.minosUntilInfection}手)
+                </div>
+              ) : (
+                <div className="text-rose-400 text-xs font-bold">
+                  ▲ 感染進行中 ▲
+                </div>
+              )}
+            </div>
+
             {/* BEST SCORE */}
             <div className="pt-1 border-t border-slate-800">
               <div className="text-slate-500 text-[10px]">BEST SCORE</div>

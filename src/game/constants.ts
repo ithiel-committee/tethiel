@@ -104,7 +104,7 @@ export const STAGES: StageData[] = [
     description:
       "回路を繋いでイティエルをGOALへ導こう！小さなお子様やご家族連れでも楽しめるやさしい難易度。",
     isUnlocked: true,
-    infectionIntervalMs: 2000, // 2.0秒ごと（即置きなし＆↓入力半分ほどでギリギリクリアできる速度）
+    infectionIntervalMs: 4500, // 4.5秒ごと（2ミノ配置後から開始。落ち着いてプレイできるゆったり速度）
     goalRow: GOAL_ROW,
     startCols: START_COLS,
     initialObstacles: [
@@ -130,7 +130,7 @@ export const STAGES: StageData[] = [
     description:
       "トゲ障害物を巧みに回避しながら回路を繋ぎ、迫り来るウイルスからイティエルを守り抜け！",
     isUnlocked: true,
-    infectionIntervalMs: 1400, // 1.4秒ごとに回路を1マス黒く感染
+    infectionIntervalMs: 1400,
     goalRow: GOAL_ROW,
     startCols: START_COLS,
     initialObstacles: [
@@ -177,7 +177,7 @@ export const STAGES: StageData[] = [
     subtitle: "最終防衛戦",
     description: "高速ウイルスとの最終決戦。（Coming Soon）",
     isUnlocked: false,
-    infectionIntervalMs: 900,
+    infectionIntervalMs: 2200, // 2.2秒ごと
     goalRow: GOAL_ROW,
     startCols: START_COLS,
     initialObstacles: [],

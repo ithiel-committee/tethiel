@@ -69,7 +69,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         BLOCK_SIZE,
       );
       ctx.fillStyle = "#020617";
-      ctx.font = '10px "Silkscreen", monospace';
+      ctx.font = '11px "DotGothic16", monospace';
       ctx.textAlign = "center";
       ctx.fillText(
         "G  O  A  L",
@@ -88,7 +88,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         BLOCK_SIZE,
       );
       ctx.fillStyle = "#ffffff";
-      ctx.font = '8px "Silkscreen", monospace';
+      ctx.font = '9px "DotGothic16", monospace';
       ctx.fillText(
         "BONUS",
         bonusStartX + (BONUS_GOAL_COLS.length * BLOCK_SIZE) / 2,
@@ -242,7 +242,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.shadowColor = engine.isBonusGoal ? "#ff007f" : "#ffdd00";
         ctx.shadowBlur = 12;
         ctx.fillStyle = engine.isBonusGoal ? "#ff007f" : "#ffe600";
-        ctx.font = '12px "Silkscreen", monospace';
+        ctx.font = '13px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText(
           engine.isBonusGoal ? "★ BONUS GOAL! ★" : "★ GOAL! ★",
@@ -252,7 +252,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.restore();
       }
 
-      // 10.3. せりあがるマグマ（横一列ウイルス感染）の描画
+      // 10.3. せりあがるウイルス感染ライン（揺れのない直線サイバー警戒ライン）
       if (
         engine.infectionMode === "rising_magma" &&
         engine.magmaRow < GRID_HEIGHT
@@ -261,37 +261,43 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         const magmaHeight = CANVAS_HEIGHT - magmaY;
 
         ctx.save();
-        // マグマゾーンの暗赤色・暗紫色のグラデーション
+        // 感染領域（暗赤色・暗紫色のサイバー警戒ゾーン）
         const grad = ctx.createLinearGradient(0, magmaY, 0, CANVAS_HEIGHT);
-        grad.addColorStop(0, "rgba(255, 0, 70, 0.45)");
-        grad.addColorStop(0.2, "rgba(45, 5, 20, 0.8)");
+        grad.addColorStop(0, "rgba(255, 0, 70, 0.4)");
+        grad.addColorStop(0.2, "rgba(45, 5, 20, 0.85)");
         grad.addColorStop(1, "rgba(8, 2, 10, 0.95)");
         ctx.fillStyle = grad;
         ctx.fillRect(0, magmaY, CANVAS_WIDTH, magmaHeight);
 
-        // 波打つサイバーマグマの表面ライン（赤〜ネオンオレンジの溶岩ウェーブ）
+        // 揺れのない水平なサイバー境界ライン（ネオンマゼンタの直線）
         ctx.beginPath();
         ctx.moveTo(0, magmaY);
-        for (let x = 0; x <= CANVAS_WIDTH; x += 4) {
-          const wave =
-            Math.sin(x * 0.05 + time * 0.005) * 2.5 +
-            Math.cos(x * 0.03 - time * 0.003) * 1.5;
-          ctx.lineTo(x, magmaY + wave);
-        }
+        ctx.lineTo(CANVAS_WIDTH, magmaY);
         ctx.strokeStyle = "#ff0055";
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2;
         ctx.shadowColor = "#ff0055";
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         ctx.stroke();
 
-        // 警告ラベル "▲ VIRUS MAGMA ▲"
-        const pulse = 0.6 + Math.sin(time / 160) * 0.4;
-        ctx.font = 'bold 8px "Press Start 2P", monospace';
-        ctx.fillStyle = `rgba(255, 60, 90, ${pulse})`;
+        // 警戒ライン下の静止ハザードストライプ（揺れないフラットな斜線）
+        ctx.strokeStyle = "rgba(255, 0, 85, 0.25)";
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 0;
+        for (let x = 0; x < CANVAS_WIDTH; x += 14) {
+          ctx.beginPath();
+          ctx.moveTo(x, magmaY);
+          ctx.lineTo(x + 8, magmaY + 8);
+          ctx.stroke();
+        }
+
+        // 警告ラベル "▲ VIRUS HAZARD LINE ▲"（静止、ドットフォント）
+        const pulse = 0.7 + Math.sin(time / 200) * 0.3;
+        ctx.font = '10px "DotGothic16", monospace';
+        ctx.fillStyle = `rgba(255, 80, 110, ${pulse})`;
         ctx.shadowColor = "#ff0055";
         ctx.shadowBlur = 4;
         ctx.textAlign = "left";
-        ctx.fillText("▲ VIRUS MAGMA ▲", 6, magmaY - 6);
+        ctx.fillText("▲ VIRUS HAZARD LINE ▲", 6, magmaY - 6);
         ctx.restore();
       }
 
@@ -352,7 +358,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         ctx.fillStyle = "#00f0ff";
-        ctx.font = '16px "Silkscreen", monospace';
+        ctx.font = '18px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText("PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
       }
@@ -572,7 +578,7 @@ function drawStarItem(
   ctx.fillStyle = "#ffdd00";
   ctx.shadowColor = "#ffdd00";
   ctx.shadowBlur = 8;
-  ctx.font = '14px "Silkscreen", monospace';
+  ctx.font = '14px "DotGothic16", monospace';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("★", cx, cy);

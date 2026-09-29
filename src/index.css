@@ -1,8 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=DotGothic16&family=Silkscreen:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DotGothic16&display=swap");
 
 :root {
+  --font-pixel: "DotGothic16", monospace, sans-serif;
   --font-pixel-jp: "DotGothic16", monospace, sans-serif;
-  --font-pixel-en: "Silkscreen", monospace, sans-serif;
+  --font-pixel-en: "DotGothic16", monospace, sans-serif;
   --bg-dark: #070a14;
   --bg-card: rgba(13, 20, 38, 0.85);
   --cyan-main: #00f0ff;
@@ -36,7 +37,7 @@ body {
     linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
   color: #e2e8f0;
-  font-family: var(--font-pixel-jp);
+  font-family: var(--font-pixel);
   letter-spacing: 0.05em;
   min-height: 100vh;
   display: flex;
@@ -47,17 +48,13 @@ body {
   user-select: none;
 }
 
-/* ユーティリティクラス */
+/* ゲーム用ドットフォント（日本語・英数字共通統一） */
 .font-pixel-en,
-[class*="Silkscreen"],
-[class*="Press_Start_2P"] {
-  font-family: var(--font-pixel-en);
-  letter-spacing: 0.05em;
-}
-
 .font-pixel-jp,
+[class*="Silkscreen"],
+[class*="Press_Start_2P"],
 [class*="DotGothic16"] {
-  font-family: var(--font-pixel-jp);
+  font-family: var(--font-pixel);
   letter-spacing: 0.05em;
 }
 

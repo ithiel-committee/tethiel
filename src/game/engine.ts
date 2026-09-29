@@ -108,6 +108,11 @@ export class GameEngine {
   public timePenalty = 0;
   public minoBonus = 0;
 
+  // 感染開始までの残り配置ミノ数（0なら既にウイルス活動中）
+  public get minosUntilInfection(): number {
+    return Math.max(0, 2 - this.minoCount);
+  }
+
   constructor(stage: StageData, callbacks: EngineCallbacks) {
     this.stage = stage;
     this.callbacks = callbacks;
@@ -237,10 +242,13 @@ export class GameEngine {
     this.elapsedTimeMs = now - this.startTimeMs;
 
     // 1. ウイルス感染進行（マグマせりあがり または 従来の回路感染）
+    // 要件：「2ミノを配置完了し終わるまで動き出さないように」
+    const isReadyToInfect = this.minoCount >= 2;
     const shouldInfect =
-      this.infectionMode === "rising_magma"
+      isReadyToInfect &&
+      (this.infectionMode === "rising_magma"
         ? this.connectedPath.length > 0 || this.minoCount > 0
-        : this.connectedPath.length > 0;
+        : this.connectedPath.length > 0);
 
     if (shouldInfect) {
       this.infectionTimerMs += deltaMs;
@@ -248,6 +256,9 @@ export class GameEngine {
         this.infectionTimerMs = 0;
         this.advanceInfection();
       }
+    } else {
+      // 2ミノ配置完了するまでは待機タイマーを0に維持
+      this.infectionTimerMs = 0;
     }
 
     // 2. ウイルス領域滞在中の継続ダメージ（1秒おきにハート-1）
