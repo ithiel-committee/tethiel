@@ -252,6 +252,49 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.restore();
       }
 
+      // 10.3. せりあがるマグマ（横一列ウイルス感染）の描画
+      if (
+        engine.infectionMode === "rising_magma" &&
+        engine.magmaRow < GRID_HEIGHT
+      ) {
+        const magmaY = engine.magmaRow * BLOCK_SIZE;
+        const magmaHeight = CANVAS_HEIGHT - magmaY;
+
+        ctx.save();
+        // マグマゾーンの暗赤色・暗紫色のグラデーション
+        const grad = ctx.createLinearGradient(0, magmaY, 0, CANVAS_HEIGHT);
+        grad.addColorStop(0, "rgba(255, 0, 70, 0.45)");
+        grad.addColorStop(0.2, "rgba(45, 5, 20, 0.8)");
+        grad.addColorStop(1, "rgba(8, 2, 10, 0.95)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, magmaY, CANVAS_WIDTH, magmaHeight);
+
+        // 波打つサイバーマグマの表面ライン（赤〜ネオンオレンジの溶岩ウェーブ）
+        ctx.beginPath();
+        ctx.moveTo(0, magmaY);
+        for (let x = 0; x <= CANVAS_WIDTH; x += 4) {
+          const wave =
+            Math.sin(x * 0.05 + time * 0.005) * 2.5 +
+            Math.cos(x * 0.03 - time * 0.003) * 1.5;
+          ctx.lineTo(x, magmaY + wave);
+        }
+        ctx.strokeStyle = "#ff0055";
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = "#ff0055";
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+
+        // 警告ラベル "▲ VIRUS MAGMA ▲"
+        const pulse = 0.6 + Math.sin(time / 160) * 0.4;
+        ctx.font = 'bold 8px "Press Start 2P", monospace';
+        ctx.fillStyle = `rgba(255, 60, 90, ${pulse})`;
+        ctx.shadowColor = "#ff0055";
+        ctx.shadowBlur = 4;
+        ctx.textAlign = "left";
+        ctx.fillText("▲ VIRUS MAGMA ▲", 6, magmaY - 6);
+        ctx.restore();
+      }
+
       // 11. 一時停止画面
       if (engine.status === "paused") {
         ctx.fillStyle = "rgba(0, 0, 0, 0.8)";

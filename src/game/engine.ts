@@ -91,6 +91,9 @@ export class GameEngine {
 
   // 接続された回路パス（STARTから昇順）
   public connectedPath: [number, number][] = [];
+  public magmaRow: number = GRID_HEIGHT;
+  // ウイルス感染モード ("rising_magma": マグマ横一列せりあがり / "circuit_path": 従来の回路辿り)
+  public infectionMode: "rising_magma" | "circuit_path" = "rising_magma";
   // トゲトラップ接触時の爆砕エフェクト情報
   public spikeHitEffects: {
     x: number;
@@ -324,7 +327,44 @@ export class GameEngine {
   }
 
   // ウイルス感染を一歩進める
+  // ウイルス感染を一歩進める
   private advanceInfection() {
+    if (this.infectionMode === "rising_magma") {
+      this.advanceMagmaInfection();
+    } else {
+      this.advanceCircuitPathInfection();
+    }
+  }
+
+  // 新仕様：マグマがせりあがってくるように横一列で下から感染を進める
+  private advanceMagmaInfection() {
+    if (this.magmaRow > 0) {
+      this.magmaRow--;
+      const targetRow = this.magmaRow;
+
+      // 対象行のすべての設置済みブロックをウイルス感染状態にする
+      for (let c = 0; c < GRID_WIDTH; c++) {
+        if (this.grid[targetRow][c].type === "placed") {
+          this.grid[targetRow][c].isInfected = true;
+        }
+      }
+
+      // イティエルの現在行がせりあがったマグマ行に到達（呑み込まれた）場合
+      const charRow = Math.round(this.characterPos.y);
+      if (charRow >= targetRow) {
+        this.takeDamage("迫り来るウイルス（マグマ）に飲み込まれました！");
+        this.infectedDamageTimerMs = 0;
+      }
+    }
+  }
+
+  /* =========================================================================
+   * ※【既存形式の保持】
+   * 以前の「STARTから繋がった回路パスを最下部から1マスずつ黒く感染させる」形式のロジックです。
+   * 要件「現在の形式も一応残しておく / 残しておくことをコメントつける」に基づき残しています。
+   * engine.infectionMode = "circuit_path" を指定することで切り替えて使用可能です。
+   * ========================================================================= */
+  private advanceCircuitPathInfection() {
     // connectedPath は START から最上部に向かって並んでいる
     for (const [r, c] of this.connectedPath) {
       const cell = this.grid[r][c];
