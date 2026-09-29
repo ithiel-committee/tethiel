@@ -94,21 +94,47 @@ export const COLORS = {
   starGlow: "rgba(255, 221, 0, 0.8)",
 };
 
-// ステージデータ定義（PDF 5pの配置を忠実に反映）
+// ステージデータ定義
 export const STAGES: StageData[] = [
   {
     id: 1,
     name: "STAGE 1",
     codeName: "STAGE 1",
-    subtitle: "",
+    subtitle: "入門・回路接続",
     description:
-      "START地点から回路を繋ぎ、ウイルスに追いつかれる前にGOALへイティエルを導け！",
+      "回路を繋いでイティエルをGOALへ導こう！小さなお子様やご家族連れでも楽しめるやさしい難易度。",
+    isUnlocked: true,
+    infectionIntervalMs: 2000, // 2.0秒ごと（即置きなし＆↓入力半分ほどでギリギリクリアできる速度）
+    goalRow: GOAL_ROW,
+    startCols: START_COLS,
+    initialObstacles: [
+      // 初心者向け：中央のメインルートを塞がない、左右端のトゲ障害物
+      [15, 1],
+      [15, 2],
+      [10, 9],
+      [10, 10],
+    ],
+    initialStars: [
+      // 登る途中で自然に回収できる★配置
+      [17, 5],
+      [13, 6],
+      [9, 5],
+      [4, 6],
+    ],
+  },
+  {
+    id: 2,
+    name: "STAGE 2",
+    codeName: "STAGE 2",
+    subtitle: "サイバー迂回ルート",
+    description:
+      "トゲ障害物を巧みに回避しながら回路を繋ぎ、迫り来るウイルスからイティエルを守り抜け！",
     isUnlocked: true,
     infectionIntervalMs: 1400, // 1.4秒ごとに回路を1マス黒く感染
     goalRow: GOAL_ROW,
     startCols: START_COLS,
     initialObstacles: [
-      // 1〜4ブロック程度の小型障害物クラスター配置
+      // 1〜4ブロック程度の小型障害物クラスター配置（PDF 5p準拠）
       // 左上小型ブロック (1ブロック)
       [6, 3],
       // 右上L字障害物 (3ブロック)
@@ -145,27 +171,13 @@ export const STAGES: StageData[] = [
     ],
   },
   {
-    id: 2,
-    name: "STAGE 2",
-    codeName: "STAGE 2",
-    subtitle: "",
-    description:
-      "多重プロキシで迂回を強いられる難関ルート。（Coming Soon）",
-    isUnlocked: false,
-    infectionIntervalMs: 1100,
-    goalRow: GOAL_ROW,
-    startCols: START_COLS,
-    initialObstacles: [],
-    initialStars: [],
-  },
-  {
     id: 3,
     name: "STAGE 3",
     codeName: "STAGE 3",
-    subtitle: "",
+    subtitle: "最終防衛戦",
     description: "高速ウイルスとの最終決戦。（Coming Soon）",
     isUnlocked: false,
-    infectionIntervalMs: 800,
+    infectionIntervalMs: 900,
     goalRow: GOAL_ROW,
     startCols: START_COLS,
     initialObstacles: [],
