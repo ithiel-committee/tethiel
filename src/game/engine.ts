@@ -339,7 +339,9 @@ export class GameEngine {
   }
 
   // ダメージ処理（ハート-1、SE、ゲームオーバー判定）
-  private takeDamage(reason = "最上部のミノがウイルスに追いつかれました！") {
+  private takeDamage(
+    reason = "最上部のミノがウイルスに追いつかれました！",
+  ) {
     sounds.playAlert();
     this.hearts = Math.max(0, this.hearts - 1);
     this.callbacks.onHeartsChange(this.hearts);
@@ -546,7 +548,7 @@ export class GameEngine {
 
     // 上記で見つからない場合、接続された回路の中で現在地に最も近いブロックを始点にする
     if (!startNode && this.connectedPath.length > 0) {
-      let minDist = Infinity;
+      let minDist = Number.POSITIVE_INFINITY;
       for (const [r, c] of this.connectedPath) {
         const d = Math.hypot(
           c + 0.5 - this.characterPos.x,
@@ -577,7 +579,9 @@ export class GameEngine {
     let found = false;
 
     while (queue.length > 0) {
-      const [cr, cc] = queue.shift()!;
+      const curr = queue.shift();
+      if (!curr) break;
+      const [cr, cc] = curr;
       if (cr === tr && cc === tc) {
         found = true;
         break;
@@ -651,9 +655,9 @@ export class GameEngine {
     }
   }
 
-  public rotate() {
+  public rotate(clockwise = true) {
     if (this.status !== "playing" || !this.currentPiece) return;
-    const result = tryRotate(this.currentPiece, this.grid);
+    const result = tryRotate(this.currentPiece, this.grid, clockwise);
     if (result.success) {
       this.currentPiece.matrix = result.newMatrix;
       this.currentPiece.x = result.newX;

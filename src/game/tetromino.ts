@@ -93,14 +93,19 @@ export function checkCollision(
   return false;
 }
 
-// マトリクスの回転（時計回り）
-export function rotateMatrix(matrix: number[][]): number[][] {
+// マトリクスの回転（clockwise: true=時計回り/右回転, false=反時計回り/左回転）
+export function rotateMatrix(
+  matrix: number[][],
+  clockwise = true,
+): number[][] {
   const n = matrix.length;
   const result: number[][] = [];
   for (let r = 0; r < n; r++) {
     result[r] = [];
     for (let c = 0; c < n; c++) {
-      result[r][c] = matrix[n - 1 - c][r];
+      result[r][c] = clockwise
+        ? matrix[n - 1 - c][r]
+        : matrix[c][n - 1 - r];
     }
   }
   return result;
@@ -110,6 +115,7 @@ export function rotateMatrix(matrix: number[][]): number[][] {
 export function tryRotate(
   piece: Tetromino,
   grid: Cell[][],
+  clockwise = true,
 ): {
   success: boolean;
   newMatrix: number[][];
@@ -126,7 +132,7 @@ export function tryRotate(
     };
   }
 
-  const rotated = rotateMatrix(piece.matrix);
+  const rotated = rotateMatrix(piece.matrix, clockwise);
 
   // 壁蹴りオフセット候補 (dx, dy)
   const kickOffsets = [

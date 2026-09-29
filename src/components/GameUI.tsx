@@ -3,6 +3,7 @@ import {
   Heart,
   Pause,
   Play,
+  RotateCcw,
   RotateCw,
   User,
   Volume2,
@@ -45,7 +46,9 @@ export const GameUI = ({
   const [damagePopups, setDamagePopups] = useState<
     { id: number; text: string }[]
   >([]);
-  const [brokenHeartIndices, setBrokenHeartIndices] = useState<number[]>([]);
+  const [brokenHeartIndices, setBrokenHeartIndices] = useState<number[]>(
+    [],
+  );
   const prevStarsRef = useRef(stats.bonusStars);
   const prevHeartsRef = useRef(hearts);
 
@@ -59,7 +62,10 @@ export const GameUI = ({
       const diff = stats.bonusStars - prevStarsRef.current;
       const addedScore = diff * 800;
       const id = Date.now() + Math.random();
-      setFloatingScores((prev) => [...prev, { id, text: `+${addedScore}` }]);
+      setFloatingScores((prev) => [
+        ...prev,
+        { id, text: `+${addedScore}` },
+      ]);
       setIsScoreBumping(true);
       const bumpTimer = setTimeout(() => setIsScoreBumping(false), 400);
       const popupTimer = setTimeout(() => {
@@ -93,9 +99,14 @@ export const GameUI = ({
       }, 650);
 
       const newId = Date.now() + Math.random();
-      setDamagePopups((prev) => [...prev, { id: newId, text: `♡ -${diff}` }]);
+      setDamagePopups((prev) => [
+        ...prev,
+        { id: newId, text: `♡ -${diff}` },
+      ]);
       const popupTimer = setTimeout(() => {
-        setDamagePopups((prev) => prev.filter((item) => item.id !== newId));
+        setDamagePopups((prev) =>
+          prev.filter((item) => item.id !== newId),
+        );
       }, 1000);
 
       return () => {
@@ -208,7 +219,6 @@ export const GameUI = ({
             </div>
           </div>
 
-
           <div className="bg-slate-900/95 border-2 border-cyan-500/50 rounded-xl p-3 space-y-2.5 shadow-[0_0_15px_rgba(0,240,255,0.15)] text-left">
             <div className="font-pixel-en text-[10px] text-cyan-400 border-b border-slate-800 pb-1">
               STATUS
@@ -220,7 +230,9 @@ export const GameUI = ({
               <div className="relative flex items-center gap-2">
                 <div
                   className={`font-pixel-en text-yellow-400 text-sm tracking-wider transition-transform ${
-                    isScoreBumping ? "animate-score-bump text-yellow-300" : ""
+                    isScoreBumping
+                      ? "animate-score-bump text-yellow-300"
+                      : ""
                   }`}
                 >
                   {stats.score.toLocaleString()}
@@ -346,9 +358,10 @@ export const GameUI = ({
             </div>
 
             <div className="text-[11px] text-slate-300 space-y-1">
+              <div>・即置き: [↑] / [Space]</div>
+              <div>・回転: [Z] (左) / [X] [W] (右)</div>
               <div>・移動: [←] [→] / [A] [D]</div>
-              <div>・回転: [↑] / [W] / [ROTATE]</div>
-              <div>・落下: [↓] (Soft) / [Space] (Drop)</div>
+              <div>・落下: [↓] / [S] (Soft)</div>
               <div>・ホールド: [C] キー</div>
             </div>
 
@@ -363,10 +376,10 @@ export const GameUI = ({
               </button>
               <button
                 type="button"
-                onClick={() => engine.rotate()}
+                onClick={() => engine.softDrop()}
                 className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
-                <RotateCw size={12} /> ROTATE
+                ▼ DOWN
               </button>
               <button
                 type="button"
@@ -377,10 +390,17 @@ export const GameUI = ({
               </button>
               <button
                 type="button"
-                onClick={() => engine.softDrop()}
+                onClick={() => engine.rotate(false)}
                 className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
               >
-                ▼ DOWN
+                <RotateCcw size={12} /> ROT L
+              </button>
+              <button
+                type="button"
+                onClick={() => engine.rotate(true)}
+                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
+              >
+                <RotateCw size={12} /> ROT R
               </button>
               <button
                 type="button"
@@ -392,7 +412,9 @@ export const GameUI = ({
               <button
                 type="button"
                 onClick={() => engine.hold()}
-                className="py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1"
+                className={`${
+                  engine.skills.length > 0 ? "col-span-1" : "col-span-3"
+                } py-2 px-1 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1`}
               >
                 HOLD [C]
               </button>
@@ -400,7 +422,7 @@ export const GameUI = ({
                 <button
                   type="button"
                   onClick={() => engine.useBomb()}
-                  className="col-span-3 py-2 px-2 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1.5"
+                  className="col-span-2 py-2 px-2 bg-slate-800/80 hover:bg-cyan-950/80 active:bg-cyan-600/40 border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-xs text-cyan-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(0,240,255,0.15)] hover:shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center justify-center gap-1.5"
                 >
                   <Bomb size={12} /> BOMB!
                 </button>
@@ -427,11 +449,14 @@ function MiniPieceView({ type }: { type: TetrominoType }) {
 
   return (
     <svg
+      role="img"
+      aria-label={`Tetromino ${type}`}
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
       style={{ display: "block" }}
     >
+      <title>{`Tetromino ${type}`}</title>
       {matrix.map((row, r) =>
         row.map((val, c) => {
           if (!val) return null;
