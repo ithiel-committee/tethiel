@@ -78,18 +78,18 @@ export const TETROMINO_SHAPES: Record<
 };
 
 export const COLORS = {
-  background: "#080c18",
-  fieldBg: "#0d1326",
-  gridLine: "rgba(0, 240, 255, 0.07)",
+  background: "#0a0407",
+  fieldBg: "#12060c",
+  gridLine: "rgba(255, 40, 80, 0.08)",
   obstacle: "#475569",
   obstacleBorder: "#94a3b8",
-  goalArea: "#00e5ff",
-  goalBonusArea: "#ff007f",
-  startArea: "#00ff88",
+  goalArea: "#ff1a4b",
+  goalBonusArea: "#ffaa00",
+  startArea: "#ffffff",
   circuitLine: "#ffffff",
-  circuitGlow: "rgba(0, 255, 200, 0.8)",
-  infectedBlack: "#05070d",
-  infectedBorder: "#ff0055",
+  circuitGlow: "rgba(255, 50, 90, 0.9)",
+  infectedBlack: "#050103",
+  infectedBorder: "#ff0040",
   star: "#ffdd00",
   starGlow: "rgba(255, 221, 0, 0.8)",
 };

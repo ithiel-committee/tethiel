@@ -100,9 +100,9 @@ export class GameEngine {
     createdAt: number;
   }[] = [];
 
-  // マグマせりあがり型ウイルス（横一列感染）の現在進行行（初期値は最下部の外側）
+  // せりあがり型ウイルス（横一列感染）の現在進行行（初期値は最下部の外側）
   public magmaRow: number = GRID_HEIGHT;
-  // ウイルス感染モード ("rising_magma": マグマ横一列せりあがり / "circuit_path": 従来の回路辿り)
+  // ウイルス感染モード ("rising_magma": マグマ状横一列せりあがり / "circuit_path": 従来の回路辿り)
   public infectionMode: "rising_magma" | "circuit_path" = "rising_magma";
 
   // スコア内訳用
@@ -362,9 +362,7 @@ export class GameEngine {
       this.infectedDamageTimerMs += deltaMs;
       if (this.infectedDamageTimerMs >= 1000) {
         this.infectedDamageTimerMs = 0;
-        this.takeDamage(
-          "ウイルス（マグマ）の感染領域内に留まり続けています！",
-        );
+        this.takeDamage("ウイルスの感染領域内に留まり続けています！");
         if (this.status !== "playing") return;
       }
     } else {
@@ -477,10 +475,10 @@ export class GameEngine {
         }
       }
 
-      // イティエルの現在行がせりあがったマグマ行に到達（呑み込まれた）場合
+      // イティエルの現在行がせりあがったウイルス行に到達（呑み込まれた）場合
       const charRow = Math.round(this.characterPos.y);
       if (charRow >= targetRow) {
-        this.takeDamage("迫り来るウイルス（マグマ）に飲み込まれました！");
+        this.takeDamage("ウイルスに飲み込まれました！");
         this.infectedDamageTimerMs = 0;
       }
     }

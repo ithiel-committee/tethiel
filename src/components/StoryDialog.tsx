@@ -1,6 +1,7 @@
 import { AlertTriangle, ChevronRight, Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { StageData } from "../types/game";
+import { Keycap } from "./Keycap";
 
 interface StoryDialogProps {
   stage: StageData;
@@ -46,17 +47,17 @@ export const StoryDialog = ({
   }, [currentLineIndex, onStartGame, storyLines.length]);
 
   return (
-    <div className="w-full max-w-xl bg-slate-900/95 border-2 border-cyan-500/60 rounded-xl p-5 md:p-7 shadow-[0_0_30px_rgba(0,240,255,0.2)] font-['DotGothic16',sans-serif] space-y-5">
+    <div className="w-full max-w-xl bg-slate-900/95 border-2 border-rose-500/60 rounded-xl p-5 md:p-7 shadow-[0_0_30px_rgba(255,26,75,0.25)] font-['DotGothic16',sans-serif] space-y-5">
       {/* ターミナルヘッダー */}
-      <div className="flex items-center justify-between border-b border-cyan-500/30 pb-3">
-        <div className="flex items-center gap-2 text-cyan-400">
+      <div className="flex items-center justify-between border-b border-rose-500/30 pb-3">
+        <div className="flex items-center gap-2 text-rose-400">
           <Terminal size={18} />
-          <span className="font-['Press_Start_2P'] text-xs">
+          <span className="font-['Press_Start_2P'] text-xs tracking-wider">
             iTL DEFENSE BRIEFING
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-rose-400 bg-rose-950/60 border border-rose-500/40 px-2 py-0.5 rounded">
-          <AlertTriangle size={12} />
+        <div className="flex items-center gap-1.5 text-xs text-rose-300 bg-rose-950/70 border border-rose-500/50 px-2.5 py-0.5 rounded shadow-[0_0_8px_rgba(255,26,75,0.2)]">
+          <AlertTriangle size={12} className="text-rose-400" />
           <span>SECURITY LEVEL: CRITICAL</span>
         </div>
       </div>
@@ -64,7 +65,7 @@ export const StoryDialog = ({
       {/* ステージ名 */}
       <div className="text-left space-y-0.5">
         <div className="text-xs text-slate-400">MISSION TARGET:</div>
-        <div className="text-lg font-bold text-cyan-200">
+        <div className="text-lg font-bold text-rose-200">
           {stage.subtitle
             ? `${stage.name}: ${stage.subtitle}`
             : stage.name}
@@ -72,7 +73,7 @@ export const StoryDialog = ({
       </div>
 
       {/* 会話・テキスト枠 */}
-      <div className="min-h-[120px] bg-slate-950/90 border border-slate-800 rounded-lg p-4 text-left text-sm md:text-base leading-relaxed text-slate-200">
+      <div className="min-h-[120px] bg-slate-950/90 border border-slate-800 rounded-lg p-4 text-left text-sm md:text-base leading-relaxed text-slate-200 shadow-inner">
         <p className="animate-fadeIn">{storyLines[currentLineIndex]}</p>
       </div>
 
@@ -83,9 +84,9 @@ export const StoryDialog = ({
             key={line.slice(0, 10)}
             className={`w-2 h-2 rounded-full transition-all ${
               idx === currentLineIndex
-                ? "bg-cyan-400 w-5"
+                ? "bg-rose-500 w-5 shadow-[0_0_8px_rgba(255,26,75,0.7)]"
                 : idx < currentLineIndex
-                  ? "bg-cyan-700"
+                  ? "bg-rose-800"
                   : "bg-slate-700"
             }`}
           />
@@ -97,7 +98,7 @@ export const StoryDialog = ({
         <button
           type="button"
           onClick={onBackToTitle}
-          className="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 border border-slate-700 hover:border-slate-500 rounded cursor-pointer transition-colors"
+          className="px-3.5 py-1.5 text-xs text-slate-400 hover:text-slate-200 border border-slate-700 hover:border-rose-500/50 rounded cursor-pointer transition-colors"
         >
           BACK
         </button>
@@ -106,16 +107,19 @@ export const StoryDialog = ({
           <button
             type="button"
             onClick={() => setCurrentLineIndex((prev) => prev + 1)}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 rounded-lg text-cyan-300 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-rose-500/50 hover:border-rose-400 rounded-lg text-rose-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-[0_0_8px_rgba(255,26,75,0.15)]"
           >
-            <span>NEXT [Space]</span>
-            <ChevronRight size={14} />
+            <span>NEXT</span>
+            <Keycap size="xs" variant="accent">
+              SPACE
+            </Keycap>
+            <ChevronRight size={14} className="text-rose-400" />
           </button>
         ) : (
           <button
             type="button"
             onClick={onStartGame}
-            className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 font-['Press_Start_2P'] text-xs font-bold rounded-lg cursor-pointer transition-all shadow-[0_0_15px_rgba(0,240,255,0.5)] animate-pulse"
+            className="px-5 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 text-white font-['Press_Start_2P'] text-xs font-bold rounded-lg cursor-pointer transition-all shadow-[0_0_18px_rgba(255,26,75,0.6)] animate-pulse"
           >
             START MISSION
           </button>

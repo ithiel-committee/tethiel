@@ -43,7 +43,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
       for (let c = 0; c <= GRID_WIDTH; c++) {
         // 市松模様の縦ストライプ背景
         if (c % 2 === 0) {
-          ctx.fillStyle = "rgba(0, 240, 255, 0.02)";
+          ctx.fillStyle = "rgba(255, 26, 75, 0.02)";
           ctx.fillRect(c * BLOCK_SIZE, 0, BLOCK_SIZE, CANVAS_HEIGHT);
         }
         ctx.beginPath();
@@ -60,13 +60,13 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
 
       // 4. 最上部ヘッダー（エンドレス時は高度表示、ステージ時はGOALライン）
       if (engine.gameMode === "endless") {
-        ctx.fillStyle = "rgba(0, 240, 255, 0.15)";
+        ctx.fillStyle = "rgba(255, 26, 75, 0.18)";
         ctx.fillRect(0, 0, CANVAS_WIDTH, BLOCK_SIZE);
-        ctx.strokeStyle = "rgba(0, 240, 255, 0.4)";
+        ctx.strokeStyle = "rgba(255, 40, 80, 0.5)";
         ctx.lineWidth = 1;
         ctx.strokeRect(0, 0, CANVAS_WIDTH, BLOCK_SIZE);
 
-        ctx.fillStyle = "#00f0ff";
+        ctx.fillStyle = "#ff2a55";
         ctx.font = '11px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText(
@@ -77,15 +77,15 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
       } else {
         // 通常ステージモード：GOALライン描画（行2）
         const goalY = GOAL_ROW * BLOCK_SIZE;
-        // 通常GOALエリア
-        ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
+        // 通常GOALエリア（学部の赤サイバーコア）
+        ctx.fillStyle = "rgba(255, 26, 75, 0.9)";
         ctx.fillRect(
           0,
           goalY,
           (GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE,
           BLOCK_SIZE,
         );
-        ctx.fillStyle = "#020617";
+        ctx.fillStyle = "#ffffff";
         ctx.font = '11px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText(
@@ -97,14 +97,14 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         // BONUSエリア（右端2マス）
         const bonusStartX =
           (GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE;
-        ctx.fillStyle = "rgba(255, 0, 127, 0.9)";
+        ctx.fillStyle = "rgba(255, 170, 0, 0.92)";
         ctx.fillRect(
           bonusStartX,
           goalY,
           BONUS_GOAL_COLS.length * BLOCK_SIZE,
           BLOCK_SIZE,
         );
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = "#0a0407";
         ctx.font = '9px "DotGothic16", monospace';
         ctx.fillText(
           "BONUS",
@@ -153,7 +153,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
               ctx,
               px,
               py,
-              cell.color || "#00f0ff",
+              cell.color || "#ff1a4b",
               time,
               cell.glitchSeed ?? 0,
             );
@@ -165,8 +165,8 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
       if (engine.circuitRoute.length > 0) {
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 3;
-        ctx.shadowColor = "#00ffff";
-        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#ff1a4b";
+        ctx.shadowBlur = 12;
         ctx.beginPath();
         const [firstR, firstC] = engine.circuitRoute[0];
         ctx.moveTo(
@@ -375,7 +375,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
       if (engine.status === "paused") {
         ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        ctx.fillStyle = "#00f0ff";
+        ctx.fillStyle = "#ff2a55";
         ctx.font = '18px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText("PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
@@ -389,7 +389,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
   }, [engine]);
 
   return (
-    <div className="relative inline-block border-2 border-cyan-500/50 rounded-lg p-1 bg-slate-950/90 shadow-[0_0_25px_rgba(0,240,255,0.2)]">
+    <div className="relative inline-block border-2 border-rose-500/60 rounded-xl p-1 bg-slate-950/90 shadow-[0_0_30px_rgba(255,26,75,0.25)]">
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
@@ -431,7 +431,7 @@ function drawMinoBlock(
     ctx.fillRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
     ctx.shadowBlur = 0;
 
-    ctx.strokeStyle = "#00ffff";
+    ctx.strokeStyle = "#ff1a4b";
     ctx.lineWidth = 2;
     ctx.strokeRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
     return;
@@ -572,7 +572,7 @@ function drawGlitchedBlock(
   }
 
   // グリッチした崩れ枠線
-  ctx.strokeStyle = isJitter ? "#00ffff" : "rgba(255, 0, 85, 0.8)";
+  ctx.strokeStyle = isJitter ? "#ff4d6d" : "rgba(255, 0, 85, 0.8)";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(
     x + 1 + (isJitter ? (glitchFrame % 5) - 2 : 0),

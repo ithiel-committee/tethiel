@@ -326,7 +326,7 @@ export function App() {
   }, [screen, engine]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-2 sm:p-4 select-none overflow-x-hidden">
+    <div className="min-h-screen text-slate-100 flex flex-col items-center justify-center p-2 sm:p-4 select-none overflow-x-hidden">
       {screen === "title" && (
         <TitleScreen
           onSelectStage={handleSelectStage}

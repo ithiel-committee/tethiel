@@ -37,7 +37,7 @@ export const ResultScreen = ({
         particleCount: isBonusClear ? 150 : 80,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["#00f0ff", "#00ff88", "#ffe600", "#ff007f", "#ffffff"],
+        colors: ["#ff1a4b", "#ff2a6d", "#ffdd00", "#ff9900", "#ffffff"],
       });
     }
   }, [isCleared, isBonusClear]);
@@ -54,17 +54,17 @@ export const ResultScreen = ({
   const rank = calculateRank();
 
   return (
-    <div className="w-full max-w-lg bg-slate-900/95 border-2 rounded-2xl p-6 md:p-8 shadow-[0_0_35px_rgba(0,0,0,0.8)] font-['DotGothic16',sans-serif] space-y-6 text-center animate-fadeIn border-cyan-500/50">
+    <div className="w-full max-w-lg bg-slate-900/95 border-2 rounded-2xl p-6 md:p-8 shadow-[0_0_35px_rgba(255,26,75,0.2)] font-['DotGothic16',sans-serif] space-y-6 text-center animate-fadeIn border-rose-500/50">
       <div className="space-y-2">
         {stats.gameMode === "endless" ? (
           <>
-            <div className="inline-flex p-3 bg-purple-950/80 border border-purple-500/60 rounded-full text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+            <div className="inline-flex p-3 bg-red-950/80 border border-rose-500/60 rounded-full text-rose-400 shadow-[0_0_15px_rgba(255,26,75,0.5)]">
               <Trophy size={40} className="text-yellow-400" />
             </div>
-            <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-pink-400 tracking-wider">
+            <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-rose-400 tracking-wider">
               ENDLESS RECORD
             </h2>
-            <p className="text-sm text-cyan-300 font-bold">
+            <p className="text-sm text-amber-300 font-bold">
               到達高度: {stats.climbedHeight ?? 0} m
             </p>
             <p className="text-xs text-rose-300">
@@ -73,17 +73,17 @@ export const ResultScreen = ({
           </>
         ) : isCleared ? (
           <>
-            <div className="inline-flex p-3 bg-emerald-950/80 border border-emerald-500/60 rounded-full text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+            <div className="inline-flex p-3 bg-red-950/80 border border-rose-500/60 rounded-full text-amber-300 shadow-[0_0_15px_rgba(255,26,75,0.4)]">
               {isBonusClear ? (
                 <Sparkles size={40} className="text-yellow-400" />
               ) : (
                 <CheckCircle2 size={40} />
               )}
             </div>
-            <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-emerald-400 tracking-wider">
+            <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-amber-300 tracking-wider">
               {isBonusClear ? "BONUS CLEAR!" : "STAGE CLEAR!"}
             </h2>
-            <p className="text-sm text-cyan-300">
+            <p className="text-sm text-rose-200">
               {isBonusClear
                 ? "最高難度のBONUSゴールへイティエルを到達させました！"
                 : "イティエルが無事にGOALサーバーへ到達しました！"}
@@ -117,7 +117,7 @@ export const ResultScreen = ({
               <Award size={14} className="text-yellow-400" />
               CLIMBED ALTITUDE
             </span>
-            <span className="font-['Press_Start_2P'] text-2xl text-cyan-300">
+            <span className="font-['Press_Start_2P'] text-2xl text-amber-300">
               {stats.climbedHeight ?? 0} m
             </span>
           </div>
@@ -140,7 +140,7 @@ export const ResultScreen = ({
             <span className="text-slate-500 block text-[11px]">
               FINAL SCORE
             </span>
-            <span className="font-['Press_Start_2P'] text-cyan-300">
+            <span className="font-['Press_Start_2P'] text-rose-300">
               {stats.score.toLocaleString()}
             </span>
           </div>
@@ -181,7 +181,7 @@ export const ResultScreen = ({
             </div>
             <div className="flex justify-between items-center">
               <span>・ミノ節約ボーナス:</span>
-              <span className="text-emerald-400 font-['Press_Start_2P'] text-[10px]">
+              <span className="text-amber-300 font-['Press_Start_2P'] text-[10px]">
                 +{(stats.minoBonus ?? 0).toLocaleString()} pts
               </span>
             </div>
@@ -193,7 +193,7 @@ export const ResultScreen = ({
         <button
           type="button"
           onClick={onRetry}
-          className="flex-1 py-3 px-4 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_0_12px_rgba(0,240,255,0.4)] text-sm"
+          className="flex-1 py-3 px-4 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_0_15px_rgba(255,26,75,0.45)] text-sm"
         >
           <RotateCcw size={16} />
           RETRY
@@ -202,7 +202,7 @@ export const ResultScreen = ({
         <button
           type="button"
           onClick={onSelectStage}
-          className="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all text-sm"
+          className="flex-1 py-3 px-4 bg-slate-850 hover:bg-slate-800 border border-slate-700 hover:border-rose-500/40 text-slate-200 font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all text-sm"
         >
           <Trophy size={16} />
           STAGE SELECT
