@@ -8,6 +8,7 @@
 
 - [概要](#概要)
 - [ゲームシステム](#ゲームシステム)
+- [画面遷移](#画面遷移)
 - [操作方法](#操作方法)
 - [コマンド一覧](#コマンド一覧)
 - [ディレクトリ構造](#ディレクトリ構造)
@@ -41,6 +42,27 @@
 8. **エンドレスモード (無限縦スクロールクライミング)**  
    - ゴールで区切らず、イティエルが登るにつれて画面が自動で下へスクロールし続けるサバイバルモード。
    - スクロールで迫り来るウイルスラインを下に押し返すことが可能。登った最高高度 (メートル) を競います。
+
+## 画面遷移
+
+アプリケーションは4つの主要画面で構成され、各画面間の遷移は以下の通りです。
+
+```mermaid
+flowchart TD
+    Title["タイトル画面 (TitleScreen)<br/>・通常ステージ選択<br/>・無限クライミング選択<br/>・サウンド切替"]
+    Story["ミッションブリーフィング (StoryDialog)<br/>・ストーリー/迎撃命令確認<br/>・キー操作確認"]
+    Game["メインゲーム (GameUI / GameCanvas)<br/>・パズル操作/回路構築<br/>・ポーズ (PAUSE/RESUME)"]
+    Result["リザルト画面 (ResultScreen)<br/>・CLEAR / BONUS CLEAR 判定<br/>・GAME OVER 判定<br/>・到達高度 (エンドレス)"]
+
+    Title -->|"ステージ選択 (START / START ENDLESS)"| Story
+    Story -->|"作戦開始 (START MISSION または Space/Enter)"| Game
+    Story -->|"戻る (BACK)"| Title
+    Game -->|"回路接続成功 (GOAL / BONUS)"| Result
+    Game -->|"防衛失敗 (ウイルス接触 / ライフ0)"| Result
+    Game -->|"中断 (EXIT)"| Title
+    Result -->|"再挑戦 (RETRY)"| Game
+    Result -->|"タイトルへ (STAGE SELECT)"| Title
+```
 
 ## 操作方法
 
