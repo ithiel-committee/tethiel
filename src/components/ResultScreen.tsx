@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import type { GameStats, StageData } from "../types/game";
+import { CyberButton, CyberCard } from "./ui";
 
 interface ResultScreenProps {
   isCleared: boolean;
@@ -54,7 +55,10 @@ export const ResultScreen = ({
   const rank = calculateRank();
 
   return (
-    <div className="w-full max-w-lg bg-slate-900/95 border-2 rounded-2xl p-6 md:p-8 shadow-[0_0_35px_rgba(255,26,75,0.2)] font-['DotGothic16',sans-serif] space-y-6 text-center animate-fadeIn border-rose-500/50">
+    <CyberCard
+      variant="default"
+      className="w-full max-w-lg p-6 md:p-8 space-y-6 text-center animate-fadeIn shadow-[0_0_35px_rgba(255,26,75,0.2)]"
+    >
       <div className="space-y-2">
         {stats.gameMode === "endless" ? (
           <>
@@ -110,7 +114,7 @@ export const ResultScreen = ({
           : `// ${stage.name}`}
       </div>
 
-      <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 text-left space-y-3">
+      <CyberCard variant="subtle" className="p-4 text-left space-y-3">
         {stats.gameMode === "endless" ? (
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs text-slate-400 flex items-center gap-1.5">
@@ -187,27 +191,29 @@ export const ResultScreen = ({
             </div>
           </div>
         )}
-      </div>
+      </CyberCard>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-        <button
-          type="button"
+        <CyberButton
+          variant="primary"
+          size="lg"
+          className="flex-1"
+          icon={<RotateCcw size={16} />}
           onClick={onRetry}
-          className="flex-1 py-3 px-4 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_0_15px_rgba(255,26,75,0.45)] text-sm"
         >
-          <RotateCcw size={16} />
           RETRY
-        </button>
+        </CyberButton>
 
-        <button
-          type="button"
+        <CyberButton
+          variant="secondary"
+          size="lg"
+          className="flex-1"
+          icon={<Trophy size={16} />}
           onClick={onSelectStage}
-          className="flex-1 py-3 px-4 bg-slate-850 hover:bg-slate-800 border border-slate-700 hover:border-rose-500/40 text-slate-200 font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all text-sm"
         >
-          <Trophy size={16} />
           STAGE SELECT
-        </button>
+        </CyberButton>
       </div>
-    </div>
+    </CyberCard>
   );
 };

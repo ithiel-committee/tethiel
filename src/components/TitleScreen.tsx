@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import type { StageData } from "../types/game";
-import { Keycap } from "./Keycap";
+import { CyberBadge, CyberButton, CyberCard, Keycap } from "./ui";
 
 interface TitleScreenProps {
   onSelectStage: (stage: StageData) => void;
@@ -25,10 +25,12 @@ export const TitleScreen = ({
     <div className="w-full max-w-2xl flex flex-col items-center gap-6 p-4 md:p-6 text-center font-['DotGothic16',sans-serif]">
       {/* 1. タイトルヘッダー */}
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-red-950/70 border border-rose-500/50 rounded-full text-xs text-rose-300 shadow-[0_0_10px_rgba(255,26,75,0.2)]">
-          <Terminal size={14} className="text-rose-400" />
-          <span>CHUO UNIV. iTL CYBER DEFENSE SYSTEM</span>
-        </div>
+        <CyberBadge
+          variant="red"
+          icon={<Terminal size={14} className="text-rose-400" />}
+        >
+          CHUO UNIV. iTL CYBER DEFENSE SYSTEM
+        </CyberBadge>
 
         <h1 className="font-['Press_Start_2P'] text-4xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-amber-300 drop-shadow-[0_0_24px_rgba(255,26,75,0.7)] py-2 tracking-wider">
           tethiel
@@ -39,7 +41,10 @@ export const TitleScreen = ({
       </div>
 
       {/* 2. ゲーム目的・イントロ */}
-      <div className="w-full bg-slate-900/80 border border-rose-500/40 rounded-xl p-4 text-left text-xs md:text-sm text-slate-300 space-y-2 shadow-[0_0_12px_rgba(255,26,75,0.1)]">
+      <CyberCard
+        variant="subtle"
+        className="w-full p-4 text-left text-xs md:text-sm text-slate-300 space-y-2 border-rose-500/40 shadow-[0_0_12px_rgba(255,26,75,0.1)]"
+      >
         <div className="flex items-center gap-2 text-rose-400 font-bold">
           <ShieldAlert size={16} />
           <span>MISSION: STAGE 1</span>
@@ -53,7 +58,7 @@ export const TitleScreen = ({
           </span>
           へ回路を接続せよ！
         </p>
-      </div>
+      </CyberCard>
 
       {/* 3. ステージ選択 */}
       <div className="w-full space-y-3">
@@ -67,13 +72,20 @@ export const TitleScreen = ({
             const isUnlocked = stage.isUnlocked;
 
             return (
-              <div
+              <CyberCard
                 key={stage.id}
-                className={`relative flex flex-col md:flex-row items-start md:items-center justify-between p-4 rounded-xl border text-left transition-all ${
-                  isUnlocked
-                    ? "bg-slate-900/90 hover:bg-slate-850 border-rose-500/50 shadow-[0_0_15px_rgba(255,26,75,0.15)] group"
-                    : "bg-slate-950/60 border-slate-800 opacity-60"
+                variant={isUnlocked ? "interactive" : "subtle"}
+                className={`p-4 flex flex-col md:flex-row items-start md:items-center justify-between text-left ${
+                  !isUnlocked ? "opacity-60" : ""
                 }`}
+                style={
+                  isUnlocked
+                    ? {
+                        background:
+                          "linear-gradient(135deg, rgba(26, 8, 16, 0.95) 0%, rgba(18, 5, 11, 0.95) 100%)",
+                      }
+                    : undefined
+                }
               >
                 <div className="space-y-1 pr-4">
                   <div className="flex items-center gap-2">
@@ -93,14 +105,14 @@ export const TitleScreen = ({
 
                 <div className="mt-3 md:mt-0 flex items-center gap-2 shrink-0">
                   {isUnlocked ? (
-                    <button
-                      type="button"
+                    <CyberButton
+                      variant="primary"
+                      size="md"
+                      icon={<Play size={14} fill="currentColor" />}
                       onClick={() => onSelectStage(stage)}
-                      className="px-4 py-2 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-500 text-white font-bold rounded-lg flex items-center gap-1.5 text-xs transition-all shadow-[0_0_12px_rgba(255,26,75,0.45)] cursor-pointer"
                     >
-                      <Play size={14} fill="currentColor" />
                       START
-                    </button>
+                    </CyberButton>
                   ) : (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded text-slate-500 text-xs font-['Press_Start_2P']">
                       <Lock size={12} />
@@ -108,17 +120,14 @@ export const TitleScreen = ({
                     </div>
                   )}
                 </div>
-              </div>
+              </CyberCard>
             );
           })}
 
           {/* エンドレスモード特別カード（無限クライミングバナー） */}
-          <div
-            className="relative flex flex-col md:flex-row items-start md:items-center justify-between p-4 rounded-xl border border-rose-500/80 shadow-[0_0_24px_rgba(255,26,75,0.35)] text-left transition-all bg-endless-banner"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(32, 9, 20, 0.98) 0%, rgba(75, 14, 36, 0.95) 50%, rgba(22, 6, 14, 0.98) 100%)",
-            }}
+          <CyberCard
+            variant="endless"
+            className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between text-left"
           >
             <div className="space-y-1 pr-4">
               <div className="flex items-center gap-2">
@@ -135,25 +144,24 @@ export const TitleScreen = ({
             </div>
 
             <div className="mt-3 md:mt-0 flex items-center gap-2 shrink-0">
-              <button
-                type="button"
+              <CyberButton
+                variant="primary"
+                size="md"
+                icon={<Play size={14} fill="currentColor" />}
                 onClick={() => onSelectStage(ENDLESS_STAGE)}
-                className="px-4 py-2 text-white font-bold rounded-lg flex items-center gap-1.5 text-xs transition-all shadow-[0_0_15px_rgba(255,26,75,0.5)] hover:shadow-[0_0_20px_rgba(255,26,75,0.7)] cursor-pointer"
-                style={{
-                  background:
-                    "linear-gradient(to right, #dc2626, #e11d48, #ef4444)",
-                }}
               >
-                <Play size={14} fill="currentColor" />
                 START ENDLESS
-              </button>
+              </CyberButton>
             </div>
-          </div>
+          </CyberCard>
         </div>
       </div>
 
-      {/* 4. 操作方法＆ルールガイド（キートップUI化） */}
-      <div className="w-full bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 text-left space-y-2">
+      {/* 4. 操作方法＆ルールガイド */}
+      <CyberCard
+        variant="subtle"
+        className="w-full p-3.5 text-xs text-slate-300 text-left space-y-2"
+      >
         <div className="font-bold text-rose-400 flex items-center justify-between">
           <span>{"// HOW TO PLAY (操作ガイド)"}</span>
           <span className="text-[10px] text-slate-500 font-normal">
@@ -206,26 +214,24 @@ export const TitleScreen = ({
           ★
           ルール：下から上へ回路を繋げ！回路から外れたトゲに触れるとミノが破壊されハート減少！
         </div>
-      </div>
+      </CyberCard>
 
       {/* 5. サウンド切り替え */}
       <div className="flex justify-center">
-        <button
-          type="button"
+        <CyberButton
+          variant="secondary"
+          size="sm"
+          icon={
+            isMuted ? (
+              <VolumeX size={14} className="text-rose-400" />
+            ) : (
+              <Volume2 size={14} className="text-rose-400" />
+            )
+          }
           onClick={onToggleMute}
-          className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-rose-500/50 rounded-lg text-xs text-slate-300 transition-colors cursor-pointer"
         >
-          {isMuted ? (
-            <VolumeX size={14} className="text-rose-400" />
-          ) : (
-            <Volume2 size={14} className="text-rose-400" />
-          )}
-          <span>
-            {isMuted
-              ? "SOUND: OFF (クリックでON)"
-              : "SOUND: ON (シンセSE)"}
-          </span>
-        </button>
+          {isMuted ? "SOUND: OFF (クリックでON)" : "SOUND: ON (シンセSE)"}
+        </CyberButton>
       </div>
     </div>
   );

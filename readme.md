@@ -1,6 +1,6 @@
 # tethiel
 
-中央大学国際情報学部（iTL）公式キャラクター「イティエル」をモチーフにした逆テトリス型アクションパズルゲーム。  
+中央大学国際情報学部 (iTL) 公式キャラクター「イティエル」をモチーフにした逆テトリス型アクションパズルゲーム。  
 企画書「逆テトリス型 回路つなぎパズル」準拠。  
 サイバー攻撃の魔の手が迫る市ヶ谷田町キャンパスを舞台に、最下部「START」からブロックを積み上げて回路を繋ぎ、ウイルスに追いつかれないようイティエルを最上部の「GOAL」へと導く。
 
@@ -17,7 +17,7 @@
 
 - ジャンル: 逆テトリス型アクションパズル
 - コンセプト: 積んでつなげるアクションパズル。ウイルスに追いつかれない緊張感とクリア時の達成感
-- デザイン: 学部のテーマカラー（赤）をベースとしたクリムゾンサイバー調UIと、リアルなゲーミングキートップUI
+- デザイン: 学部のテーマカラー (赤) をベースとしたクリムゾンサイバー調UIと、リアルなゲーミングキートップUI
 - 対象プラットフォーム: 展示用PC・Webブラウザ (タッチパネル・低スペック端末対応)
 
 ## ゲームシステム
@@ -59,7 +59,7 @@
 
 | コマンド | 説明 |
 | :--- | :--- |
-| `pnpm dev` | ローカル開発サーバーを起動する（デフォルト: http://localhost:5173/） |
+| `pnpm dev` | ローカル開発サーバーを起動する (デフォルト: http://localhost:5173/) |
 | `pnpm build` | TypeScript型検査および本番用静的バンドルをビルドする |
 | `pnpm preview` | ビルド成果物をローカルでプレビュー実行する |
 | `pnpm format` | Biomeを用いてプロジェクト全体のコードフォーマットを実行する |
@@ -76,8 +76,10 @@ tethiel/
 │   ├── audio/
 │   │   └── soundSystem.ts     # Web Audio APIによるシンセ効果音エンジン
 │   ├── components/
+│   │   ├── ui/                # 共通UIコンポーネント (CyberCard, CyberButton, CyberBadge)
 │   │   ├── GameCanvas.tsx     # START/GOAL、回路パス、登るイティエル、黒色感染を描画するCanvas
-│   │   ├── GameUI.tsx         # 企画書5,6p準拠の3カラムHUD（ハート5つ、ステータス、立ち絵枠、操作説明）
+│   │   ├── GameUI.tsx         # 企画書5,6p準拠の3カラムHUD (ハート5つ、ステータス、立ち絵枠、操作説明)
+│   │   ├── Keycap.tsx         # 2重立体構造のリアルなキートップコンポーネント
 │   │   ├── ResultScreen.tsx   # 通常/ボーナスクリア・リザルト画面
 │   │   ├── StoryDialog.tsx    # iTL防衛戦ミッションブリーフィングダイアログ
 │   │   └── TitleScreen.tsx    # タイトル画面およびステージ選択
@@ -94,13 +96,13 @@ tethiel/
 ├── index.html                 # DotGothic16 / Press Start 2P フォント設定
 ├── package.json               # 依存関係およびスクリプト定義
 ├── tsconfig.json              # TypeScriptコンパイラ設定
-└── vite.config.ts             # Vite設定（ローカル開発時のタイトルprefix付与）
+└── vite.config.ts             # Vite設定 (ローカル開発時のタイトルprefix付与)
 ```
 
 ## 技術仕様
 
 - フレームワーク: Vite + React 19 + TypeScript
-- レンダリング: HTML5 Canvas 2D Context（60fps requestAnimationFrame）
-- サウンド: Web Audio API（シンセサイザー合成音、外部音声ファイル不要・完全軽量）
+- レンダリング: HTML5 Canvas 2D Context (60fps requestAnimationFrame)
+- サウンド: Web Audio API (シンセサイザー合成音、外部音声ファイル不要・完全軽量)
 - フォント: DotGothic16, Press Start 2P
 - コード品質管理: Biome 1.9.4

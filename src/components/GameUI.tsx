@@ -14,6 +14,7 @@ import { TETROMINO_SHAPES } from "../game/constants";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
 import { Keycap } from "./Keycap";
+import { CyberButton, CyberCard } from "./ui";
 
 interface GameUIProps {
   engine: GameEngine;
@@ -131,7 +132,10 @@ export const GameUI = ({
   return (
     <div className="w-full max-w-5xl flex flex-col items-center gap-3 font-['DotGothic16',sans-serif]">
       {/* トップコントロールバー（一時停止・ミュート・終了） */}
-      <div className="w-full flex items-center justify-between px-3 py-1.5 bg-slate-900/80 border border-rose-500/30 rounded-lg text-xs shadow-[0_0_10px_rgba(255,26,75,0.08)]">
+      <CyberCard
+        variant="subtle"
+        className="w-full flex items-center justify-between px-3 py-1.5 text-xs shadow-[0_0_10px_rgba(255,26,75,0.08)] border-rose-500/30"
+      >
         <div className="flex items-center gap-2 text-rose-400 font-pixel-en">
           <span className="text-rose-400/80 text-xs font-['DotGothic16']">
             {stats.gameMode === "endless"
@@ -141,44 +145,43 @@ export const GameUI = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <CyberButton
+            variant="secondary"
+            size="xs"
             onClick={() => {
               engine.togglePause();
               setIsPaused(engine.status === "paused");
             }}
-            className="flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-rose-500/50 rounded text-rose-200 transition-colors cursor-pointer text-xs"
+            icon={
+              isPaused ? (
+                <Play size={13} className="text-rose-400" />
+              ) : (
+                <Pause size={13} className="text-rose-400" />
+              )
+            }
           >
-            {isPaused ? (
-              <Play size={13} className="text-rose-400" />
-            ) : (
-              <Pause size={13} className="text-rose-400" />
-            )}
-            <span>{isPaused ? "RESUME" : "PAUSE"}</span>
-          </button>
+            {isPaused ? "RESUME" : "PAUSE"}
+          </CyberButton>
 
-          <button
-            type="button"
+          <CyberButton
+            variant="secondary"
+            size="xs"
             onClick={onToggleMute}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-rose-500/50 rounded text-rose-200 transition-colors cursor-pointer"
             title={isMuted ? "ミュート解除" : "ミュート"}
-          >
-            {isMuted ? (
-              <VolumeX size={15} className="text-rose-400" />
-            ) : (
-              <Volume2 size={15} className="text-rose-400" />
-            )}
-          </button>
+            icon={
+              isMuted ? (
+                <VolumeX size={15} className="text-rose-400" />
+              ) : (
+                <Volume2 size={15} className="text-rose-400" />
+              )
+            }
+          />
 
-          <button
-            type="button"
-            onClick={onExitGame}
-            className="px-2.5 py-1 bg-rose-950/70 hover:bg-rose-900 border border-rose-500/60 rounded text-rose-200 hover:text-white transition-colors cursor-pointer text-xs shadow-[0_0_8px_rgba(255,26,75,0.25)]"
-          >
+          <CyberButton variant="danger" size="xs" onClick={onExitGame}>
             EXIT
-          </button>
+          </CyberButton>
         </div>
-      </div>
+      </CyberCard>
 
       {/* 3カラムメインレイアウト (PDF 5, 6p 完全準拠) */}
       <div
@@ -189,7 +192,10 @@ export const GameUI = ({
         {/* ================= 左パネル ================= */}
         <div className="w-full lg:w-[220px] flex flex-col gap-3">
           {/* 1. 残りライフ（ハート5つ） */}
-          <div className="relative flex items-center justify-center lg:justify-start gap-2 px-3 py-2 bg-slate-900/90 border border-rose-500/40 rounded-xl shadow-[0_0_10px_rgba(255,26,75,0.15)]">
+          <CyberCard
+            variant="subtle"
+            className="relative flex items-center justify-center lg:justify-start gap-2 px-3 py-2 border-rose-500/40 shadow-[0_0_10px_rgba(255,26,75,0.15)]"
+          >
             {[0, 1, 2, 3, 4].map((i) => {
               const isBroken = brokenHeartIndices.includes(i);
               const isAlive = i < hearts;
@@ -228,9 +234,12 @@ export const GameUI = ({
                 </span>
               ))}
             </div>
-          </div>
+          </CyberCard>
 
-          <div className="bg-slate-900/95 border-2 border-rose-500/50 rounded-xl p-3 space-y-2.5 shadow-[0_0_15px_rgba(255,26,75,0.15)] text-left">
+          <CyberCard
+            variant="default"
+            className="p-3 space-y-2.5 text-left"
+          >
             <div className="font-pixel-en text-[10px] text-rose-400 border-b border-slate-800 pb-1 flex justify-between items-center">
               <span>STATUS</span>
               <span className="text-[9px] text-slate-500">
@@ -332,7 +341,7 @@ export const GameUI = ({
                 {stats.bestScore.toLocaleString()}
               </div>
             </div>
-          </div>
+          </CyberCard>
         </div>
 
         {/* ================= 中央パネル (Canvas) ================= */}
@@ -343,7 +352,10 @@ export const GameUI = ({
           {/* NEXT & HOLD スロット */}
           <div className="grid grid-cols-2 gap-2">
             {/* NEXT */}
-            <div className="bg-slate-900/90 border-2 border-rose-500/50 rounded-xl p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]">
+            <CyberCard
+              variant="default"
+              className="p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]"
+            >
               <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 font-bold">
                 NEXT
               </div>
@@ -354,10 +366,13 @@ export const GameUI = ({
                   <span className="text-slate-600 text-xs">--</span>
                 )}
               </div>
-            </div>
+            </CyberCard>
 
             {/* HOLD */}
-            <div className="bg-slate-900/90 border-2 border-rose-500/50 rounded-xl p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]">
+            <CyberCard
+              variant="default"
+              className="p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]"
+            >
               <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex items-center justify-between px-1 font-bold">
                 <span>HOLD</span>
                 <Keycap size="xs" variant="accent">
@@ -371,11 +386,14 @@ export const GameUI = ({
                   <span className="text-slate-600 text-xs">--</span>
                 )}
               </div>
-            </div>
+            </CyberCard>
           </div>
 
           {/* イティエル立ち絵表示枠 (PDF 5p/6p) */}
-          <div className="relative w-full h-44 bg-slate-900/90 border-2 border-rose-500/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(255,26,75,0.15)] flex flex-col items-center justify-center p-2">
+          <CyberCard
+            variant="default"
+            className="relative w-full h-44 overflow-hidden flex flex-col items-center justify-center p-2"
+          >
             {/* サイバー背景エフェクト */}
             <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#ff1a4b_1px,transparent_1px)] [background-size:12px_12px]" />
 
@@ -392,10 +410,13 @@ export const GameUI = ({
                 </span>
               </div>
             </div>
-          </div>
+          </CyberCard>
 
           {/* 操作説明枠 & オンスクリーンコントローラー (PDF 6p) */}
-          <div className="bg-slate-900/90 border-2 border-rose-500/50 rounded-xl p-3 text-left space-y-2.5 shadow-[0_0_15px_rgba(255,26,75,0.1)]">
+          <CyberCard
+            variant="default"
+            className="p-3 text-left space-y-2.5 shadow-[0_0_15px_rgba(255,26,75,0.1)]"
+          >
             <div className="font-['Press_Start_2P'] text-[10px] text-rose-400 border-b border-slate-800 pb-1 flex justify-between items-center">
               <span>CONTROLS</span>
               <span className="text-[9px] text-slate-500 font-sans">
@@ -458,71 +479,68 @@ export const GameUI = ({
 
             {/* 展示PC用タッチ/マウスクリックボタン（統一デザイン） */}
             <div className="pt-2 border-t border-slate-800 grid grid-cols-3 gap-1.5">
-              <button
-                type="button"
+              <CyberButton
+                variant="touch"
                 onClick={() => engine.moveLeft()}
-                className="py-2 px-1 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1"
               >
                 ◀ LEFT
-              </button>
-              <button
-                type="button"
+              </CyberButton>
+              <CyberButton
+                variant="touch"
                 onClick={() => engine.softDrop()}
-                className="py-2 px-1 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1"
               >
                 ▼ DOWN
-              </button>
-              <button
-                type="button"
+              </CyberButton>
+              <CyberButton
+                variant="touch"
                 onClick={() => engine.moveRight()}
-                className="py-2 px-1 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1"
               >
                 RIGHT ▶
-              </button>
-              <button
-                type="button"
+              </CyberButton>
+              <CyberButton
+                variant="touch"
                 onClick={() => engine.rotate(false)}
-                className="py-2 px-1 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1"
+                icon={<RotateCcw size={12} />}
               >
-                <RotateCcw size={12} /> ROT L
-              </button>
-              <button
-                type="button"
+                ROT L
+              </CyberButton>
+              <CyberButton
+                variant="touch"
                 onClick={() => engine.rotate(true)}
-                className="py-2 px-1 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1"
+                icon={<RotateCw size={12} />}
               >
-                <RotateCw size={12} /> ROT R
-              </button>
-              <button
-                type="button"
+                ROT R
+              </CyberButton>
+              <CyberButton
+                variant="touch"
                 onClick={() => engine.hardDrop()}
-                className="py-2 px-1 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1"
               >
                 ⚡ DROP
-              </button>
-              <button
-                type="button"
+              </CyberButton>
+              <CyberButton
+                variant="touch"
                 onClick={() => engine.hold()}
-                className={`${
+                className={
                   engine.skills.length > 0 ? "col-span-1" : "col-span-3"
-                } py-2 px-1 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1.5`}
+                }
               >
                 <span>HOLD</span>
                 <Keycap size="xs" variant="accent">
                   C
                 </Keycap>
-              </button>
+              </CyberButton>
               {engine.skills.length > 0 && (
-                <button
-                  type="button"
+                <CyberButton
+                  variant="touch"
                   onClick={() => engine.useBomb()}
-                  className="col-span-2 py-2 px-2 bg-slate-800/80 hover:bg-red-950/80 active:bg-red-600/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-xs text-rose-200 cursor-pointer font-bold transition-all shadow-[0_0_6px_rgba(255,26,75,0.15)] hover:shadow-[0_0_10px_rgba(255,26,75,0.3)] flex items-center justify-center gap-1.5"
+                  className="col-span-2"
+                  icon={<Bomb size={12} />}
                 >
-                  <Bomb size={12} /> BOMB!
-                </button>
+                  BOMB!
+                </CyberButton>
               )}
             </div>
-          </div>
+          </CyberCard>
         </div>
       </div>
     </div>

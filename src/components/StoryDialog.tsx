@@ -2,6 +2,7 @@ import { AlertTriangle, ChevronRight, Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { StageData } from "../types/game";
 import { Keycap } from "./Keycap";
+import { CyberBadge, CyberButton, CyberCard } from "./ui";
 
 interface StoryDialogProps {
   stage: StageData;
@@ -47,7 +48,10 @@ export const StoryDialog = ({
   }, [currentLineIndex, onStartGame, storyLines.length]);
 
   return (
-    <div className="w-full max-w-xl bg-slate-900/95 border-2 border-rose-500/60 rounded-xl p-5 md:p-7 shadow-[0_0_30px_rgba(255,26,75,0.25)] font-['DotGothic16',sans-serif] space-y-5">
+    <CyberCard
+      variant="default"
+      className="w-full max-w-xl p-5 md:p-7 shadow-[0_0_30px_rgba(255,26,75,0.25)] space-y-5"
+    >
       {/* ターミナルヘッダー */}
       <div className="flex items-center justify-between border-b border-rose-500/30 pb-3">
         <div className="flex items-center gap-2 text-rose-400">
@@ -56,10 +60,12 @@ export const StoryDialog = ({
             iTL DEFENSE BRIEFING
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-rose-300 bg-rose-950/70 border border-rose-500/50 px-2.5 py-0.5 rounded shadow-[0_0_8px_rgba(255,26,75,0.2)]">
-          <AlertTriangle size={12} className="text-rose-400" />
-          <span>SECURITY LEVEL: CRITICAL</span>
-        </div>
+        <CyberBadge
+          variant="danger"
+          icon={<AlertTriangle size={12} className="text-rose-400" />}
+        >
+          SECURITY LEVEL: CRITICAL
+        </CyberBadge>
       </div>
 
       {/* ステージ名 */}
@@ -95,36 +101,34 @@ export const StoryDialog = ({
 
       {/* ボタンフッター */}
       <div className="flex items-center justify-between pt-2">
-        <button
-          type="button"
-          onClick={onBackToTitle}
-          className="px-3.5 py-1.5 text-xs text-slate-400 hover:text-slate-200 border border-slate-700 hover:border-rose-500/50 rounded cursor-pointer transition-colors"
-        >
+        <CyberButton variant="secondary" size="sm" onClick={onBackToTitle}>
           BACK
-        </button>
+        </CyberButton>
 
         {currentLineIndex < storyLines.length - 1 ? (
-          <button
-            type="button"
+          <CyberButton
+            variant="secondary"
+            size="md"
             onClick={() => setCurrentLineIndex((prev) => prev + 1)}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-rose-500/50 hover:border-rose-400 rounded-lg text-rose-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-[0_0_8px_rgba(255,26,75,0.15)]"
+            className="text-rose-200 font-bold border-rose-500/50 hover:border-rose-400"
           >
             <span>NEXT</span>
             <Keycap size="xs" variant="accent">
               SPACE
             </Keycap>
             <ChevronRight size={14} className="text-rose-400" />
-          </button>
+          </CyberButton>
         ) : (
-          <button
-            type="button"
+          <CyberButton
+            variant="primary"
+            size="lg"
             onClick={onStartGame}
-            className="px-5 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 text-white font-['Press_Start_2P'] text-xs font-bold rounded-lg cursor-pointer transition-all shadow-[0_0_18px_rgba(255,26,75,0.6)] animate-pulse"
+            className="font-['Press_Start_2P'] text-xs font-bold animate-pulse shadow-[0_0_18px_rgba(255,26,75,0.6)]"
           >
             START MISSION
-          </button>
+          </CyberButton>
         )}
       </div>
-    </div>
+    </CyberCard>
   );
 };
