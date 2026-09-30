@@ -267,22 +267,35 @@ export const GameUI = ({
               </div>
             </div>
 
-            {/* BONUS (★ 7/12) */}
+            {/* STAGE or MODE */}
             <div>
-              <div className="text-slate-400 text-[11px]">BONUS</div>
-              <div className="font-['Press_Start_2P'] text-amber-300 text-xs flex items-center gap-1">
-                <span>★</span>
-                <span>{`${stats.bonusStars}/${stats.totalStars}`}</span>
+              <div className="text-slate-400 text-[11px]">
+                {engine.gameMode === "endless" ? "MODE" : "STAGE"}
+              </div>
+              <div className="font-['Press_Start_2P'] text-emerald-400 text-xs tracking-wider">
+                {engine.gameMode === "endless"
+                  ? "ENDLESS"
+                  : stats.stageNumber.toString().padStart(2, "0")}
               </div>
             </div>
 
-            {/* STAGE */}
-            <div>
-              <div className="text-slate-400 text-[11px]">STAGE</div>
-              <div className="font-['Press_Start_2P'] text-emerald-400 text-xs tracking-wider">
-                {stats.stageNumber.toString().padStart(2, "0")}
+            {/* HEIGHT (エンドレス時) または BONUS (ステージ時) */}
+            {engine.gameMode === "endless" ? (
+              <div>
+                <div className="text-slate-400 text-[11px]">HEIGHT</div>
+                <div className="font-['Press_Start_2P'] text-cyan-300 text-xs font-bold tracking-wider">
+                  {engine.climbedHeight} m
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <div className="text-slate-400 text-[11px]">BONUS</div>
+                <div className="font-['Press_Start_2P'] text-amber-300 text-xs flex items-center gap-1">
+                  <span>★</span>
+                  <span>{`${stats.bonusStars}/${stats.totalStars}`}</span>
+                </div>
+              </div>
+            )}
 
             {/* VIRUS STATUS */}
             <div>

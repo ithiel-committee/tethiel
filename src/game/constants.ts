@@ -184,3 +184,29 @@ export const STAGES: StageData[] = [
     initialStars: [],
   },
 ];
+
+// エンドレスモード設定（無限縦スクロールクライミング）
+export const ENDLESS_STAGE: StageData = {
+  id: 99,
+  name: "ENDLESS",
+  codeName: "ENDLESS",
+  subtitle: "無限クライミング",
+  description:
+    "天井のないサイバー空間をどこまでも登り続けろ！登った総高度とスコアの極限を目指すサバイバルモード。",
+  isUnlocked: true,
+  infectionIntervalMs: 3800, // 初期3.8秒。高度に応じて加速
+  goalRow: -999, // ゴールなし（無限進行）
+  startCols: START_COLS,
+  mode: "endless",
+  initialObstacles: [
+    [16, 2],
+    [16, 9],
+    [12, 4],
+    [12, 7],
+  ],
+  initialStars: [
+    [18, 5],
+    [14, 6],
+    [10, 5],
+  ],
+};

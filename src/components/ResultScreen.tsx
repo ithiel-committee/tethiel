@@ -56,7 +56,22 @@ export const ResultScreen = ({
   return (
     <div className="w-full max-w-lg bg-slate-900/95 border-2 rounded-2xl p-6 md:p-8 shadow-[0_0_35px_rgba(0,0,0,0.8)] font-['DotGothic16',sans-serif] space-y-6 text-center animate-fadeIn border-cyan-500/50">
       <div className="space-y-2">
-        {isCleared ? (
+        {stats.gameMode === "endless" ? (
+          <>
+            <div className="inline-flex p-3 bg-purple-950/80 border border-purple-500/60 rounded-full text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+              <Trophy size={40} className="text-yellow-400" />
+            </div>
+            <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-pink-400 tracking-wider">
+              ENDLESS RECORD
+            </h2>
+            <p className="text-sm text-cyan-300 font-bold">
+              到達高度: {stats.climbedHeight ?? 0} m
+            </p>
+            <p className="text-xs text-rose-300">
+              {gameOverReason || "ウイルスに追いつかれました"}
+            </p>
+          </>
+        ) : isCleared ? (
           <>
             <div className="inline-flex p-3 bg-emerald-950/80 border border-emerald-500/60 rounded-full text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
               {isBonusClear ? (
@@ -96,16 +111,28 @@ export const ResultScreen = ({
       </div>
 
       <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 text-left space-y-3">
-        {isCleared && (
+        {stats.gameMode === "endless" ? (
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs text-slate-400 flex items-center gap-1.5">
               <Award size={14} className="text-yellow-400" />
-              EVALUATION RANK
+              CLIMBED ALTITUDE
             </span>
-            <span className="font-['Press_Start_2P'] text-2xl text-yellow-400">
-              RANK {rank}
+            <span className="font-['Press_Start_2P'] text-2xl text-cyan-300">
+              {stats.climbedHeight ?? 0} m
             </span>
           </div>
+        ) : (
+          isCleared && (
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                <Award size={14} className="text-yellow-400" />
+                EVALUATION RANK
+              </span>
+              <span className="font-['Press_Start_2P'] text-2xl text-yellow-400">
+                RANK {rank}
+              </span>
+            </div>
+          )
         )}
 
         <div className="grid grid-cols-2 gap-3 text-xs md:text-sm">
@@ -137,7 +164,9 @@ export const ResultScreen = ({
               BONUS STARS
             </span>
             <span className="font-['Press_Start_2P'] text-amber-300">
-              {`★ ${stats.bonusStars}/${stats.totalStars}`}
+              {stats.gameMode === "endless"
+                ? `★ ${stats.bonusStars}`
+                : `★ ${stats.bonusStars}/${stats.totalStars}`}
             </span>
           </div>
         </div>

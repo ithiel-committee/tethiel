@@ -2,6 +2,7 @@ import { sounds } from "../audio/soundSystem";
 import type {
   Cell,
   CharacterPosition,
+  GameMode,
   GameStats,
   GameStatus,
   SkillType,
@@ -108,6 +109,13 @@ export class GameEngine {
   public timePenalty = 0;
   public minoBonus = 0;
 
+  // ゲームモード ("stage": 通常ステージ / "endless": 無限縦スクロール)
+  public gameMode: GameMode = "stage";
+  // エンドレスモードで登った総高度（メートル）
+  public climbedHeight = 0;
+  // 現在のウイルス感染間隔（エンドレスモードで加速）
+  public currentInfectionIntervalMs = 3800;
+
   // 感染開始までの残り配置ミノ数（0なら既にウイルス活動中）
   public get minosUntilInfection(): number {
     return Math.max(0, 2 - this.minoCount);
@@ -123,6 +131,10 @@ export class GameEngine {
 
   // グリッド初期化
   public initGrid() {
+    this.gameMode = this.stage.mode ?? "stage";
+    this.climbedHeight = 0;
+    this.currentInfectionIntervalMs = this.stage.infectionIntervalMs;
+
     this.grid = [];
     for (let r = 0; r < GRID_HEIGHT; r++) {
       this.grid[r] = [];
@@ -181,6 +193,80 @@ export class GameEngine {
     this.goalReachedTimerMs = 0;
     this.infectionTimerMs = 0;
     this.infectedDamageTimerMs = 0;
+  }
+
+  // エンドレスモード用：画面上部にスクロール追加される新しい1行を生成
+  private generateNewEndlessRow(height: number): Cell[] {
+    const row: Cell[] = [];
+    for (let c = 0; c < GRID_WIDTH; c++) {
+      row.push({ type: "empty" });
+    }
+
+    // ボーナス星の配置：4行に1回、中央寄りの列に配置
+    if (height > 0 && height % 4 === 0) {
+      const starCol = 3 + ((height * 7) % 6);
+      row[starCol] = { type: "star" };
+    }
+
+    // トゲ障害物の配置：3行に1回、左右端寄り（列 1〜2 または 列 9〜10）に配置
+    // ※中央列（4〜7）は通り道を100%確保するため絶対に配置しない
+    if (height > 4 && height % 3 === 0) {
+      const isLeft = height % 6 === 0;
+      const obstacleCol = isLeft ? 1 + (height % 2) : 9 + (height % 2);
+      row[obstacleCol] = { type: "obstacle" };
+    }
+
+    return row;
+  }
+
+  // エンドレスモード用：フィールド全体を下にスクロール（イティエルが登った高度を進める）
+  public scrollDown(count = 1) {
+    for (let step = 0; step < count; step++) {
+      this.climbedHeight++;
+      this.score += 50;
+
+      // ウイルスの段階的加速（10m登るごとに120ms短縮、最小1400ms）
+      this.currentInfectionIntervalMs = Math.max(
+        1400,
+        this.stage.infectionIntervalMs -
+          Math.floor(this.climbedHeight / 10) * 120,
+      );
+
+      // グリッドを1行下へシフト
+      this.grid.pop();
+      this.grid.unshift(this.generateNewEndlessRow(this.climbedHeight));
+    }
+
+    // エンティティの座標を下にシフト
+    this.characterPos.y += count;
+    this.characterPos.targetY += count;
+    for (const wp of this.waypoints) {
+      wp.y += count;
+    }
+
+    // 回路パス
+    this.connectedPath = this.connectedPath
+      .map(([r, c]) => [r + count, c] as [number, number])
+      .filter(([r]) => r < GRID_HEIGHT);
+
+    this.circuitRoute = this.circuitRoute
+      .map(([r, c]) => [r + count, c] as [number, number])
+      .filter(([r]) => r < GRID_HEIGHT);
+
+    // トゲエフェクト
+    for (const fx of this.spikeHitEffects) {
+      fx.y += count;
+    }
+
+    // 操作中のミノも連動
+    if (this.currentPiece) {
+      this.currentPiece.y += count;
+    }
+
+    // ウイルス感染ラインも連動（押し返す）
+    this.magmaRow = Math.min(GRID_HEIGHT, this.magmaRow + count);
+
+    this.callbacks.onCharacterMove({ ...this.characterPos });
   }
 
   // ゲーム開始
@@ -252,7 +338,7 @@ export class GameEngine {
 
     if (shouldInfect) {
       this.infectionTimerMs += deltaMs;
-      if (this.infectionTimerMs >= this.stage.infectionIntervalMs) {
+      if (this.infectionTimerMs >= this.currentInfectionIntervalMs) {
         this.infectionTimerMs = 0;
         this.advanceInfection();
       }
@@ -303,8 +389,12 @@ export class GameEngine {
 
         if (this.waypoints.length === 0) {
           this.characterPos.isClimbing = false;
-          // ゴールマスに到着した瞬間
-          if (this.isGoalPending && this.characterPos.y <= GOAL_ROW) {
+          // ゴールマスに到着した瞬間（ステージモードのみ）
+          if (
+            this.gameMode === "stage" &&
+            this.isGoalPending &&
+            this.characterPos.y <= GOAL_ROW
+          ) {
             this.isGoalCelebration = true;
             sounds.playClear();
           }
@@ -320,13 +410,23 @@ export class GameEngine {
     } else {
       this.characterPos.isClimbing = false;
 
-      // ゴールマスに到着後のセレブレーション待機（1秒後にリザルト画面へ遷移）
-      if (this.isGoalCelebration) {
+      // ゴールマスに到着後のセレブレーション待機（1秒後にリザルト画面へ遷移・ステージモードのみ）
+      if (this.gameMode === "stage" && this.isGoalCelebration) {
         this.goalReachedTimerMs += deltaMs;
         if (this.goalReachedTimerMs >= 1000) {
           this.triggerStageClear(this.isBonusGoal);
           return;
         }
+      }
+    }
+
+    // 2.5 エンドレスモード時の自動縦スクロール処理
+    // イティエルが画面上部（行11未満）に登ったら、フィールドを下にスクロールして中央へ戻す
+    if (this.gameMode === "endless" && this.characterPos.y < 11) {
+      const scrollRows = Math.floor(11 - this.characterPos.y);
+      if (scrollRows > 0) {
+        this.scrollDown(scrollRows);
+        this.recalculateCircuit();
       }
     }
 
@@ -561,6 +661,35 @@ export class GameEngine {
       }
     }
 
+    // エンドレスモード時：スクロール後も回路が途切れないよう、イティエルの足元ブロックと最下行ブロックをシードに含める
+    if (this.gameMode === "endless") {
+      const footR = Math.round(this.characterPos.y);
+      const footC = Math.floor(this.characterPos.x);
+      if (
+        footR >= 0 &&
+        footR < GRID_HEIGHT &&
+        footC >= 0 &&
+        footC < GRID_WIDTH
+      ) {
+        if (this.grid[footR][footC].type === "placed") {
+          const key = `${footR},${footC}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push([footR, footC]);
+          }
+        }
+      }
+      for (let c = 0; c < GRID_WIDTH; c++) {
+        if (this.grid[GRID_HEIGHT - 1][c].type === "placed") {
+          const key = `${GRID_HEIGHT - 1},${c}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push([GRID_HEIGHT - 1, c]);
+          }
+        }
+      }
+    }
+
     const path: [number, number][] = [];
     let topRow = GRID_HEIGHT;
     let topCell: [number, number] | null = null;
@@ -625,8 +754,8 @@ export class GameEngine {
       // キャラクター現在位置から最上部ブロックまで、ミノをたどるルート（最短経路）をBFSで探索
       this.calculateWaypointsTo(tr, tc);
 
-      // GOAL判定の準備（キャラクターがミノをたどって登りきった時にクリア）
-      if (tr <= GOAL_ROW) {
+      // GOAL判定の準備（ステージモードのみ。エンドレスモードではゴール終了せず無限クライミング）
+      if (this.gameMode === "stage" && tr <= GOAL_ROW) {
         this.isGoalPending = true;
         this.isBonusGoal = BONUS_GOAL_COLS.includes(tc);
         this.currentPiece = null; // ゴール達成時はミノの落下を止めて登頂を見届ける
@@ -899,6 +1028,8 @@ export class GameEngine {
       totalStars: this.totalStars,
       stageNumber: this.stage.id,
       bestScore: this.bestScore,
+      gameMode: this.gameMode,
+      climbedHeight: this.climbedHeight,
     };
     this.callbacks.onStatsChange(stats);
   }
@@ -937,6 +1068,8 @@ export class GameEngine {
       bestScore: Math.max(this.bestScore, this.score),
       timePenalty: this.timePenalty,
       minoBonus: this.minoBonus,
+      gameMode: this.gameMode,
+      climbedHeight: this.climbedHeight,
     };
     this.callbacks.onStatusChange(this.status);
     this.callbacks.onStageClear(isBonusClear, stats);
@@ -954,6 +1087,8 @@ export class GameEngine {
       totalStars: this.totalStars,
       stageNumber: this.stage.id,
       bestScore: this.bestScore,
+      gameMode: this.gameMode,
+      climbedHeight: this.climbedHeight,
     };
     this.callbacks.onStatusChange(this.status);
     this.callbacks.onGameOver(reason, stats);

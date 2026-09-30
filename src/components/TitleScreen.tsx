@@ -6,7 +6,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { STAGES } from "../game/constants";
+import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import type { StageData } from "../types/game";
 
 interface TitleScreenProps {
@@ -110,6 +110,34 @@ export const TitleScreen = ({
               </div>
             );
           })}
+
+          {/* エンドレスモード特別カード */}
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between p-4 rounded-xl border border-pink-500/70 bg-gradient-to-r from-slate-900/95 via-purple-950/40 to-slate-900/95 shadow-[0_0_20px_rgba(236,72,153,0.25)] text-left transition-all">
+            <div className="space-y-1 pr-4">
+              <div className="flex items-center gap-2">
+                <span className="font-['Press_Start_2P'] text-xs text-pink-400">
+                  ★ ENDLESS MODE
+                </span>
+                <span className="text-yellow-300 text-xs font-bold">
+                  無限クライミング
+                </span>
+              </div>
+              <p className="text-xs text-slate-300">
+                {ENDLESS_STAGE.description}
+              </p>
+            </div>
+
+            <div className="mt-3 md:mt-0 flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => onSelectStage(ENDLESS_STAGE)}
+                className="px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold rounded-lg flex items-center gap-1.5 text-xs transition-all shadow-[0_0_12px_rgba(236,72,153,0.5)] cursor-pointer"
+              >
+                <Play size={14} fill="currentColor" />
+                START ENDLESS
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

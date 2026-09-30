@@ -58,42 +58,60 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.stroke();
       }
 
-      // 4. GOALライン描画（行2）
-      const goalY = GOAL_ROW * BLOCK_SIZE;
-      // 通常GOALエリア
-      ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
-      ctx.fillRect(
-        0,
-        goalY,
-        (GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE,
-        BLOCK_SIZE,
-      );
-      ctx.fillStyle = "#020617";
-      ctx.font = '11px "DotGothic16", monospace';
-      ctx.textAlign = "center";
-      ctx.fillText(
-        "G  O  A  L",
-        ((GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE) / 2,
-        goalY + 17,
-      );
+      // 4. 最上部ヘッダー（エンドレス時は高度表示、ステージ時はGOALライン）
+      if (engine.gameMode === "endless") {
+        ctx.fillStyle = "rgba(0, 240, 255, 0.15)";
+        ctx.fillRect(0, 0, CANVAS_WIDTH, BLOCK_SIZE);
+        ctx.strokeStyle = "rgba(0, 240, 255, 0.4)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, CANVAS_WIDTH, BLOCK_SIZE);
 
-      // BONUSエリア（右端2マス）
-      const bonusStartX =
-        (GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE;
-      ctx.fillStyle = "rgba(255, 0, 127, 0.9)";
-      ctx.fillRect(
-        bonusStartX,
-        goalY,
-        BONUS_GOAL_COLS.length * BLOCK_SIZE,
-        BLOCK_SIZE,
-      );
-      ctx.fillStyle = "#ffffff";
-      ctx.font = '9px "DotGothic16", monospace';
-      ctx.fillText(
-        "BONUS",
-        bonusStartX + (BONUS_GOAL_COLS.length * BLOCK_SIZE) / 2,
-        goalY + 16,
-      );
+        ctx.fillStyle = "#00f0ff";
+        ctx.font = '11px "DotGothic16", monospace';
+        ctx.textAlign = "center";
+        ctx.fillText(
+          `▲ CLIMB: ${engine.climbedHeight}m ▲`,
+          CANVAS_WIDTH / 2,
+          18,
+        );
+      } else {
+        // 通常ステージモード：GOALライン描画（行2）
+        const goalY = GOAL_ROW * BLOCK_SIZE;
+        // 通常GOALエリア
+        ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
+        ctx.fillRect(
+          0,
+          goalY,
+          (GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE,
+          BLOCK_SIZE,
+        );
+        ctx.fillStyle = "#020617";
+        ctx.font = '11px "DotGothic16", monospace';
+        ctx.textAlign = "center";
+        ctx.fillText(
+          "G  O  A  L",
+          ((GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE) / 2,
+          goalY + 17,
+        );
+
+        // BONUSエリア（右端2マス）
+        const bonusStartX =
+          (GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE;
+        ctx.fillStyle = "rgba(255, 0, 127, 0.9)";
+        ctx.fillRect(
+          bonusStartX,
+          goalY,
+          BONUS_GOAL_COLS.length * BLOCK_SIZE,
+          BLOCK_SIZE,
+        );
+        ctx.fillStyle = "#ffffff";
+        ctx.font = '9px "DotGothic16", monospace';
+        ctx.fillText(
+          "BONUS",
+          bonusStartX + (BONUS_GOAL_COLS.length * BLOCK_SIZE) / 2,
+          goalY + 16,
+        );
+      }
 
       // 5. スタート台座（立っている位置にミノと同質の白いブロックを配置）
       const startY = START_ROW * BLOCK_SIZE;

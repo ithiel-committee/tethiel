@@ -45,6 +45,8 @@ export interface CharacterPosition {
   isClimbing: boolean;
 }
 
+export type GameMode = "stage" | "endless";
+
 export interface StageData {
   id: number;
   name: string;
@@ -58,6 +60,7 @@ export interface StageData {
   initialStars: [number, number][]; // [row, col]
   startCols: number[]; // 最下部START地点の列番号
   goalRow: number; // 最上部GOALラインの行番号
+  mode?: GameMode;
 }
 
 export interface GameStats {
@@ -71,4 +74,6 @@ export interface GameStats {
   bestScore: number;
   timePenalty?: number;
   minoBonus?: number;
+  gameMode?: GameMode;
+  climbedHeight?: number; // エンドレスモードで登った総高度（メートル）
 }
