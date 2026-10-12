@@ -43,6 +43,8 @@ export interface CharacterPosition {
   targetX: number;
   targetY: number;
   isClimbing: boolean;
+  facing: "left" | "right";
+  isMoving: boolean;
 }
 
 export type GameMode = "stage" | "endless";

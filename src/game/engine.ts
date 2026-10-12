@@ -54,6 +54,8 @@ export class GameEngine {
     targetX: 5.5,
     targetY: START_ROW,
     isClimbing: false,
+    facing: "left",
+    isMoving: false,
   };
 
   // ミノをたどるウェイポイント列
@@ -172,6 +174,8 @@ export class GameEngine {
       targetX: 5.5,
       targetY: START_ROW,
       isClimbing: false,
+      facing: "left",
+      isMoving: false,
     };
 
     this.hearts = 5;
@@ -376,6 +380,10 @@ export class GameEngine {
       const dy = target.y - this.characterPos.y;
       const dist = Math.hypot(dx, dy);
 
+      // 右に移動するときだけ右向き、それ以外（左移動・上下移動・停止）はデフォルト左向き
+      this.characterPos.facing = dx > 0.02 ? "right" : "left";
+      this.characterPos.isMoving = true;
+
       // 移動速度（ブロック/秒）
       const speed = this.isGoalPending ? 12.0 : 9.0;
       const step = (speed * deltaMs) / 1000;
@@ -387,6 +395,8 @@ export class GameEngine {
 
         if (this.waypoints.length === 0) {
           this.characterPos.isClimbing = false;
+          this.characterPos.isMoving = false;
+          this.characterPos.facing = "left";
           // ゴールマスに到着した瞬間（ステージモードのみ）
           if (
             this.gameMode === "stage" &&
@@ -407,6 +417,8 @@ export class GameEngine {
       this.callbacks.onCharacterMove({ ...this.characterPos });
     } else {
       this.characterPos.isClimbing = false;
+      this.characterPos.isMoving = false;
+      this.characterPos.facing = "left";
 
       // ゴールマスに到着後のセレブレーション待機（1秒後にリザルト画面へ遷移・ステージモードのみ）
       if (this.gameMode === "stage" && this.isGoalCelebration) {

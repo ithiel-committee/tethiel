@@ -10,6 +10,15 @@ import {
 } from "../game/constants";
 import type { GameEngine } from "../game/engine";
 import { calculateGhostY } from "../game/tetromino";
+import playerLeftImg from "../assets/character/player_left.png";
+import playerRightImg from "../assets/character/player_right.png";
+
+// スプライト画像キャッシュ
+const playerSpriteLeft = new Image();
+playerSpriteLeft.src = playerLeftImg;
+
+const playerSpriteRight = new Image();
+playerSpriteRight.src = playerRightImg;
 
 interface GameCanvasProps {
   engine: GameEngine;
@@ -229,7 +238,8 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         engine.characterPos.x * BLOCK_SIZE,
         engine.characterPos.y * BLOCK_SIZE,
         time,
-        engine.characterPos.isClimbing,
+        engine.characterPos.isMoving,
+        engine.characterPos.facing,
       );
 
       // 10.5 ゴール到達時のセレブレーション演出（キャラクターが到着した瞬間に発動）
@@ -603,39 +613,88 @@ function drawStarItem(
   ctx.shadowBlur = 0;
 }
 
-// イティエルのミニドットキャラ描画（無機質な白い人形シルエット）
+// イティエルの自機キャラ描画（イラスト担当のラフスプライトを使用）
 function drawIthielCharacter(
   ctx: CanvasRenderingContext2D,
   px: number,
   py: number,
   time: number,
-  isClimbing: boolean,
+  isMoving: boolean,
+  facing: "left" | "right" = "left",
 ) {
-  const bobbing = isClimbing
-    ? Math.sin(time / 80) * 3
-    : Math.sin(time / 300) * 1.5;
-  const cx = px;
-  const cy = py - 6 + bobbing;
+  // スプライトの向き選択（デフォルトは左、右移動時のみ右向き）
+  const img = facing === "right" ? playerSpriteRight : playerSpriteLeft;
 
-  // 足場の光るオーラ
-  ctx.fillStyle = "rgba(0, 255, 200, 0.4)";
+  // キャラクターの描画サイズ（ブロックサイズ28に対して高さ約44px）
+  const charHeight = 44;
+  // 元画像アスペクト比（左: 225x426, 右: 249x423）
+  const aspectRatio = facing === "right" ? 249 / 423 : 225 / 426;
+  const charWidth = charHeight * aspectRatio;
+
+  // 移動時は歩くように上下にピョンピョン跳ねるモーション
+  // 停止時は呼吸のような穏やかな浮遊感
+  let bounceY = 0;
+  let tilt = 0;
+  if (isMoving) {
+    // 80ms周期のリズミカルなステップバウンス
+    const stepPhase = (time / 80) % Math.PI;
+    bounceY = Math.sin(stepPhase) * 6; // 最大6px跳ね上がる
+    // 歩行方向への微細な前傾チルト
+    tilt = (facing === "right" ? 0.05 : -0.05) * Math.sin(stepPhase);
+  } else {
+    // 停止時は穏やかな浮遊
+    bounceY = Math.sin(time / 300) * 1.5;
+  }
+
+  const cx = px;
+  // ブロック上面に足元を着地させる
+  const groundY = py + BLOCK_SIZE;
+
+  // 1. 足場の光るオーラ・影（跳ねたときは影が小さく薄くなって空中感を演出）
+  const shadowScale = isMoving ? Math.max(0.6, 1 - (bounceY / 6) * 0.4) : 1;
+  const shadowAlpha = isMoving
+    ? Math.max(0.2, 0.45 - (bounceY / 6) * 0.25)
+    : 0.4;
+  ctx.fillStyle = `rgba(0, 255, 200, ${shadowAlpha})`;
   ctx.beginPath();
-  ctx.ellipse(cx, cy + 12, 10, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(
+    cx,
+    groundY,
+    11 * shadowScale,
+    3.5 * shadowScale,
+    0,
+    0,
+    Math.PI * 2,
+  );
   ctx.fill();
 
-  // 無機質な白い人形シルエット (ドット調)
-  ctx.fillStyle = "#ffffff";
-  // 頭 (6x6)
-  ctx.fillRect(cx - 3, cy - 5, 6, 6);
-  // 首・肩・胴体 (8x8)
-  ctx.fillRect(cx - 4, cy + 2, 8, 8);
-  // 足 (左右)
-  ctx.fillRect(cx - 3, cy + 10, 2, 3);
-  ctx.fillRect(cx + 1, cy + 10, 2, 3);
+  // 2. 自機スプライトの描画
+  ctx.save();
+  ctx.translate(cx, groundY - bounceY);
+  if (tilt !== 0) {
+    ctx.rotate(tilt);
+  }
 
-  // 頭上のネームラベル「イティエル」
+  if (img.complete && img.naturalWidth > 0) {
+    // スプライト本体を描画（足元基準: -charWidth / 2, -charHeight）
+    ctx.drawImage(img, -charWidth / 2, -charHeight, charWidth, charHeight);
+  } else {
+    // 画像ロード前のフォールバック（無機質白いシルエット）
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(-3, -charHeight + 5, 6, 6);
+    ctx.fillRect(-4, -charHeight + 12, 8, 8);
+    ctx.fillRect(-3, -charHeight + 20, 2, 3);
+    ctx.fillRect(1, -charHeight + 20, 2, 3);
+  }
+  ctx.restore();
+
+  // 3. 頭上のネームラベル「イティエル」
+  const labelY = groundY - charHeight - bounceY - 6;
   ctx.fillStyle = "#ffffff";
   ctx.font = '9px "DotGothic16", monospace';
   ctx.textAlign = "center";
-  ctx.fillText("イティエル", cx, cy - 10);
+  ctx.shadowColor = "rgba(0, 240, 255, 0.8)";
+  ctx.shadowBlur = 4;
+  ctx.fillText("イティエル", cx, labelY);
+  ctx.shadowBlur = 0;
 }
