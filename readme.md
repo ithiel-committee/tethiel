@@ -95,6 +95,7 @@ tethiel/
 │   └── GAME_DESIGN.md         # ゲーム詳細仕様書・要件ドキュメント
 ├── public/                    # 静的アセット
 ├── scripts/
+│   ├── generate_favicon.js    # イティエル画像をもとにfavicon(ICO/PNG)を生成するスクリプト
 │   └── process_cursor.js      # イティエルカーソル画像のセンタリング・リサンプリングスクリプト
 ├── src/
 │   ├── assets/
