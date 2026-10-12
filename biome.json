@@ -38,7 +38,7 @@
       "**/*.css",
       "**/*.md"
     ],
-    "ignore": ["dist/**", "node_modules/**", "output/**"]
+    "ignore": ["dist/**", "node_modules/**", "output/**", ".vite/**"]
   },
   "overrides": [
     {

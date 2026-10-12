@@ -22,6 +22,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html,
+body {
+  cursor: url("./assets/cursor/tethiel_cursor_32.png") 16 16, auto;
+}
+
 body {
   margin: 0;
   background-color: var(--bg-dark);
@@ -869,10 +874,14 @@ button:active {
 .font-bold {
   font-weight: 700;
 }
-.cursor-pointer {
-  cursor: pointer;
+.cursor-pointer,
+button,
+a,
+[role="button"] {
+  cursor: url("./assets/cursor/tethiel_cursor_32.png") 16 16, pointer;
 }
-.cursor-not-allowed {
+.cursor-not-allowed,
+button:disabled {
   cursor: not-allowed;
 }
 .opacity-60 {

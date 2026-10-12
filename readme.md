@@ -94,7 +94,12 @@ tethiel/
 ├── docs/
 │   └── GAME_DESIGN.md         # ゲーム詳細仕様書・要件ドキュメント
 ├── public/                    # 静的アセット
+├── scripts/
+│   └── process_cursor.js      # イティエルカーソル画像のセンタリング・リサンプリングスクリプト
 ├── src/
+│   ├── assets/
+│   │   ├── character/         # プレイヤーキャラクター歩行スプライト
+│   │   └── cursor/            # イティエルカスタムマウスカーソル画像
 │   ├── audio/
 │   │   └── soundSystem.ts     # Web Audio APIによるシンセ効果音エンジン
 │   ├── components/
@@ -126,5 +131,6 @@ tethiel/
 - フレームワーク: Vite + React 19 + TypeScript
 - レンダリング: HTML5 Canvas 2D Context (60fps requestAnimationFrame)
 - サウンド: Web Audio API (シンセサイザー合成音、外部音声ファイル不要・完全軽量)
+- UI / カーソル: クリムゾンサイバー調デザイン、イティエルドット絵カスタムカーソル (中心ホットスポット 16 16)
 - フォント: DotGothic16, Press Start 2P
 - コード品質管理: Biome 1.9.4
