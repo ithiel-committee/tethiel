@@ -8,169 +8,16 @@ import { TitleScreen } from "./components/TitleScreen";
 import { getStoryScene } from "./data/storyData";
 import { STAGES } from "./game/constants";
 import { GameEngine } from "./game/engine";
+import { dispatchGameAction, getGameActionFromEvent } from "./game/input";
 import type {
   GameStats,
   GameStatus,
   StageData,
   TetrominoType,
 } from "./types/game";
+import { cleanStageUrl, parseStageFromUrl } from "./utils/url";
 
 type Screen = "title" | "prologue" | "game" | "epilogue" | "result";
-
-// URLから直接開始するステージを判定 (/play/stage-1, #/play/stage-1, ?stage=1 など)
-function parseStageFromUrl(): StageData | null {
-  if (typeof window === "undefined") return null;
-  const url =
-    `${window.location.pathname}${window.location.search}${window.location.hash}`.toLowerCase();
-  const match = url.match(
-    /(?:play\/stage-|play\/stage|stage-|stage=)(\d+)/,
-  );
-  if (match) {
-    const stageId = Number.parseInt(match[1], 10);
-    const found = STAGES.find((s) => s.id === stageId);
-    if (found) return found;
-  }
-  return null;
-}
-
-// キー入力判定：物理キー(code)と文字(key)の両方を検証し、
-// 日本語IME（全角ひらがなモード/全角英数/かな入力等）の変な状態でも100%確実に操作を拾えるようにする
-type GameAction =
-  | "moveLeft"
-  | "moveRight"
-  | "hardDrop"
-  | "softDrop"
-  | "rotateCcw"
-  | "rotateCw"
-  | "hold"
-  | "bomb"
-  | "pause";
-
-function getGameActionFromEvent(e: KeyboardEvent): GameAction | null {
-  const code = e.code;
-  const key = e.key;
-  const lowerKey = key.toLowerCase();
-
-  // 1. ポーズ (P, Escape, 全角P, かな「せ」)
-  if (
-    code === "KeyP" ||
-    code === "Escape" ||
-    lowerKey === "p" ||
-    key === "ｐ" ||
-    key === "Ｐ" ||
-    key === "せ" ||
-    key === "Escape"
-  ) {
-    return "pause";
-  }
-
-  // 2. 即置き / ハードドロップ (ArrowUp, Space, 全角スペース)
-  if (
-    code === "ArrowUp" ||
-    code === "Space" ||
-    key === "ArrowUp" ||
-    key === " " ||
-    key === "　"
-  ) {
-    return "hardDrop";
-  }
-
-  // 3. 左移動 (ArrowLeft, A, 全角A, かな「ち」)
-  if (
-    code === "ArrowLeft" ||
-    code === "KeyA" ||
-    key === "ArrowLeft" ||
-    lowerKey === "a" ||
-    key === "ａ" ||
-    key === "Ａ" ||
-    key === "ち"
-  ) {
-    return "moveLeft";
-  }
-
-  // 4. 右移動 (ArrowRight, D, 全角D, かな「し」)
-  if (
-    code === "ArrowRight" ||
-    code === "KeyD" ||
-    key === "ArrowRight" ||
-    lowerKey === "d" ||
-    key === "ｄ" ||
-    key === "Ｄ" ||
-    key === "し"
-  ) {
-    return "moveRight";
-  }
-
-  // 5. ソフトドロップ (ArrowDown, S, 全角S, かな「と」)
-  if (
-    code === "ArrowDown" ||
-    code === "KeyS" ||
-    key === "ArrowDown" ||
-    lowerKey === "s" ||
-    key === "ｓ" ||
-    key === "Ｓ" ||
-    key === "と"
-  ) {
-    return "softDrop";
-  }
-
-  // 6. 反時計回り / 左回転 (Z, 全角Z, かな「つ」「っ」)
-  if (
-    code === "KeyZ" ||
-    lowerKey === "z" ||
-    key === "ｚ" ||
-    key === "Ｚ" ||
-    key === "つ" ||
-    key === "っ"
-  ) {
-    return "rotateCcw";
-  }
-
-  // 7. 時計回り / 右回転 (X, W, 全角X, 全角W, かな「さ」「て」)
-  if (
-    code === "KeyX" ||
-    code === "KeyW" ||
-    lowerKey === "x" ||
-    lowerKey === "w" ||
-    key === "ｘ" ||
-    key === "Ｘ" ||
-    key === "ｗ" ||
-    key === "Ｗ" ||
-    key === "さ" ||
-    key === "て"
-  ) {
-    return "rotateCw";
-  }
-
-  // 8. ホールド (C, 全角C, かな「そ」)
-  if (
-    code === "KeyC" ||
-    lowerKey === "c" ||
-    key === "ｃ" ||
-    key === "Ｃ" ||
-    key === "そ"
-  ) {
-    return "hold";
-  }
-
-  // 9. ボム (1, テンキー1, B, 全角1, 全角B, かな「こ」「ぬ」)
-  if (
-    code === "Digit1" ||
-    code === "Numpad1" ||
-    code === "KeyB" ||
-    key === "1" ||
-    key === "１" ||
-    key === "ぬ" ||
-    lowerKey === "b" ||
-    key === "ｂ" ||
-    key === "Ｂ" ||
-    key === "こ"
-  ) {
-    return "bomb";
-  }
-
-  return null;
-}
 
 export function App() {
   const directStage = useMemo(() => parseStageFromUrl(), []);
@@ -264,17 +111,7 @@ export function App() {
 
   // タイトルへ戻る
   const handleBackToTitle = useCallback(() => {
-    if (
-      window.location.pathname.includes("/play/") ||
-      window.location.hash ||
-      window.location.search.includes("stage=")
-    ) {
-      const cleanPath = window.location.pathname.replace(
-        /\/play\/.*$/,
-        "/",
-      );
-      window.history.replaceState(null, "", cleanPath || "/");
-    }
+    cleanStageUrl();
     setScreen("title");
   }, []);
 
@@ -302,32 +139,7 @@ export function App() {
       e.preventDefault();
       e.stopPropagation();
 
-      switch (action) {
-        case "moveLeft":
-          engine.moveLeft();
-          break;
-        case "moveRight":
-          engine.moveRight();
-          break;
-        case "hardDrop":
-          engine.hardDrop();
-          break;
-        case "softDrop":
-          engine.softDrop();
-          break;
-        case "rotateCcw":
-          engine.rotate(false);
-          break;
-        case "rotateCw":
-          engine.rotate(true);
-          break;
-        case "hold":
-          engine.hold();
-          break;
-        case "bomb":
-          engine.useBomb();
-          break;
-      }
+      dispatchGameAction(engine, action);
     };
 
     window.addEventListener("keydown", handleKeyDown, { capture: true });

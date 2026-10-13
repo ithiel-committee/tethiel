@@ -156,10 +156,7 @@ export const NovelScreen = ({
     ITHIEL_EXPRESSION_IMAGES.default;
 
   return (
-    <div
-      className="novel-wrapper"
-      style={{ width: "min(840px, 96vw)", minWidth: "min(840px, 96vw)", maxWidth: 840, boxSizing: "border-box" }}
-    >
+    <div className="novel-wrapper">
       {/* 1. 背景演出 */}
       <div className="novel-bg-grid" />
 
@@ -218,8 +215,7 @@ export const NovelScreen = ({
             <button
               type="button"
               onClick={onBackToTitle}
-              className="novel-ctrl-btn"
-              style={{ marginLeft: 4 }}
+              className="novel-ctrl-btn novel-ctrl-btn-title"
             >
               <RotateCcw size={12} />
               <span className="hidden sm:inline">TITLE</span>
@@ -251,7 +247,6 @@ export const NovelScreen = ({
           }
         }}
         className="novel-msg-container"
-        style={{ width: "100%", minWidth: "100%", maxWidth: "100%", boxSizing: "border-box" }}
       >
         {/* ネームプレート (左上に飛び出たサイバーバッジ) */}
         <div className="novel-nameplate">
@@ -260,26 +255,20 @@ export const NovelScreen = ({
         </div>
 
         {/* メインテキストボックス (すりガラス調サイバーウィンドウ) */}
-        <div
-          className="novel-textbox"
-          style={{ width: "100%", minWidth: "100%", maxWidth: "100%", boxSizing: "border-box" }}
-        >
+        <div className="novel-textbox">
           {/* テキスト本文 */}
-          <p
-            className="novel-textbox-text"
-            style={{ width: "100%", minWidth: "100%", maxWidth: "100%", boxSizing: "border-box" }}
-          >
+          <p className="novel-textbox-text">
             {displayedText}
           </p>
 
           {/* 下部ガイド & 送りカーソル */}
           <div className="novel-textbox-footer">
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "rgba(255, 175, 195, 0.85)" }}>
+            <div className="novel-footer-info">
+              <span className="novel-footer-count">
                 {dialogueIndex + 1} / {scene.dialogues.length}
               </span>
-              <span style={{ color: "#64748b" }}>|</span>
-              <span style={{ color: "#64748b" }}>
+              <span className="novel-footer-hint">|</span>
+              <span className="novel-footer-hint">
                 [SPACE / クリック] 次へ
               </span>
             </div>
@@ -299,8 +288,8 @@ export const NovelScreen = ({
       {/* 5. バックログモーダル (ノベルゲーム定番機能) */}
       {showLog && (
         <div className="novel-log-modal">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 12, borderBottom: "1px solid rgba(255, 35, 75, 0.3)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#ff2a6d", fontWeight: "bold" }}>
+          <div className="novel-log-header">
+            <div className="novel-log-title">
               <History size={16} />
               <span>DIALOGUE LOG</span>
             </div>
@@ -320,17 +309,17 @@ export const NovelScreen = ({
                 key={`${d.speaker}-${d.expression}-${idx}`}
                 className="novel-log-item"
               >
-                <div style={{ fontSize: 12, fontWeight: "bold", color: "#ff2a6d", marginBottom: 4 }}>
+                <div className="novel-log-speaker">
                   {d.speaker}
                 </div>
-                <div style={{ fontSize: 14, color: "#f1f5f9", lineHeight: 1.6 }}>
+                <div className="novel-log-text">
                   {d.text}
                 </div>
               </div>
             ))}
           </div>
 
-          <div style={{ paddingTop: 8, textAlign: "center" }}>
+          <div className="novel-log-footer">
             <CyberButton
               variant="secondary"
               size="sm"

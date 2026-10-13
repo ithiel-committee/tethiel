@@ -1296,6 +1296,10 @@ button:disabled {
   border-color: #f59e0b;
 }
 
+.novel-ctrl-btn-title {
+  margin-left: 4px;
+}
+
 .novel-char-stage {
   position: relative;
   flex: 1;
@@ -1422,6 +1426,20 @@ button:disabled {
   text-shadow: 0 0 8px rgba(255, 42, 109, 0.9);
 }
 
+.novel-footer-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.novel-footer-count {
+  color: rgba(255, 175, 195, 0.85);
+}
+
+.novel-footer-hint {
+  color: #64748b;
+}
+
 .novel-log-modal {
   position: absolute;
   inset: 0;
@@ -1433,6 +1451,22 @@ button:disabled {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.novel-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 35, 75, 0.3);
+}
+
+.novel-log-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ff2a6d;
+  font-weight: bold;
 }
 
 .novel-log-content {
@@ -1450,6 +1484,24 @@ button:disabled {
   background: rgba(22, 7, 13, 0.7);
   border: 1px solid rgba(255, 35, 75, 0.2);
   text-align: left;
+}
+
+.novel-log-speaker {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ff2a6d;
+  margin-bottom: 4px;
+}
+
+.novel-log-text {
+  font-size: 14px;
+  color: #f1f5f9;
+  line-height: 1.6;
+}
+
+.novel-log-footer {
+  padding-top: 8px;
+  text-align: center;
 }
 
 @media (max-width: 640px) {
