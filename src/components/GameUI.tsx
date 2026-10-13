@@ -402,6 +402,8 @@ export const GameUI = ({
             <img
               src={ithielStandingImg}
               alt="イティエル"
+              loading="eager"
+              decoding="async"
               className="relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_0_14px_rgba(255,26,75,0.35)] select-none pointer-events-none transition-transform duration-300"
             />
           </CyberCard>

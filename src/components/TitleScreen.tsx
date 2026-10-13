@@ -6,9 +6,11 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { useEffect } from "react";
 import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import type { StageData } from "../types/game";
+import { preloadGameAssets } from "../utils/preloadAssets";
 import { CyberBadge, CyberButton, CyberCard, Keycap } from "./ui";
 
 interface TitleScreenProps {
@@ -22,6 +24,10 @@ export const TitleScreen = ({
   isMuted,
   onToggleMute,
 }: TitleScreenProps) => {
+  useEffect(() => {
+    preloadGameAssets();
+  }, []);
+
   return (
     <div className="w-full max-w-2xl flex flex-col items-center gap-6 p-4 md:p-6 text-center font-['DotGothic16',sans-serif]">
       {/* 1. タイトルヘッダー / キービジュアル */}
