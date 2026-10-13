@@ -27,10 +27,22 @@ export const CyberBadge: React.FC<CyberBadgeProps> = ({
 
   return (
     <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+      }}
       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-['DotGothic16',sans-serif] tracking-wider select-none ${variantStyles} ${className}`}
     >
-      {icon && <span className="shrink-0 flex items-center">{icon}</span>}
-      <span>{children}</span>
+      {icon && (
+        <span className="inline-flex items-center justify-center shrink-0 self-center leading-none">
+          {icon}
+        </span>
+      )}
+      <span className="inline-flex items-center justify-center leading-none self-center">
+        {children}
+      </span>
     </div>
   );
 };

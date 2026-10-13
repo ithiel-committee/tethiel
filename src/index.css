@@ -345,6 +345,20 @@ button:active {
 .flex {
   display: flex;
 }
+.inline-flex {
+  display: inline-flex;
+}
+.self-center {
+  align-self: center;
+}
+.leading-none {
+  line-height: 1;
+}
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
 .flex-col {
   flex-direction: column;
 }

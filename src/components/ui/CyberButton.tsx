@@ -51,6 +51,10 @@ export const CyberButton: React.FC<CyberButtonProps> = ({
 
   // primaryボタン用インライングラデーション（未定義クラスフォールバック対策）
   const mergedStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    verticalAlign: "middle",
     ...(variant === "primary"
       ? {
           background:
@@ -69,8 +73,16 @@ export const CyberButton: React.FC<CyberButtonProps> = ({
       style={mergedStyle}
       className={`inline-flex items-center justify-center gap-1.5 font-['DotGothic16',sans-serif] select-none cursor-pointer transition-all duration-100 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed ${sizeClasses} ${variantStyles} ${className}`}
     >
-      {icon && <span className="shrink-0 flex items-center">{icon}</span>}
-      {children && <span>{children}</span>}
+      {icon && (
+        <span className="inline-flex items-center justify-center shrink-0 self-center leading-none">
+          {icon}
+        </span>
+      )}
+      {children && (
+        <span className="inline-flex items-center justify-center leading-none self-center">
+          {children}
+        </span>
+      )}
     </button>
   );
 };
