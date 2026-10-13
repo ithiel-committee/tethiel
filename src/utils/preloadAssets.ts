@@ -1,12 +1,14 @@
 import ithielStandingImg from "../assets/character/ithiel_standing_smile.png";
 import playerLeftImg from "../assets/character/player_left.png";
 import playerRightImg from "../assets/character/player_right.png";
+import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 
-// ゲーム画面で使用する画像アセットリスト
+// ゲームおよびストーリー画面で使用する画像アセットリスト
 export const GAME_ASSET_IMAGES = [
   ithielStandingImg,
   playerLeftImg,
   playerRightImg,
+  ...Object.values(ITHIEL_EXPRESSION_IMAGES),
 ];
 
 // GCによるデコード結果解放を防ぐための参照保持キャッシュ

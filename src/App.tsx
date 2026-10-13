@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { sounds } from "./audio/soundSystem";
 import { GameCanvas } from "./components/GameCanvas";
 import { GameUI } from "./components/GameUI";
+import { NovelScreen } from "./components/NovelScreen";
 import { ResultScreen } from "./components/ResultScreen";
-import { StoryDialog } from "./components/StoryDialog";
 import { TitleScreen } from "./components/TitleScreen";
+import { getStoryScene } from "./data/storyData";
 import { STAGES } from "./game/constants";
 import { GameEngine } from "./game/engine";
 import type {
@@ -14,7 +15,7 @@ import type {
   TetrominoType,
 } from "./types/game";
 
-type Screen = "title" | "story" | "game" | "result";
+type Screen = "title" | "prologue" | "game" | "epilogue" | "result";
 
 // URLから直接開始するステージを判定 (/play/stage-1, #/play/stage-1, ?stage=1 など)
 function parseStageFromUrl(): StageData | null {
@@ -210,7 +211,12 @@ export function App() {
       onStatsChange: (newStats) => setStats(newStats),
       onStageClear: (isBonus) => {
         setIsBonusClear(isBonus);
-        setScreen("result");
+        const epilogue = getStoryScene(selectedStage.id, "epilogue");
+        if (epilogue) {
+          setScreen("epilogue");
+        } else {
+          setScreen("result");
+        }
       },
       onGameOver: (reason) => {
         setGameOverReason(reason);
@@ -232,11 +238,17 @@ export function App() {
     setIsMuted(muted);
   }, []);
 
-  // ステージ選択
+  // ステージ選択 (プロローグが存在すればプロローグへ、なければゲーム開始)
   const handleSelectStage = useCallback((stage: StageData) => {
     setSelectedStage(stage);
-    setScreen("story");
-  }, []);
+    const prologue = getStoryScene(stage.id, "prologue");
+    if (prologue) {
+      setScreen("prologue");
+    } else {
+      setScreen("game");
+      engine.start();
+    }
+  }, [engine]);
 
   // ゲーム開始
   const handleStartGame = useCallback(() => {
@@ -326,7 +338,7 @@ export function App() {
   }, [screen, engine]);
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col items-center justify-center p-2 sm:p-4 select-none overflow-x-hidden">
+    <div className="w-full min-h-screen text-slate-100 flex flex-col items-center justify-center p-2 sm:p-4 select-none overflow-x-hidden">
       {screen === "title" && (
         <TitleScreen
           onSelectStage={handleSelectStage}
@@ -335,11 +347,50 @@ export function App() {
         />
       )}
 
-      {screen === "story" && (
-        <StoryDialog
-          stage={selectedStage}
-          onStartGame={handleStartGame}
+      {screen === "prologue" && (
+        <NovelScreen
+          scene={
+            getStoryScene(selectedStage.id, "prologue") ?? {
+              id: "fallback-prologue",
+              stageId: selectedStage.id,
+              type: "prologue",
+              title: "MISSION BRIEFING",
+              dialogues: [
+                {
+                  speaker: "イティエル",
+                  expression: "determined",
+                  text: "準備はいい？ 防衛戦を開始するよ！",
+                },
+              ],
+            }
+          }
+          onComplete={handleStartGame}
           onBackToTitle={handleBackToTitle}
+          isMuted={isMuted}
+          onToggleMute={handleToggleMute}
+        />
+      )}
+
+      {screen === "epilogue" && (
+        <NovelScreen
+          scene={
+            getStoryScene(selectedStage.id, "epilogue") ?? {
+              id: "fallback-epilogue",
+              stageId: selectedStage.id,
+              type: "epilogue",
+              title: "MISSION COMPLETE",
+              dialogues: [
+                {
+                  speaker: "イティエル",
+                  expression: "smile",
+                  text: "防衛成功！ お疲れ様、オペレーター！",
+                },
+              ],
+            }
+          }
+          onComplete={() => setScreen("result")}
+          isMuted={isMuted}
+          onToggleMute={handleToggleMute}
         />
       )}
 

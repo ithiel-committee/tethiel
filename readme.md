@@ -50,14 +50,16 @@
 ```mermaid
 flowchart TD
     Title["タイトル画面 (TitleScreen)<br/>・通常ステージ選択<br/>・無限クライミング選択<br/>・サウンド切替"]
-    Story["ミッションブリーフィング (StoryDialog)<br/>・ストーリー/迎撃命令確認<br/>・キー操作確認"]
+    Prologue["プロローグADV (NovelScreen)<br/>・ノベルゲー風ミニストーリー<br/>・表情差分付きイティエル会話<br/>・スキップ/オート/ログ機能"]
     Game["メインゲーム (GameUI / GameCanvas)<br/>・パズル操作/回路構築<br/>・ポーズ (PAUSE/RESUME)"]
+    Epilogue["エピローグADV (NovelScreen)<br/>・クリア後ミニストーリー<br/>・勝利・感謝のメッセージ"]
     Result["リザルト画面 (ResultScreen)<br/>・CLEAR / BONUS CLEAR 判定<br/>・GAME OVER 判定<br/>・到達高度 (エンドレス)"]
 
-    Title -->|"ステージ選択 (START / START ENDLESS)"| Story
-    Story -->|"作戦開始 (START MISSION または Space/Enter)"| Game
-    Story -->|"戻る (BACK)"| Title
-    Game -->|"回路接続成功 (GOAL / BONUS)"| Result
+    Title -->|"ステージ選択 (START / START ENDLESS)"| Prologue
+    Prologue -->|"ストーリー完了 / SKIP"| Game
+    Prologue -->|"戻る (TITLE)"| Title
+    Game -->|"回路接続成功 (GOAL / BONUS)"| Epilogue
+    Epilogue -->|"エピローグ完了 / SKIP"| Result
     Game -->|"防衛失敗 (ウイルス接触 / ライフ0)"| Result
     Game -->|"中断 (EXIT)"| Title
     Result -->|"再挑戦 (RETRY)"| Game
@@ -102,6 +104,7 @@ tethiel/
 │   ├── assets/
 │   │   ├── character/         # 自機歩行スプライトおよび基本立ち絵イラスト
 │   │   ├── cursor/            # イティエルカスタムマウスカーソル画像
+│   │   ├── story/             # ノベルゲーム用表情差分立ち絵イラスト8種
 │   │   └── visual/            # タイトル画面用キービジュアル画像
 │   ├── audio/
 │   │   └── soundSystem.ts     # Web Audio APIによるシンセ効果音エンジン
@@ -110,17 +113,20 @@ tethiel/
 │   │   ├── GameCanvas.tsx     # START/GOAL、回路パス、登るイティエル、黒色感染を描画するCanvas
 │   │   ├── GameUI.tsx         # 企画書5,6p準拠の3カラムHUD (ハート5つ、ステータス、立ち絵枠、操作説明)
 │   │   ├── Keycap.tsx         # 2重立体構造のリアルなキートップコンポーネント
+│   │   ├── NovelScreen.tsx    # ノベルゲー・ギャルゲー風ミニストーリーADVコンポーネント
 │   │   ├── ResultScreen.tsx   # 通常/ボーナスクリア・リザルト画面
-│   │   ├── StoryDialog.tsx    # iTL防衛戦ミッションブリーフィングダイアログ
 │   │   └── TitleScreen.tsx    # タイトル画面およびステージ選択
+│   ├── data/
+│   │   └── storyData.ts       # ステージ別プロローグ・エピローグシナリオデータ
 │   ├── game/
 │   │   ├── constants.ts       # グリッド(12x22)、障害物・星配置、START/GOAL定数
 │   │   ├── engine.ts          # BFS回路探索・登頂・感染・勝敗判定ゲームエンジン
 │   │   └── tetromino.ts       # 7-bag生成、壁蹴り回転、ゴースト計算
 │   ├── types/
-│   │   └── game.ts            # ゲームエンティティ・状態の型定義
+│   │   ├── game.ts            # ゲームエンティティ・状態の型定義
+│   │   └── story.ts           # ストーリーシナリオ・表情の型定義
 │   ├── utils/
-│   │   └── preloadAssets.ts   # ゲーム画面用画像アセットの事前読み込み・デコード管理
+│   │   └── preloadAssets.ts   # ゲーム・ストーリー用画像アセットの事前読み込み・デコード管理
 │   ├── App.tsx                # 画面遷移・全体状態管理
 │   ├── index.css              # サイバーレトロ調スタイルシート
 │   └── main.tsx               # アプリケーションエントリーポイント
