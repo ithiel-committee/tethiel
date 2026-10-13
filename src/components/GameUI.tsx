@@ -5,11 +5,11 @@ import {
   Play,
   RotateCcw,
   RotateCw,
-  User,
   Volume2,
   VolumeX,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import ithielStandingImg from "../assets/character/ithiel_standing_smile.png";
 import { TETROMINO_SHAPES } from "../game/constants";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
@@ -392,24 +392,18 @@ export const GameUI = ({
           {/* イティエル立ち絵表示枠 (PDF 5p/6p) */}
           <CyberCard
             variant="default"
-            className="relative w-full h-44 overflow-hidden flex flex-col items-center justify-center p-2"
+            className="relative w-full h-48 overflow-hidden flex flex-col items-center justify-end p-2 border-rose-500/30"
           >
             {/* サイバー背景エフェクト */}
-            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#ff1a4b_1px,transparent_1px)] [background-size:12px_12px]" />
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ff1a4b_1px,transparent_1px)] [background-size:12px_12px]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,26,75,0.2)_0%,transparent_70%)] pointer-events-none" />
 
-            {/* イティエルのサイバーアートワーク（無機質な白い人形シルエット） */}
-            <div className="relative z-10 flex flex-col items-center">
-              {/* キャラクターアイコン */}
-              <div className="w-20 h-20 rounded-full border-2 border-rose-500/40 bg-slate-950/80 flex items-center justify-center shadow-[0_0_15px_rgba(255,26,75,0.2)] overflow-hidden">
-                <User size={44} className="text-rose-100" />
-              </div>
-
-              <div className="mt-2 text-center">
-                <span className="font-bold text-xs text-rose-200 block">
-                  イティエル
-                </span>
-              </div>
-            </div>
+            {/* イティエル公式立ち絵イラスト */}
+            <img
+              src={ithielStandingImg}
+              alt="イティエル"
+              className="relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_0_14px_rgba(255,26,75,0.35)] select-none pointer-events-none transition-transform duration-300"
+            />
           </CyberCard>
 
           {/* 操作説明枠 & オンスクリーンコントローラー (PDF 6p) */}

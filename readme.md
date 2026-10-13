@@ -99,7 +99,7 @@ tethiel/
 │   └── process_cursor.js      # イティエルカーソル画像のセンタリング・リサンプリングスクリプト
 ├── src/
 │   ├── assets/
-│   │   ├── character/         # プレイヤーキャラクター歩行スプライト
+│   │   ├── character/         # 自機歩行スプライトおよび基本立ち絵イラスト
 │   │   └── cursor/            # イティエルカスタムマウスカーソル画像
 │   ├── audio/
 │   │   └── soundSystem.ts     # Web Audio APIによるシンセ効果音エンジン
