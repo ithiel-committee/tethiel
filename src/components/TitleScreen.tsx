@@ -6,6 +6,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import type { StageData } from "../types/game";
 import { CyberBadge, CyberButton, CyberCard, Keycap } from "./ui";
@@ -23,8 +24,8 @@ export const TitleScreen = ({
 }: TitleScreenProps) => {
   return (
     <div className="w-full max-w-2xl flex flex-col items-center gap-6 p-4 md:p-6 text-center font-['DotGothic16',sans-serif]">
-      {/* 1. タイトルヘッダー */}
-      <div className="space-y-2">
+      {/* 1. タイトルヘッダー / キービジュアル */}
+      <div className="flex flex-col items-center space-y-3 w-full">
         <CyberBadge
           variant="red"
           icon={<Terminal size={14} className="text-rose-400" />}
@@ -32,10 +33,20 @@ export const TitleScreen = ({
           CHUO UNIV. iTL CYBER DEFENSE SYSTEM
         </CyberBadge>
 
-        <h1 className="font-['Press_Start_2P'] text-4xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-amber-300 drop-shadow-[0_0_24px_rgba(255,26,75,0.7)] py-2 tracking-wider">
-          tethiel
-        </h1>
-        <p className="text-sm md:text-base text-rose-200">
+        {/* キービジュアル画像 */}
+        <div className="relative w-full max-w-lg md:max-w-xl flex justify-center py-1">
+          {/* 背景のサイバーグローエフェクト */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,26,75,0.25)_0%,transparent_70%)] pointer-events-none" />
+
+          <img
+            src={titleKeyVisual}
+            alt="tethiel - iTL防衛戦 逆テトリス型アクションパズル"
+            className="relative z-10 w-full max-h-[280px] md:max-h-[340px] object-contain drop-shadow-[0_0_35px_rgba(255,26,75,0.5)] select-none pointer-events-none"
+          />
+        </div>
+
+        <h1 className="sr-only">tethiel - iTL防衛戦 逆テトリス型アクションパズル</h1>
+        <p className="text-sm md:text-base text-rose-200 tracking-wider">
           - iTL防衛戦 逆テトリス型アクションパズル -
         </p>
       </div>

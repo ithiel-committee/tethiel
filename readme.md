@@ -95,12 +95,14 @@ tethiel/
 │   └── GAME_DESIGN.md         # ゲーム詳細仕様書・要件ドキュメント
 ├── public/                    # 静的アセット
 ├── scripts/
+│   ├── extract_title_visual.js # PSDからタイトルキービジュアルを抽出するスクリプト
 │   ├── generate_favicon.js    # イティエル画像をもとにfavicon(ICO/PNG)を生成するスクリプト
 │   └── process_cursor.js      # イティエルカーソル画像のセンタリング・リサンプリングスクリプト
 ├── src/
 │   ├── assets/
 │   │   ├── character/         # 自機歩行スプライトおよび基本立ち絵イラスト
-│   │   └── cursor/            # イティエルカスタムマウスカーソル画像
+│   │   ├── cursor/            # イティエルカスタムマウスカーソル画像
+│   │   └── visual/            # タイトル画面用キービジュアル画像
 │   ├── audio/
 │   │   └── soundSystem.ts     # Web Audio APIによるシンセ効果音エンジン
 │   ├── components/
