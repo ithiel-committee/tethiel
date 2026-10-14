@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Cpu,
   Info,
+  Lock,
   Play,
   Settings,
   ShieldAlert,
@@ -133,7 +134,7 @@ export const TitleScreen = ({
                 <div className="title-mission-card">
                   <div className="title-mission-header">
                     <ShieldAlert size={14} />
-                    <span>MISSION: STAGE 1 入門・回路接続</span>
+                    <span>EMERGENCY MISSION: 市ヶ谷田町キャンパス防衛</span>
                   </div>
                   <p className="title-mission-desc">
                     突如キャンパスのネットワークを襲ったサイバー攻撃！
@@ -143,50 +144,95 @@ export const TitleScreen = ({
                   </p>
                 </div>
 
-                {/* STAGE 1 */}
-                <div className="title-stage-card">
-                  <div className="title-stage-info">
-                    <div className="title-stage-name-row">
-                      <span className="title-stage-name">{STAGES[0].name}</span>
-                      <span className="title-stage-sub">
-                        {STAGES[0].subtitle}
-                      </span>
+                {/* ステージ選択グリッド */}
+                <div className="title-stages-grid">
+                  {/* STAGE 1 */}
+                  <div className="title-stage-card">
+                    <div className="title-stage-info">
+                      <div className="title-stage-name-row">
+                        <span className="title-stage-name">{STAGES[0].name}</span>
+                        <span className="title-stage-sub">
+                          {STAGES[0].subtitle}
+                        </span>
+                      </div>
+                      <p className="title-stage-desc">{STAGES[0].description}</p>
                     </div>
-                    <p className="title-stage-desc">{STAGES[0].description}</p>
+                    <button
+                      type="button"
+                      className="title-start-btn"
+                      onClick={() => onSelectStage(STAGES[0])}
+                    >
+                      <Play size={12} fill="currentColor" />
+                      <span>START</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="title-start-btn"
-                    onClick={() => onSelectStage(STAGES[0])}
-                  >
-                    <Play size={13} fill="currentColor" />
-                    <span>START</span>
-                  </button>
-                </div>
 
-                {/* ENDLESS MODE */}
-                <div className="title-stage-card title-stage-card-endless">
-                  <div className="title-stage-info">
-                    <div className="title-stage-name-row">
-                      <span className="title-stage-name-endless">
-                        ★ ENDLESS MODE
-                      </span>
-                      <span className="title-stage-sub-endless">
-                        無限クライミング
-                      </span>
+                  {/* STAGE 2 */}
+                  <div className="title-stage-card">
+                    <div className="title-stage-info">
+                      <div className="title-stage-name-row">
+                        <span className="title-stage-name">{STAGES[1].name}</span>
+                        <span className="title-stage-sub">
+                          {STAGES[1].subtitle}
+                        </span>
+                      </div>
+                      <p className="title-stage-desc">{STAGES[1].description}</p>
                     </div>
-                    <p className="title-stage-desc-endless">
-                      {ENDLESS_STAGE.description}
-                    </p>
+                    <button
+                      type="button"
+                      className="title-start-btn"
+                      onClick={() => onSelectStage(STAGES[1])}
+                    >
+                      <Play size={12} fill="currentColor" />
+                      <span>START</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="title-start-btn title-start-btn-endless"
-                    onClick={() => onSelectStage(ENDLESS_STAGE)}
-                  >
-                    <Play size={13} fill="currentColor" />
-                    <span>START ENDLESS</span>
-                  </button>
+
+                  {/* ENDLESS MODE */}
+                  <div className="title-stage-card title-stage-card-endless">
+                    <div className="title-stage-info">
+                      <div className="title-stage-name-row">
+                        <span className="title-stage-name-endless">
+                          ★ ENDLESS
+                        </span>
+                        <span className="title-stage-sub-endless">
+                          {ENDLESS_STAGE.subtitle}
+                        </span>
+                      </div>
+                      <p className="title-stage-desc-endless">
+                        {ENDLESS_STAGE.description}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="title-start-btn title-start-btn-endless"
+                      onClick={() => onSelectStage(ENDLESS_STAGE)}
+                    >
+                      <Play size={12} fill="currentColor" />
+                      <span>START ENDLESS</span>
+                    </button>
+                  </div>
+
+                  {/* STAGE 3 (LOCKED) */}
+                  <div className="title-stage-card title-stage-card-locked">
+                    <div className="title-stage-info">
+                      <div className="title-stage-name-row">
+                        <span className="title-stage-name text-slate-500">
+                          {STAGES[2].name}
+                        </span>
+                        <span className="title-stage-sub text-slate-500">
+                          {STAGES[2].subtitle}
+                        </span>
+                      </div>
+                      <p className="title-stage-desc text-slate-500">
+                        {STAGES[2].description}
+                      </p>
+                    </div>
+                    <div className="title-locked-badge">
+                      <Lock size={12} />
+                      <span>LOCKED</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
