@@ -46,28 +46,23 @@ export const TitleScreen = ({
       <div className="title-bg-glow-left" />
       <div className="title-bg-glow-right" />
 
-      {/* メイン横分割レイアウト */}
-      <div className="title-content-layout">
-        {/* 左側カラム: 左上タイトル + 左中央〜左下メニュー */}
-        <div className="title-left-column">
-          {/* 1. 左上: ゲームタイトル & キービジュアル */}
-          <div className="title-header-area">
-            <img
-              src={titleKeyVisual}
-              alt="tethiel"
-              className="title-logo-img"
-            />
+      {menuView === "main" ? (
+        /* メインメニューレイアウト: 左にロゴ+メニュー、右にイティエル立ち絵 */
+        <div key="main" className="title-content-layout title-view-animated">
+          {/* 左側カラム: 左上タイトル + 左中央〜左下メニュー */}
+          <div className="title-left-column">
+            {/* 1. 左上: ゲームタイトル & キービジュアル */}
+            <div className="title-header-area">
+              <img
+                src={titleKeyVisual}
+                alt="tethiel"
+                className="title-logo-img"
+              />
+              <h1 className="sr-only">tethiel</h1>
+            </div>
 
-            <h1 className="sr-only">tethiel</h1>
-          </div>
-
-          {/* 2. 左中央〜左下: メニューエリア (START画面 / レベル選択画面) */}
-          <div
-            key={menuView}
-            className="title-menu-area title-view-animated"
-          >
-            {menuView === "main" ? (
-              /* メインメニュー: START, RANKING, OPTION, CREDIT */
+            {/* 2. メニューエリア */}
+            <div className="title-menu-area">
               <div className="title-main-menu">
                 {/* 1. START ボタン */}
                 <button
@@ -117,160 +112,165 @@ export const TitleScreen = ({
                   </div>
                 </button>
               </div>
-            ) : (
-              /* レベル選択画面: START押下後 */
-              <div className="title-stages-wrapper">
-                {/* レベル選択ヘッダー: 中央揃え */}
-                <div className="title-level-header">
-                  <button
-                    type="button"
-                    className="title-back-btn"
-                    onClick={() => setMenuView("main")}
-                  >
-                    <ArrowLeft size={12} />
-                    <span>BACK</span>
-                  </button>
-                  <div className="title-level-title">{"// SELECT LEVEL"}</div>
-                  <div className="title-header-spacer" />
+            </div>
+          </div>
+
+          {/* 右側カラム: イティエル立ち絵 (下部はみきれ) */}
+          <div className="title-right-column">
+            {/* サイバーホログラムサークル演出 */}
+            <div className="title-cyber-ring">
+              <div className="title-cyber-ring-inner" />
+            </div>
+
+            {/* 立ち絵 (下部はみきれ) */}
+            <img
+              src={ithielStandingDefault}
+              alt="イティエル"
+              className="title-ithiel-standing"
+            />
+          </div>
+        </div>
+      ) : (
+        /* ステージ選択レイアウト: ロゴ・イティエル不要、画面全体の中央ぞろえ */
+        <div
+          key="select_level"
+          className="title-select-level-container title-view-animated"
+        >
+          <div className="title-stages-wrapper">
+            {/* レベル選択ヘッダー: 中央揃え */}
+            <div className="title-level-header">
+              <button
+                type="button"
+                className="title-back-btn"
+                onClick={() => setMenuView("main")}
+              >
+                <ArrowLeft size={12} />
+                <span>BACK</span>
+              </button>
+              <div className="title-level-title">{"// SELECT LEVEL"}</div>
+              <div className="title-header-spacer" />
+            </div>
+
+            {/* ステージ選択垂直リスト (中央線でそろえる) */}
+            <div className="title-stages-vertical">
+              {/* STAGE 1 */}
+              <div
+                className={`title-stage-card ${
+                  selectedStageId === STAGES[0].id
+                    ? "title-stage-card-selected"
+                    : ""
+                }`}
+              >
+                <div className="title-stage-info">
+                  <div className="title-stage-name-row">
+                    <span className="title-stage-name">{STAGES[0].name}</span>
+                    <span className="title-stage-sub">
+                      {STAGES[0].subtitle}
+                    </span>
+                  </div>
+                  <p className="title-stage-desc">{STAGES[0].description}</p>
                 </div>
+                <button
+                  type="button"
+                  className="title-start-btn"
+                  onClick={() => {
+                    setSelectedStageId(STAGES[0].id);
+                    setTimeout(() => onSelectStage(STAGES[0]), 160);
+                  }}
+                >
+                  <Play size={12} fill="currentColor" />
+                  <span>START</span>
+                </button>
+              </div>
 
-                {/* ステージ選択垂直リスト (中央線でそろえる) */}
-                <div className="title-stages-vertical">
-                  {/* STAGE 1 */}
-                  <div
-                    className={`title-stage-card ${
-                      selectedStageId === STAGES[0].id
-                        ? "title-stage-card-selected"
-                        : ""
-                    }`}
-                  >
-                    <div className="title-stage-info">
-                      <div className="title-stage-name-row">
-                        <span className="title-stage-name">{STAGES[0].name}</span>
-                        <span className="title-stage-sub">
-                          {STAGES[0].subtitle}
-                        </span>
-                      </div>
-                      <p className="title-stage-desc">{STAGES[0].description}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="title-start-btn"
-                      onClick={() => {
-                        setSelectedStageId(STAGES[0].id);
-                        setTimeout(() => onSelectStage(STAGES[0]), 160);
-                      }}
-                    >
-                      <Play size={12} fill="currentColor" />
-                      <span>START</span>
-                    </button>
+              {/* STAGE 2 */}
+              <div
+                className={`title-stage-card ${
+                  selectedStageId === STAGES[1].id
+                    ? "title-stage-card-selected"
+                    : ""
+                }`}
+              >
+                <div className="title-stage-info">
+                  <div className="title-stage-name-row">
+                    <span className="title-stage-name">{STAGES[1].name}</span>
+                    <span className="title-stage-sub">
+                      {STAGES[1].subtitle}
+                    </span>
                   </div>
+                  <p className="title-stage-desc">{STAGES[1].description}</p>
+                </div>
+                <button
+                  type="button"
+                  className="title-start-btn"
+                  onClick={() => {
+                    setSelectedStageId(STAGES[1].id);
+                    setTimeout(() => onSelectStage(STAGES[1]), 160);
+                  }}
+                >
+                  <Play size={12} fill="currentColor" />
+                  <span>START</span>
+                </button>
+              </div>
 
-                  {/* STAGE 2 */}
-                  <div
-                    className={`title-stage-card ${
-                      selectedStageId === STAGES[1].id
-                        ? "title-stage-card-selected"
-                        : ""
-                    }`}
-                  >
-                    <div className="title-stage-info">
-                      <div className="title-stage-name-row">
-                        <span className="title-stage-name">{STAGES[1].name}</span>
-                        <span className="title-stage-sub">
-                          {STAGES[1].subtitle}
-                        </span>
-                      </div>
-                      <p className="title-stage-desc">{STAGES[1].description}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="title-start-btn"
-                      onClick={() => {
-                        setSelectedStageId(STAGES[1].id);
-                        setTimeout(() => onSelectStage(STAGES[1]), 160);
-                      }}
-                    >
-                      <Play size={12} fill="currentColor" />
-                      <span>START</span>
-                    </button>
+              {/* ENDLESS MODE */}
+              <div
+                className={`title-stage-card title-stage-card-endless ${
+                  selectedStageId === ENDLESS_STAGE.id
+                    ? "title-stage-card-selected"
+                    : ""
+                }`}
+              >
+                <div className="title-stage-info">
+                  <div className="title-stage-name-row">
+                    <span className="title-stage-name-endless">
+                      ENDLESS
+                    </span>
+                    <span className="title-stage-sub-endless">
+                      {ENDLESS_STAGE.subtitle}
+                    </span>
                   </div>
+                  <p className="title-stage-desc-endless">
+                    {ENDLESS_STAGE.description}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="title-start-btn title-start-btn-endless"
+                  onClick={() => {
+                    setSelectedStageId(ENDLESS_STAGE.id);
+                    setTimeout(() => onSelectStage(ENDLESS_STAGE), 160);
+                  }}
+                >
+                  <Play size={12} fill="currentColor" />
+                  <span>ENDLESS</span>
+                </button>
+              </div>
 
-                  {/* ENDLESS MODE */}
-                  <div
-                    className={`title-stage-card title-stage-card-endless ${
-                      selectedStageId === ENDLESS_STAGE.id
-                        ? "title-stage-card-selected"
-                        : ""
-                    }`}
-                  >
-                    <div className="title-stage-info">
-                      <div className="title-stage-name-row">
-                        <span className="title-stage-name-endless">
-                          ENDLESS
-                        </span>
-                        <span className="title-stage-sub-endless">
-                          {ENDLESS_STAGE.subtitle}
-                        </span>
-                      </div>
-                      <p className="title-stage-desc-endless">
-                        {ENDLESS_STAGE.description}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      className="title-start-btn title-start-btn-endless"
-                      onClick={() => {
-                        setSelectedStageId(ENDLESS_STAGE.id);
-                        setTimeout(() => onSelectStage(ENDLESS_STAGE), 160);
-                      }}
-                    >
-                      <Play size={12} fill="currentColor" />
-                      <span>ENDLESS</span>
-                    </button>
+              {/* STAGE 3 (LOCKED) */}
+              <div className="title-stage-card title-stage-card-locked">
+                <div className="title-stage-info">
+                  <div className="title-stage-name-row">
+                    <span className="title-stage-name text-slate-500">
+                      {STAGES[2].name}
+                    </span>
+                    <span className="title-stage-sub text-slate-500">
+                      {STAGES[2].subtitle}
+                    </span>
                   </div>
-
-                  {/* STAGE 3 (LOCKED) */}
-                  <div className="title-stage-card title-stage-card-locked">
-                    <div className="title-stage-info">
-                      <div className="title-stage-name-row">
-                        <span className="title-stage-name text-slate-500">
-                          {STAGES[2].name}
-                        </span>
-                        <span className="title-stage-sub text-slate-500">
-                          {STAGES[2].subtitle}
-                        </span>
-                      </div>
-                      <p className="title-stage-desc text-slate-500">
-                        {STAGES[2].description}
-                      </p>
-                    </div>
-                    <div className="title-locked-badge">
-                      <Lock size={12} />
-                      <span>LOCKED</span>
-                    </div>
-                  </div>
+                  <p className="title-stage-desc text-slate-500">
+                    {STAGES[2].description}
+                  </p>
+                </div>
+                <div className="title-locked-badge">
+                  <Lock size={12} />
+                  <span>LOCKED</span>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
-
-        {/* 右側カラム: イティエル立ち絵 (下部はみきれ) */}
-        <div className="title-right-column">
-          {/* サイバーホログラムサークル演出 */}
-          <div className="title-cyber-ring">
-            <div className="title-cyber-ring-inner" />
-          </div>
-
-          {/* 立ち絵 (下部はみきれ) */}
-          <img
-            src={ithielStandingDefault}
-            alt="イティエル"
-            className="title-ithiel-standing"
-          />
-        </div>
-      </div>
+      )}
 
       {/* 画面右下: 操作ガイド(?)ボタン */}
       <button
