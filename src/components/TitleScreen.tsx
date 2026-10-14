@@ -1,6 +1,5 @@
 import {
   ArrowLeft,
-  HelpCircle,
   Info,
   Lock,
   Play,
@@ -25,7 +24,7 @@ interface TitleScreenProps {
 }
 
 type MenuView = "main" | "select_level";
-type ModalType = null | "ranking" | "option" | "credit" | "controls";
+type ModalType = null | "ranking" | "option" | "credit";
 
 export const TitleScreen = ({
   onSelectStage,
@@ -215,6 +214,27 @@ export const TitleScreen = ({
                 </button>
               </div>
 
+              {/* STAGE 3 (LOCKED) */}
+              <div className="title-stage-card title-stage-card-locked">
+                <div className="title-stage-info">
+                  <div className="title-stage-name-row">
+                    <span className="title-stage-name text-slate-500">
+                      {STAGES[2].name}
+                    </span>
+                    <span className="title-stage-sub text-slate-500">
+                      {STAGES[2].subtitle}
+                    </span>
+                  </div>
+                  <p className="title-stage-desc text-slate-500">
+                    {STAGES[2].description}
+                  </p>
+                </div>
+                <div className="title-locked-badge">
+                  <Lock size={12} />
+                  <span>LOCKED</span>
+                </div>
+              </div>
+
               {/* ENDLESS MODE */}
               <div
                 className={`title-stage-card title-stage-card-endless ${
@@ -242,45 +262,13 @@ export const TitleScreen = ({
                   onClick={() => handleStageSelectWithAnim(ENDLESS_STAGE)}
                 >
                   <Play size={12} fill="currentColor" />
-                  <span>ENDLESS</span>
+                  <span>START</span>
                 </button>
-              </div>
-
-              {/* STAGE 3 (LOCKED) */}
-              <div className="title-stage-card title-stage-card-locked">
-                <div className="title-stage-info">
-                  <div className="title-stage-name-row">
-                    <span className="title-stage-name text-slate-500">
-                      {STAGES[2].name}
-                    </span>
-                    <span className="title-stage-sub text-slate-500">
-                      {STAGES[2].subtitle}
-                    </span>
-                  </div>
-                  <p className="title-stage-desc text-slate-500">
-                    {STAGES[2].description}
-                  </p>
-                </div>
-                <div className="title-locked-badge">
-                  <Lock size={12} />
-                  <span>LOCKED</span>
-                </div>
               </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* 画面右下: 操作ガイド(?)ボタン */}
-      <button
-        type="button"
-        className="title-help-btn"
-        onClick={() => setActiveModal("controls")}
-        title="キーボード操作ガイド"
-        aria-label="キーボード操作ガイド"
-      >
-        <HelpCircle size={20} />
-      </button>
 
       {/* モーダル群: RANKING, OPTION, CREDIT, CONTROLS */}
       {activeModal && (
@@ -290,32 +278,10 @@ export const TitleScreen = ({
         >
           <div
             className={`title-modal-box ${
-              activeModal === "controls" ? "title-modal-box-wide" : ""
+              activeModal === "option" ? "title-modal-box-wide" : ""
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* CONTROLS モーダル */}
-            {activeModal === "controls" && (
-              <>
-                <div className="title-modal-title">
-                  <div className="flex items-center gap-2">
-                    <HelpCircle size={16} className="text-rose-400" />
-                    <span>HOW TO PLAY (キーボード操作ガイド)</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="title-modal-close-btn"
-                    onClick={() => setActiveModal(null)}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <div className="title-controls-modal-body">
-                  <KeyboardGuide />
-                </div>
-              </>
-            )}
-
             {/* RANKING モーダル */}
             {activeModal === "ranking" && (
               <>
@@ -394,12 +360,19 @@ export const TitleScreen = ({
                       <span>{isMuted ? "SOUND: OFF" : "SOUND: ON"}</span>
                     </button>
                   </div>
-                  <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
-                    <div className="font-bold text-slate-200">
-                      操作モード設定
+
+                  {/* キーボード操作ガイド */}
+                  <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-slate-200">
+                        キーボード操作ガイド (CONTROLS)
+                      </div>
+                      <div className="text-[11px] text-rose-400">
+                        QWERTY & 十字キー対応
+                      </div>
                     </div>
-                    <div className="text-[11px] text-slate-400">
-                      QWERTYキーボード + 十字キーハイブリッド対応
+                    <div className="title-controls-modal-body">
+                      <KeyboardGuide />
                     </div>
                   </div>
                 </div>

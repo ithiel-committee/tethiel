@@ -1581,12 +1581,13 @@ button:disabled {
 .title-content-layout {
   width: 100%;
   height: 100%;
-  max-width: 1520px;
+  max-width: 1080px;
   margin: 0 auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: stretch;
+  gap: 2rem;
   position: relative;
   z-index: 10;
   overflow: hidden;
@@ -1594,9 +1595,9 @@ button:disabled {
 
 /* 左側カラム: 左上タイトル + 左中央〜左下メニュー */
 .title-left-column {
-  width: 56%;
-  max-width: 700px;
-  min-width: 380px;
+  width: 52%;
+  max-width: 500px;
+  min-width: 360px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -2072,7 +2073,8 @@ button:disabled {
 
 /* 右側カラム (イティエル立ち絵) */
 .title-right-column {
-  width: 44%;
+  width: 48%;
+  max-width: 500px;
   height: 100%;
   position: relative;
   display: flex;

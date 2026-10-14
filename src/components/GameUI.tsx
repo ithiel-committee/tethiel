@@ -408,68 +408,44 @@ export const GameUI = ({
             />
           </CyberCard>
 
-          {/* 操作説明枠 & オンスクリーンコントローラー (PDF 6p) */}
+          {/* 操作説明枠 & オンスクリーンコントローラー */}
           <CyberCard
             variant="default"
             className="p-3 text-left space-y-2.5 shadow-[0_0_15px_rgba(255,26,75,0.1)]"
           >
-            <div className="font-['Press_Start_2P'] text-[10px] text-rose-400 border-b border-slate-800 pb-1 flex justify-between items-center">
-              <span>CONTROLS</span>
-              <span className="text-[9px] text-slate-500 font-sans">
-                KEYBOARD & TOUCH
-              </span>
+            <div className="title-controls-header border-b border-slate-800 pb-1 flex justify-between items-center text-[10px]">
+              <span className="text-rose-400 font-bold">{"// HOW TO PLAY (操作ガイド)"}</span>
+              <span className="title-controls-sub text-[9px]">KEY & TOUCH</span>
             </div>
 
-            <div className="text-xs text-slate-300 space-y-1.5 pt-0.5">
+            <div className="flex flex-col gap-1 text-[11px] pt-0.5">
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-400 w-14 shrink-0 text-[11px]">
-                  ・即置き:
-                </span>
-                <Keycap size="xs">↑</Keycap>
-                <span className="text-slate-500 text-[9px]">/</span>
-                <Keycap size="xs" className="px-1.5">
-                  SPACE
-                </Keycap>
+                <span className="ctrl-label">即置き:</span>
+                <span className="keycap">↑</span>
+                <span className="keycap keycap-wide">SPACE</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-400 w-14 shrink-0 text-[11px]">
-                  ・回転:
-                </span>
-                <Keycap size="xs">Z</Keycap>
-                <span className="text-slate-500 text-[9px]">左</span>
-                <Keycap size="xs">X</Keycap>
-                <Keycap size="xs">W</Keycap>
-                <span className="text-slate-500 text-[9px]">右</span>
+                <span className="ctrl-label">回転:</span>
+                <span className="keycap">Z</span>
+                <span className="keycap">X</span>
+                <span className="keycap">W</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-400 w-14 shrink-0 text-[11px]">
-                  ・移動:
-                </span>
-                <Keycap size="xs">←</Keycap>
-                <Keycap size="xs">→</Keycap>
-                <span className="text-slate-500 text-[9px]">/</span>
-                <Keycap size="xs">A</Keycap>
-                <Keycap size="xs">D</Keycap>
+                <span className="ctrl-label">移動:</span>
+                <span className="keycap">←</span>
+                <span className="keycap">→</span>
+                <span className="keycap">A</span>
+                <span className="keycap">D</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-400 w-14 shrink-0 text-[11px]">
-                  ・落下:
-                </span>
-                <Keycap size="xs">↓</Keycap>
-                <span className="text-slate-500 text-[9px]">/</span>
-                <Keycap size="xs">S</Keycap>
-                <span className="text-slate-500 text-[9px]">Soft</span>
+                <span className="ctrl-label">落下:</span>
+                <span className="keycap">↓</span>
+                <span className="keycap">S</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-400 w-14 shrink-0 text-[11px]">
-                  ・キープ:
-                </span>
-                <Keycap size="xs" variant="accent">
-                  C
-                </Keycap>
-                <span className="text-slate-400 text-[10px]">
-                  ホールド
-                </span>
+                <span className="ctrl-label">ホールド:</span>
+                <span className="keycap keycap-accent">C</span>
+                <span className="ctrl-note text-[10px]">(キープしたミノと交代)</span>
               </div>
             </div>
 
