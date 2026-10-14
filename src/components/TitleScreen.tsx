@@ -356,7 +356,7 @@ export const TitleScreen = ({
                     <div>キャラクターイラスト・原案: iTL 公式</div>
                     <div>サウンド: Web Audio API Synthesizer Engine</div>
                     <div className="pt-1 text-slate-400">
-                      SPECIAL THANKS: オペレーターの皆様
+                      SPECIAL THANKS: プレイヤーの皆様
                     </div>
                   </div>
                 </div>

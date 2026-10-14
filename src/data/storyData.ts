@@ -32,7 +32,7 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       {
         speaker: "イティエル",
         expression: "determined",
-        text: "ここに「オペレーターへの呼びかけ・緊急事態発生の状況説明」が入る",
+        text: "ここに「プレイヤーへの呼びかけ・緊急事態発生の状況説明」が入る",
       },
       {
         speaker: "イティエル",
@@ -65,7 +65,7 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       {
         speaker: "イティエル",
         expression: "smile",
-        text: "ここに「第1関門突破の喜び・オペレーターへの感謝」が入る",
+        text: "ここに「第1関門突破の喜び・プレイヤーへの感謝」が入る",
       },
       {
         speaker: "イティエル",
@@ -113,7 +113,7 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       {
         speaker: "イティエル",
         expression: "smile",
-        text: "ここに「オペレーターの操作を絶賛するセリフ」が入る",
+        text: "ここに「プレイヤーの操作を絶賛するセリフ」が入る",
       },
       {
         speaker: "イティエル",
@@ -171,7 +171,7 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       {
         speaker: "イティエル",
         expression: "smug",
-        text: "ここに「最高のオペレーターへの感謝と誇らしげな締めくくり」が入る",
+        text: "ここに「最高のプレイヤーへの感謝と誇らしげな締めくくり」が入る",
       },
     ],
   },

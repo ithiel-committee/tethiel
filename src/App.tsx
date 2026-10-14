@@ -201,7 +201,7 @@ export function App() {
                 {
                   speaker: "イティエル",
                   expression: "smile",
-                  text: "防衛成功！ お疲れ様、オペレーター！",
+                  text: "防衛成功！ お疲れ様、プレイヤー！",
                 },
               ],
             }
