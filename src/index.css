@@ -2103,3 +2103,158 @@ button:disabled {
   }
 }
 
+/* タイトル画面 メインメニュー (START, RANKING, OPTION, CREDIT) */
+.title-main-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.title-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.title-menu-btn-start {
+  background: linear-gradient(90deg, #dc2626 0%, #e11d48 50%, #f43f5e 100%);
+  color: #ffffff;
+  border-color: rgba(255, 120, 150, 0.8);
+  box-shadow: 0 0 16px rgba(255, 26, 75, 0.5);
+  font-size: 14px;
+}
+
+.title-menu-btn-start:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 24px rgba(255, 26, 75, 0.8);
+  transform: translateX(3px);
+}
+
+.title-menu-btn-sub {
+  background: rgba(26, 8, 16, 0.88);
+  color: #cbd5e1;
+  border-color: rgba(255, 26, 75, 0.35);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.title-menu-btn-sub:hover {
+  background: rgba(45, 12, 28, 0.95);
+  color: #ffffff;
+  border-color: rgba(255, 70, 110, 0.8);
+  box-shadow: 0 0 16px rgba(255, 26, 75, 0.35);
+  transform: translateX(3px);
+}
+
+.title-menu-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-menu-btn-tag {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+/* レベル選択ヘッダー・戻るボタン */
+.title-level-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.title-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(30, 8, 18, 0.85);
+  border: 1px solid rgba(255, 26, 75, 0.4);
+  border-radius: 6px;
+  color: #ffaec0;
+  font-size: 11px;
+  font-family: var(--font-pixel);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.title-back-btn:hover {
+  background: rgba(50, 14, 30, 0.95);
+  border-color: rgba(255, 70, 110, 0.8);
+  color: #ffffff;
+}
+
+/* モーダルダイアログ */
+.title-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 2, 5, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
+  padding: 1rem;
+}
+
+.title-modal-box {
+  background: linear-gradient(
+    135deg,
+    rgba(26, 7, 16, 0.98) 0%,
+    rgba(16, 4, 10, 0.98) 100%
+  );
+  border: 2px solid rgba(255, 26, 75, 0.6);
+  box-shadow: 0 0 35px rgba(255, 26, 75, 0.35);
+  border-radius: 12px;
+  padding: 18px 22px;
+  width: min(540px, 94vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  font-family: var(--font-pixel);
+  color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title-modal-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 26, 75, 0.3);
+  padding-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ff3366;
+}
+
+.title-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: all 0.12s ease;
+}
+
+.title-modal-close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 26, 75, 0.2);
+}
+
+
