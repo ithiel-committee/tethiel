@@ -13,7 +13,6 @@ import ithielStandingImg from "../assets/character/ithiel_standing_smile.png";
 import { TETROMINO_SHAPES } from "../game/constants";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
-import { Keycap } from "./Keycap";
 import { CyberButton, CyberCard } from "./ui";
 
 interface GameUIProps {
@@ -130,68 +129,63 @@ export const GameUI = ({
   };
 
   return (
-    <div className="w-full max-w-5xl flex flex-col items-center gap-3 font-['DotGothic16',sans-serif]">
-      {/* トップコントロールバー（一時停止・ミュート・終了） */}
-      <CyberCard
-        variant="subtle"
-        className="w-full flex items-center justify-between px-3 py-1.5 text-xs shadow-[0_0_10px_rgba(255,26,75,0.08)] border-rose-500/30"
-      >
-        <div className="flex items-center gap-2 text-rose-400 font-pixel-en">
-          <span className="text-rose-400/80 text-xs font-['DotGothic16']">
-            {stats.gameMode === "endless"
-              ? "// MODE: ENDLESS CLIMB"
-              : `// STAGE ${stats.stageNumber.toString().padStart(2, "0")}`}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <CyberButton
-            variant="secondary"
-            size="xs"
-            onClick={() => {
-              engine.togglePause();
-              setIsPaused(engine.status === "paused");
-            }}
-            icon={
-              isPaused ? (
-                <Play size={13} className="text-rose-400" />
-              ) : (
-                <Pause size={13} className="text-rose-400" />
-              )
-            }
-          >
-            {isPaused ? "RESUME" : "PAUSE"}
-          </CyberButton>
-
-          <CyberButton
-            variant="secondary"
-            size="xs"
-            onClick={onToggleMute}
-            title={isMuted ? "ミュート解除" : "ミュート"}
-            icon={
-              isMuted ? (
-                <VolumeX size={15} className="text-rose-400" />
-              ) : (
-                <Volume2 size={15} className="text-rose-400" />
-              )
-            }
-          />
-
-          <CyberButton variant="danger" size="xs" onClick={onExitGame}>
-            EXIT
-          </CyberButton>
-        </div>
-      </CyberCard>
-
-      {/* 3カラムメインレイアウト (PDF 5, 6p 完全準拠) */}
+    <div className="w-full max-w-5xl h-full flex flex-col justify-center items-center font-['DotGothic16',sans-serif]">
+      {/* 3カラムメインレイアウト */}
       <div
         className={`w-full flex flex-col lg:flex-row justify-center items-center lg:items-start gap-4 ${
           isShaking ? "animate-screen-shake" : ""
         }`}
       >
         {/* ================= 左パネル ================= */}
-        <div className="w-full lg:w-[220px] flex flex-col gap-3">
-          {/* 1. 残りライフ（ハート5つ） */}
+        <div className="w-full lg:w-[220px] flex flex-col gap-2.5">
+          {/* システムバー (STAGE名 & PAUSE / MUTE / EXIT コントロール) */}
+          <CyberCard
+            variant="subtle"
+            className="w-full flex items-center justify-between px-2.5 py-1.5 border-rose-500/40 shadow-[0_0_10px_rgba(255,26,75,0.1)]"
+          >
+            <div className="font-pixel-en text-rose-400 text-xs font-bold tracking-wider">
+              {stats.gameMode === "endless"
+                ? "ENDLESS"
+                : `STAGE ${stats.stageNumber.toString().padStart(2, "0")}`}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <CyberButton
+                variant="secondary"
+                size="xs"
+                onClick={() => {
+                  engine.togglePause();
+                  setIsPaused(engine.status === "paused");
+                }}
+                title={isPaused ? "再開" : "一時停止"}
+                className="px-1.5 py-0.5 text-[10px]"
+              >
+                {isPaused ? <Play size={11} fill="currentColor" /> : <Pause size={11} />}
+              </CyberButton>
+
+              <CyberButton
+                variant="secondary"
+                size="xs"
+                onClick={onToggleMute}
+                title={isMuted ? "ミュート解除" : "ミュート"}
+                className="px-1.5 py-0.5 text-[10px]"
+              >
+                {isMuted ? <VolumeX size={12} className="text-rose-400" /> : <Volume2 size={12} className="text-rose-400" />}
+              </CyberButton>
+
+              <CyberButton
+                variant="danger"
+                size="xs"
+                onClick={onExitGame}
+                title="タイトルへ戻る"
+                className="px-2 py-0.5 text-[10px] font-bold"
+              >
+                EXIT
+              </CyberButton>
+            </div>
+          </CyberCard>
+
+          {/* 1. 残りライフ (ハート5つ) */}
           <CyberCard
             variant="subtle"
             className="relative flex items-center justify-center lg:justify-start gap-2 px-3 py-2 border-rose-500/40 shadow-[0_0_10px_rgba(255,26,75,0.15)]"
@@ -238,14 +232,8 @@ export const GameUI = ({
 
           <CyberCard
             variant="default"
-            className="p-3 space-y-2.5 text-left"
+            className="p-3 space-y-2 text-left"
           >
-            <div className="font-pixel-en text-[10px] text-rose-400 border-b border-slate-800 pb-1 flex justify-between items-center">
-              <span>STATUS</span>
-              <span className="text-[9px] text-slate-500">
-                SYSTEM ACTIVE
-              </span>
-            </div>
 
             {/* SCORE */}
             <div className="relative">
@@ -375,9 +363,9 @@ export const GameUI = ({
             >
               <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex items-center justify-between px-1 font-bold">
                 <span>HOLD</span>
-                <Keycap size="xs" variant="accent">
+                <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none">
                   C
-                </Keycap>
+                </span>
               </div>
               <div className="w-full h-14 bg-slate-950 rounded flex items-center justify-center border border-slate-800">
                 {holdPiece ? (
@@ -392,7 +380,7 @@ export const GameUI = ({
           {/* イティエル立ち絵表示枠 (PDF 5p/6p) */}
           <CyberCard
             variant="default"
-            className="relative w-full h-48 overflow-hidden flex flex-col items-center justify-end p-2 border-rose-500/30"
+            className="relative w-full h-44 overflow-hidden flex flex-col items-center justify-end p-2 border-rose-500/30"
           >
             {/* サイバー背景エフェクト */}
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ff1a4b_1px,transparent_1px)] [background-size:12px_12px]" />
@@ -411,10 +399,10 @@ export const GameUI = ({
           {/* 操作説明枠 & オンスクリーンコントローラー */}
           <CyberCard
             variant="default"
-            className="p-3 text-left space-y-2.5 shadow-[0_0_15px_rgba(255,26,75,0.1)]"
+            className="p-2.5 text-left space-y-2 shadow-[0_0_15px_rgba(255,26,75,0.1)]"
           >
             <div className="title-controls-header border-b border-slate-800 pb-1 flex justify-between items-center text-[10px]">
-              <span className="text-rose-400 font-bold">{"// HOW TO PLAY (操作ガイド)"}</span>
+              <span className="text-rose-400 font-bold font-['DotGothic16'] text-xs">操作ガイド</span>
               <span className="title-controls-sub text-[9px]">KEY & TOUCH</span>
             </div>
 
@@ -493,13 +481,15 @@ export const GameUI = ({
                 variant="touch"
                 onClick={() => engine.hold()}
                 className={
-                  engine.skills.length > 0 ? "col-span-1" : "col-span-3"
+                  engine.skills.length > 0
+                    ? "col-span-1"
+                    : "col-span-3 flex items-center justify-center gap-1.5"
                 }
               >
                 <span>HOLD</span>
-                <Keycap size="xs" variant="accent">
+                <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none">
                   C
-                </Keycap>
+                </span>
               </CyberButton>
               {engine.skills.length > 0 && (
                 <CyberButton

@@ -152,8 +152,8 @@ export function App() {
   return (
     <div
       className={`w-full text-slate-100 flex flex-col items-center justify-center select-none overflow-x-hidden ${
-        screen === "title"
-          ? "h-screen max-h-screen overflow-hidden p-0"
+        screen === "title" || screen === "game"
+          ? "h-screen max-h-screen overflow-hidden p-1 sm:p-2"
           : "min-h-screen p-2 sm:p-4"
       }`}
     >
@@ -219,7 +219,7 @@ export function App() {
       )}
 
       {screen === "game" && (
-        <div key="game" className="screen-transition-enter w-full flex justify-center">
+        <div key="game" className="screen-transition-enter w-full h-full flex justify-center items-center overflow-hidden">
           <GameUI
             engine={engine}
             hearts={hearts}
