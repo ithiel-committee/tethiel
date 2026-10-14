@@ -115,7 +115,7 @@ tethiel/
 │   │   ├── Keycap.tsx         # 2重立体構造のリアルなキートップコンポーネント
 │   │   ├── NovelScreen.tsx    # ノベルゲー・ギャルゲー風ミニストーリーADVコンポーネント
 │   │   ├── ResultScreen.tsx   # 通常/ボーナスクリア・リザルト画面
-│   │   └── TitleScreen.tsx    # タイトル画面およびステージ選択
+│   │   └── TitleScreen.tsx    # タイトル画面 (横長ウィンドウレイアウト・イティエル立ち絵) およびステージ選択
 │   ├── data/
 │   │   └── storyData.ts       # ステージ別プロローグ・エピローグシナリオデータ
 │   ├── game/

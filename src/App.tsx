@@ -150,7 +150,13 @@ export function App() {
   }, [screen, engine]);
 
   return (
-    <div className="w-full min-h-screen text-slate-100 flex flex-col items-center justify-center p-2 sm:p-4 select-none overflow-x-hidden">
+    <div
+      className={`w-full text-slate-100 flex flex-col items-center justify-center select-none overflow-x-hidden ${
+        screen === "title"
+          ? "h-screen max-h-screen overflow-hidden p-0"
+          : "min-h-screen p-2 sm:p-4"
+      }`}
+    >
       {screen === "title" && (
         <TitleScreen
           onSelectStage={handleSelectStage}

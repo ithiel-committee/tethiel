@@ -1,3 +1,4 @@
+import ithielStandingDefault from "../assets/character/ithiel_standing_default.png";
 import ithielStandingImg from "../assets/character/ithiel_standing_smile.png";
 import playerLeftImg from "../assets/character/player_left.png";
 import playerRightImg from "../assets/character/player_right.png";
@@ -5,6 +6,7 @@ import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 
 // ゲームおよびストーリー画面で使用する画像アセットリスト
 export const GAME_ASSET_IMAGES = [
+  ithielStandingDefault,
   ithielStandingImg,
   playerLeftImg,
   playerRightImg,
