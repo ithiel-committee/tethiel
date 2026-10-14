@@ -36,6 +36,14 @@ export const TitleScreen = ({
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
 
+  const handleStageSelectWithAnim = (stage: StageData) => {
+    if (selectedStageId !== null) return;
+    setSelectedStageId(stage.id);
+    setTimeout(() => {
+      onSelectStage(stage);
+    }, 380);
+  };
+
   useEffect(() => {
     preloadGameAssets();
   }, []);
@@ -173,10 +181,7 @@ export const TitleScreen = ({
                 <button
                   type="button"
                   className="title-start-btn"
-                  onClick={() => {
-                    setSelectedStageId(STAGES[0].id);
-                    setTimeout(() => onSelectStage(STAGES[0]), 160);
-                  }}
+                  onClick={() => handleStageSelectWithAnim(STAGES[0])}
                 >
                   <Play size={12} fill="currentColor" />
                   <span>START</span>
@@ -203,10 +208,7 @@ export const TitleScreen = ({
                 <button
                   type="button"
                   className="title-start-btn"
-                  onClick={() => {
-                    setSelectedStageId(STAGES[1].id);
-                    setTimeout(() => onSelectStage(STAGES[1]), 160);
-                  }}
+                  onClick={() => handleStageSelectWithAnim(STAGES[1])}
                 >
                   <Play size={12} fill="currentColor" />
                   <span>START</span>
@@ -237,10 +239,7 @@ export const TitleScreen = ({
                 <button
                   type="button"
                   className="title-start-btn title-start-btn-endless"
-                  onClick={() => {
-                    setSelectedStageId(ENDLESS_STAGE.id);
-                    setTimeout(() => onSelectStage(ENDLESS_STAGE), 160);
-                  }}
+                  onClick={() => handleStageSelectWithAnim(ENDLESS_STAGE)}
                 >
                   <Play size={12} fill="currentColor" />
                   <span>ENDLESS</span>
