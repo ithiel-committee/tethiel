@@ -1846,15 +1846,34 @@ button:disabled {
   box-shadow: 0 0 24px rgba(245, 158, 11, 0.7);
 }
 
-/* 操作方法ガイド */
+/* 操作方法ガイド (QWERTYキーボードUI) */
 .title-controls-card {
-  background: rgba(18, 6, 12, 0.82);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(18, 6, 12, 0.85);
+  border: 1px solid rgba(255, 26, 75, 0.4);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  box-shadow: 0 0 16px rgba(255, 26, 75, 0.12);
+}
+
+.keyboard-guide-container {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.keyboard-guide-svg {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  display: block;
+  font-family: var(--font-pixel);
+  user-select: none;
 }
 
 .title-controls-header {

@@ -113,6 +113,7 @@ tethiel/
 │   │   ├── GameCanvas.tsx     # START/GOAL、回路パス、登るイティエル、黒色感染を描画するCanvas
 │   │   ├── GameUI.tsx         # 企画書5,6p準拠の3カラムHUD (ハート5つ、ステータス、立ち絵枠、操作説明)
 │   │   ├── Keycap.tsx         # 2重立体構造のリアルなキートップコンポーネント
+│   │   ├── KeyboardGuide.tsx  # QWERTY配列と引き出し線・矢印による操作説明コンポーネント
 │   │   ├── NovelScreen.tsx    # ノベルゲー・ギャルゲー風ミニストーリーADVコンポーネント
 │   │   ├── ResultScreen.tsx   # 通常/ボーナスクリア・リザルト画面
 │   │   └── TitleScreen.tsx    # タイトル画面 (横長ウィンドウレイアウト・イティエル立ち絵) およびステージ選択

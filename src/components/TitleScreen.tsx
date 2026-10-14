@@ -13,6 +13,7 @@ import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import type { StageData } from "../types/game";
 import { preloadGameAssets } from "../utils/preloadAssets";
+import { KeyboardGuide } from "./KeyboardGuide";
 
 interface TitleScreenProps {
   onSelectStage: (stage: StageData) => void;
@@ -130,42 +131,13 @@ export const TitleScreen = ({
               </div>
             </div>
 
-            {/* 操作方法ガイド (HOW TO PLAY) */}
+            {/* 操作方法ガイド (QWERTYキーボードUI) */}
             <div className="title-controls-card">
               <div className="title-controls-header">
-                <span>{"// HOW TO PLAY (操作ガイド)"}</span>
-                <span className="title-controls-sub">KEYBOARD CONTROLS</span>
+                <span>{"// HOW TO PLAY (キーボード操作ガイド)"}</span>
+                <span className="title-controls-sub">QWERTY CONTROLS</span>
               </div>
-              <div className="title-controls-grid">
-                <div className="title-ctrl-item">
-                  <span className="ctrl-label">即置き:</span>
-                  <span className="keycap">↑</span>
-                  <span className="keycap keycap-wide">SPACE</span>
-                </div>
-                <div className="title-ctrl-item">
-                  <span className="ctrl-label">回転:</span>
-                  <span className="keycap">Z</span>
-                  <span className="keycap">X</span>
-                  <span className="keycap">W</span>
-                </div>
-                <div className="title-ctrl-item">
-                  <span className="ctrl-label">移動:</span>
-                  <span className="keycap">←</span>
-                  <span className="keycap">→</span>
-                  <span className="keycap">A</span>
-                  <span className="keycap">D</span>
-                </div>
-                <div className="title-ctrl-item">
-                  <span className="ctrl-label">落下:</span>
-                  <span className="keycap">↓</span>
-                  <span className="keycap">S</span>
-                </div>
-                <div className="title-ctrl-item title-ctrl-item-full">
-                  <span className="ctrl-label">ホールド:</span>
-                  <span className="keycap keycap-accent">C</span>
-                  <span className="ctrl-note">(キープしたミノと交代)</span>
-                </div>
-              </div>
+              <KeyboardGuide />
             </div>
           </div>
 
