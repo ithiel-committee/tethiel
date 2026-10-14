@@ -5,8 +5,6 @@ import {
   Play,
   Settings,
   ShieldAlert,
-  Sparkles,
-  Terminal,
   Trophy,
   Volume2,
   VolumeX,
@@ -53,23 +51,13 @@ export const TitleScreen = ({
         <div className="title-left-column">
           {/* 1. 左上: ゲームタイトル & キービジュアル */}
           <div className="title-header-area">
-            <div className="title-badge">
-              <Terminal size={12} />
-              <span>CHUO UNIV. iTL CYBER DEFENSE SYSTEM</span>
-            </div>
-
             <img
               src={titleKeyVisual}
-              alt="tethiel - iTL防衛戦 逆テトリス型アクションパズル"
+              alt="tethiel"
               className="title-logo-img"
             />
 
-            <h1 className="sr-only">
-              tethiel - iTL防衛戦 逆テトリス型アクションパズル
-            </h1>
-            <p className="title-subtitle">
-              - iTL防衛戦 逆テトリス型アクションパズル -
-            </p>
+            <h1 className="sr-only">tethiel</h1>
           </div>
 
           {/* 2. 左中央〜左下: メニューエリア (START画面 / レベル選択画面) */}
@@ -77,11 +65,6 @@ export const TitleScreen = ({
             {menuView === "main" ? (
               /* メインメニュー: START, RANKING, OPTION, CREDIT */
               <div className="title-main-menu">
-                <div className="title-section-label">
-                  <span className="label-prefix">{"// MAIN SYSTEM MENU"}</span>
-                  <span className="label-status">PRESS START TO PLAY</span>
-                </div>
-
                 {/* 1. START ボタン */}
                 <button
                   type="button"
@@ -92,7 +75,6 @@ export const TitleScreen = ({
                     <Play size={16} fill="currentColor" />
                     <span>START</span>
                   </div>
-                  <span className="title-menu-btn-tag">MISSION SELECT ▶</span>
                 </button>
 
                 {/* 2. RANKING ボタン */}
@@ -105,7 +87,6 @@ export const TitleScreen = ({
                     <Trophy size={15} className="text-amber-400" />
                     <span>RANKING</span>
                   </div>
-                  <span className="title-menu-btn-tag">HIGH SCORES</span>
                 </button>
 
                 {/* 3. OPTION ボタン */}
@@ -118,7 +99,6 @@ export const TitleScreen = ({
                     <Settings size={15} className="text-rose-400" />
                     <span>OPTION</span>
                   </div>
-                  <span className="title-menu-btn-tag">SETTINGS</span>
                 </button>
 
                 {/* 4. CREDIT ボタン */}
@@ -131,7 +111,6 @@ export const TitleScreen = ({
                     <Info size={15} className="text-sky-400" />
                     <span>CREDIT</span>
                   </div>
-                  <span className="title-menu-btn-tag">STAFF & SPECIAL</span>
                 </button>
               </div>
             ) : (
@@ -216,27 +195,13 @@ export const TitleScreen = ({
             <div className="title-controls-card">
               <div className="title-controls-header">
                 <span>{"// HOW TO PLAY (キーボード操作ガイド)"}</span>
-                <span className="title-controls-sub">QWERTY CONTROLS</span>
               </div>
               <KeyboardGuide />
             </div>
           </div>
 
-          {/* 3. 左下: フッター (サウンド設定 & システムステータス) */}
-          <div className="title-footer-row">
-            <button
-              type="button"
-              className="title-sound-btn"
-              onClick={onToggleMute}
-            >
-              {isMuted ? (
-                <VolumeX size={13} className="text-rose-400" />
-              ) : (
-                <Volume2 size={13} className="text-rose-400" />
-              )}
-              <span>{isMuted ? "SOUND: OFF" : "SOUND: ON"}</span>
-            </button>
-
+          {/* 3. 左下: フッター (システムステータス) */}
+          <div className="title-footer-row justify-end">
             <div className="title-status-text">
               <Cpu size={12} />
               <span>DEFENSE SYSTEM ONLINE</span>
@@ -249,15 +214,6 @@ export const TitleScreen = ({
           {/* サイバーホログラムサークル演出 */}
           <div className="title-cyber-ring">
             <div className="title-cyber-ring-inner" />
-          </div>
-
-          {/* イティエルのHUDステータスプレート */}
-          <div className="title-ithiel-hud-badge">
-            <Sparkles size={13} />
-            <div>
-              <div className="hud-name">ITHIEL // AI NAVIGATOR</div>
-              <div className="hud-status">STATUS: DEFENSE MODE READY</div>
-            </div>
           </div>
 
           {/* 立ち絵 (下部はみきれ) */}
