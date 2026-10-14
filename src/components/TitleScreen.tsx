@@ -1,11 +1,10 @@
 import {
   ArrowLeft,
-  Cpu,
+  HelpCircle,
   Info,
   Lock,
   Play,
   Settings,
-  ShieldAlert,
   Trophy,
   Volume2,
   VolumeX,
@@ -26,7 +25,7 @@ interface TitleScreenProps {
 }
 
 type MenuView = "main" | "select_level";
-type ModalType = null | "ranking" | "option" | "credit";
+type ModalType = null | "ranking" | "option" | "credit" | "controls";
 
 export const TitleScreen = ({
   onSelectStage,
@@ -35,6 +34,7 @@ export const TitleScreen = ({
 }: TitleScreenProps) => {
   const [menuView, setMenuView] = useState<MenuView>("main");
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
 
   useEffect(() => {
     preloadGameAssets();
@@ -62,7 +62,10 @@ export const TitleScreen = ({
           </div>
 
           {/* 2. 左中央〜左下: メニューエリア (START画面 / レベル選択画面) */}
-          <div className="title-menu-area">
+          <div
+            key={menuView}
+            className="title-menu-area title-view-animated"
+          >
             {menuView === "main" ? (
               /* メインメニュー: START, RANKING, OPTION, CREDIT */
               <div className="title-main-menu">
@@ -117,6 +120,7 @@ export const TitleScreen = ({
             ) : (
               /* レベル選択画面: START押下後 */
               <div className="title-stages-wrapper">
+                {/* レベル選択ヘッダー: 中央揃え */}
                 <div className="title-level-header">
                   <button
                     type="button"
@@ -124,30 +128,22 @@ export const TitleScreen = ({
                     onClick={() => setMenuView("main")}
                   >
                     <ArrowLeft size={12} />
-                    <span>BACK (戻る)</span>
+                    <span>BACK</span>
                   </button>
-                  <span className="label-prefix">{"// SELECT LEVEL"}</span>
-                  <span className="label-status">OPERATION READY</span>
+                  <div className="title-level-title">{"// SELECT LEVEL"}</div>
+                  <div className="title-header-spacer" />
                 </div>
 
-                {/* ミッション概要カード */}
-                <div className="title-mission-card">
-                  <div className="title-mission-header">
-                    <ShieldAlert size={14} />
-                    <span>EMERGENCY MISSION: 市ヶ谷田町キャンパス防衛</span>
-                  </div>
-                  <p className="title-mission-desc">
-                    突如キャンパスのネットワークを襲ったサイバー攻撃！
-                    下から迫るウイルスに追いつかれないよう、上からブロックを積み上げて
-                    最上部の<span className="text-amber">【サーバーコア】</span>
-                    へ回路を接続せよ！
-                  </p>
-                </div>
-
-                {/* ステージ選択グリッド */}
-                <div className="title-stages-grid">
+                {/* ステージ選択垂直リスト (中央線でそろえる) */}
+                <div className="title-stages-vertical">
                   {/* STAGE 1 */}
-                  <div className="title-stage-card">
+                  <div
+                    className={`title-stage-card ${
+                      selectedStageId === STAGES[0].id
+                        ? "title-stage-card-selected"
+                        : ""
+                    }`}
+                  >
                     <div className="title-stage-info">
                       <div className="title-stage-name-row">
                         <span className="title-stage-name">{STAGES[0].name}</span>
@@ -160,7 +156,10 @@ export const TitleScreen = ({
                     <button
                       type="button"
                       className="title-start-btn"
-                      onClick={() => onSelectStage(STAGES[0])}
+                      onClick={() => {
+                        setSelectedStageId(STAGES[0].id);
+                        setTimeout(() => onSelectStage(STAGES[0]), 160);
+                      }}
                     >
                       <Play size={12} fill="currentColor" />
                       <span>START</span>
@@ -168,7 +167,13 @@ export const TitleScreen = ({
                   </div>
 
                   {/* STAGE 2 */}
-                  <div className="title-stage-card">
+                  <div
+                    className={`title-stage-card ${
+                      selectedStageId === STAGES[1].id
+                        ? "title-stage-card-selected"
+                        : ""
+                    }`}
+                  >
                     <div className="title-stage-info">
                       <div className="title-stage-name-row">
                         <span className="title-stage-name">{STAGES[1].name}</span>
@@ -181,7 +186,10 @@ export const TitleScreen = ({
                     <button
                       type="button"
                       className="title-start-btn"
-                      onClick={() => onSelectStage(STAGES[1])}
+                      onClick={() => {
+                        setSelectedStageId(STAGES[1].id);
+                        setTimeout(() => onSelectStage(STAGES[1]), 160);
+                      }}
                     >
                       <Play size={12} fill="currentColor" />
                       <span>START</span>
@@ -189,11 +197,17 @@ export const TitleScreen = ({
                   </div>
 
                   {/* ENDLESS MODE */}
-                  <div className="title-stage-card title-stage-card-endless">
+                  <div
+                    className={`title-stage-card title-stage-card-endless ${
+                      selectedStageId === ENDLESS_STAGE.id
+                        ? "title-stage-card-selected"
+                        : ""
+                    }`}
+                  >
                     <div className="title-stage-info">
                       <div className="title-stage-name-row">
                         <span className="title-stage-name-endless">
-                          ★ ENDLESS
+                          ENDLESS
                         </span>
                         <span className="title-stage-sub-endless">
                           {ENDLESS_STAGE.subtitle}
@@ -206,10 +220,13 @@ export const TitleScreen = ({
                     <button
                       type="button"
                       className="title-start-btn title-start-btn-endless"
-                      onClick={() => onSelectStage(ENDLESS_STAGE)}
+                      onClick={() => {
+                        setSelectedStageId(ENDLESS_STAGE.id);
+                        setTimeout(() => onSelectStage(ENDLESS_STAGE), 160);
+                      }}
                     >
                       <Play size={12} fill="currentColor" />
-                      <span>START ENDLESS</span>
+                      <span>ENDLESS</span>
                     </button>
                   </div>
 
@@ -236,22 +253,6 @@ export const TitleScreen = ({
                 </div>
               </div>
             )}
-
-            {/* 操作方法ガイド (QWERTYキーボードUI) */}
-            <div className="title-controls-card">
-              <div className="title-controls-header">
-                <span>{"// HOW TO PLAY (キーボード操作ガイド)"}</span>
-              </div>
-              <KeyboardGuide />
-            </div>
-          </div>
-
-          {/* 3. 左下: フッター (システムステータス) */}
-          <div className="title-footer-row justify-end">
-            <div className="title-status-text">
-              <Cpu size={12} />
-              <span>DEFENSE SYSTEM ONLINE</span>
-            </div>
           </div>
         </div>
 
@@ -271,16 +272,51 @@ export const TitleScreen = ({
         </div>
       </div>
 
-      {/* モーダル群: RANKING, OPTION, CREDIT */}
+      {/* 画面右下: 操作ガイド(?)ボタン */}
+      <button
+        type="button"
+        className="title-help-btn"
+        onClick={() => setActiveModal("controls")}
+        title="キーボード操作ガイド"
+        aria-label="キーボード操作ガイド"
+      >
+        <HelpCircle size={20} />
+      </button>
+
+      {/* モーダル群: RANKING, OPTION, CREDIT, CONTROLS */}
       {activeModal && (
         <div
           className="title-modal-overlay"
           onClick={() => setActiveModal(null)}
         >
           <div
-            className="title-modal-box"
+            className={`title-modal-box ${
+              activeModal === "controls" ? "title-modal-box-wide" : ""
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* CONTROLS モーダル */}
+            {activeModal === "controls" && (
+              <>
+                <div className="title-modal-title">
+                  <div className="flex items-center gap-2">
+                    <HelpCircle size={16} className="text-rose-400" />
+                    <span>HOW TO PLAY (キーボード操作ガイド)</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="title-modal-close-btn"
+                    onClick={() => setActiveModal(null)}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="title-controls-modal-body">
+                  <KeyboardGuide />
+                </div>
+              </>
+            )}
+
             {/* RANKING モーダル */}
             {activeModal === "ranking" && (
               <>

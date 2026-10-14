@@ -158,86 +158,96 @@ export function App() {
       }`}
     >
       {screen === "title" && (
-        <TitleScreen
-          onSelectStage={handleSelectStage}
-          isMuted={isMuted}
-          onToggleMute={handleToggleMute}
-        />
+        <div key="title" className="screen-transition-enter w-full h-full">
+          <TitleScreen
+            onSelectStage={handleSelectStage}
+            isMuted={isMuted}
+            onToggleMute={handleToggleMute}
+          />
+        </div>
       )}
 
       {screen === "prologue" && (
-        <NovelScreen
-          scene={
-            getStoryScene(selectedStage.id, "prologue") ?? {
-              id: "fallback-prologue",
-              stageId: selectedStage.id,
-              type: "prologue",
-              title: "MISSION BRIEFING",
-              dialogues: [
-                {
-                  speaker: "イティエル",
-                  expression: "determined",
-                  text: "準備はいい？ 防衛戦を開始するよ！",
-                },
-              ],
+        <div key="prologue" className="screen-transition-enter w-full">
+          <NovelScreen
+            scene={
+              getStoryScene(selectedStage.id, "prologue") ?? {
+                id: "fallback-prologue",
+                stageId: selectedStage.id,
+                type: "prologue",
+                title: "MISSION BRIEFING",
+                dialogues: [
+                  {
+                    speaker: "イティエル",
+                    expression: "determined",
+                    text: "準備はいい？ 防衛戦を開始するよ！",
+                  },
+                ],
+              }
             }
-          }
-          onComplete={handleStartGame}
-          onBackToTitle={handleBackToTitle}
-          isMuted={isMuted}
-          onToggleMute={handleToggleMute}
-        />
+            onComplete={handleStartGame}
+            onBackToTitle={handleBackToTitle}
+            isMuted={isMuted}
+            onToggleMute={handleToggleMute}
+          />
+        </div>
       )}
 
       {screen === "epilogue" && (
-        <NovelScreen
-          scene={
-            getStoryScene(selectedStage.id, "epilogue") ?? {
-              id: "fallback-epilogue",
-              stageId: selectedStage.id,
-              type: "epilogue",
-              title: "MISSION COMPLETE",
-              dialogues: [
-                {
-                  speaker: "イティエル",
-                  expression: "smile",
-                  text: "防衛成功！ お疲れ様、プレイヤー！",
-                },
-              ],
+        <div key="epilogue" className="screen-transition-enter w-full">
+          <NovelScreen
+            scene={
+              getStoryScene(selectedStage.id, "epilogue") ?? {
+                id: "fallback-epilogue",
+                stageId: selectedStage.id,
+                type: "epilogue",
+                title: "MISSION COMPLETE",
+                dialogues: [
+                  {
+                    speaker: "イティエル",
+                    expression: "smile",
+                    text: "防衛成功！ お疲れ様、プレイヤー！",
+                  },
+                ],
+              }
             }
-          }
-          onComplete={() => setScreen("result")}
-          isMuted={isMuted}
-          onToggleMute={handleToggleMute}
-        />
+            onComplete={() => setScreen("result")}
+            isMuted={isMuted}
+            onToggleMute={handleToggleMute}
+          />
+        </div>
       )}
 
       {screen === "game" && (
-        <GameUI
-          engine={engine}
-          hearts={hearts}
-          holdPiece={holdPiece}
-          nextPieces={nextPieces}
-          stats={stats}
-          isMuted={isMuted}
-          onToggleMute={handleToggleMute}
-          onExitGame={handleBackToTitle}
-        >
-          <GameCanvas engine={engine} />
-        </GameUI>
+        <div key="game" className="screen-transition-enter w-full flex justify-center">
+          <GameUI
+            engine={engine}
+            hearts={hearts}
+            holdPiece={holdPiece}
+            nextPieces={nextPieces}
+            stats={stats}
+            isMuted={isMuted}
+            onToggleMute={handleToggleMute}
+            onExitGame={handleBackToTitle}
+          >
+            <GameCanvas engine={engine} />
+          </GameUI>
+        </div>
       )}
 
       {screen === "result" && (
-        <ResultScreen
-          isCleared={gameStatus === "cleared"}
-          isBonusClear={isBonusClear}
-          gameOverReason={gameOverReason}
-          stage={selectedStage}
-          stats={stats}
-          hearts={hearts}
-          onRetry={handleRetry}
-          onSelectStage={handleBackToTitle}
-        />
+        <div key="result" className="screen-transition-enter w-full flex justify-center">
+          <ResultScreen
+            isCleared={gameStatus === "cleared"}
+            isBonusClear={isBonusClear}
+            gameOverReason={gameOverReason}
+            stage={selectedStage}
+            stats={stats}
+            hearts={hearts}
+            onRetry={handleRetry}
+            onSelectStage={handleBackToTitle}
+          />
+        </div>
       )}
     </div>
   );

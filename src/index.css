@@ -1689,20 +1689,90 @@ button:disabled {
   margin: 0 2px;
 }
 
-/* ステージ選択カード */
+/* 画面間トランジションアニメーション */
+@keyframes screenFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+    filter: brightness(1.2) blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: brightness(1) blur(0);
+  }
+}
+
+.screen-transition-enter {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: screenFadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* トランジションアニメーション */
+@keyframes titleViewTransition {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.title-view-animated {
+  animation: titleViewTransition 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* レベル選択ヘッダー (中央揃えレイアウト) */
+.title-level-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 520px;
+  padding: 2px 4px 6px;
+}
+
+.title-level-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ff3366;
+  text-shadow: 0 0 10px rgba(255, 51, 102, 0.45);
+  text-align: center;
+}
+
+.title-header-spacer {
+  width: 68px;
+}
+
+/* ステージ選択カード (中央線垂直並び) */
 .title-stages-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
 }
 
-.title-stages-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.title-stages-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
 }
 
 .title-stage-card {
+  width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(
     135deg,
     rgba(28, 8, 18, 0.95) 0%,
@@ -1710,15 +1780,26 @@ button:disabled {
   );
   border: 1px solid rgba(255, 26, 75, 0.5);
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
   box-shadow: 0 0 15px rgba(255, 26, 75, 0.15);
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.title-stage-card:hover {
+  border-color: rgba(255, 70, 110, 0.8);
+  box-shadow: 0 0 20px rgba(255, 26, 75, 0.3);
+  transform: translateY(-1px);
+}
+
+.title-stage-card-selected {
+  border-color: #ff3366;
+  background: rgba(255, 26, 75, 0.25);
+  box-shadow: 0 0 30px rgba(255, 26, 75, 0.7);
+  transform: scale(1.02);
 }
 
 .title-stage-card:hover {
@@ -2264,6 +2345,48 @@ button:disabled {
 .title-modal-close-btn:hover {
   color: #ffffff;
   background: rgba(255, 26, 75, 0.2);
+}
+
+.title-modal-box-wide {
+  width: min(720px, 95vw);
+}
+
+.title-controls-modal-body {
+  padding: 10px;
+  background: rgba(18, 6, 12, 0.85);
+  border: 1px solid rgba(255, 26, 75, 0.4);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 右下: 操作ガイド(?)ボタン */
+.title-help-btn {
+  position: absolute;
+  bottom: 22px;
+  right: 24px;
+  z-index: 50;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(26, 7, 16, 0.9);
+  border: 1px solid rgba(255, 42, 109, 0.6);
+  color: #ffaec0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 18px rgba(255, 26, 75, 0.35);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.title-help-btn:hover {
+  background: rgba(255, 26, 75, 0.25);
+  border-color: #ff3366;
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 0 28px rgba(255, 26, 75, 0.65);
 }
 
 
