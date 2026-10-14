@@ -1630,12 +1630,12 @@ button:disabled {
 }
 
 .title-logo-img {
-  height: clamp(95px, 18vh, 165px);
+  height: clamp(220px, 32vh, 320px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
   object-position: left center;
-  filter: drop-shadow(0 0 25px rgba(255, 26, 75, 0.5));
+  filter: drop-shadow(0 0 30px rgba(255, 26, 75, 0.55));
   user-select: none;
   pointer-events: none;
   display: block;
@@ -1979,9 +1979,9 @@ button:disabled {
 
 .title-ithiel-standing {
   position: absolute;
-  bottom: -10%;
+  bottom: -6%;
   right: 0%;
-  height: 118%;
+  height: 95%;
   max-height: none;
   width: auto;
   object-fit: contain;
