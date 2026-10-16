@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sounds } from "./audio/soundSystem";
 import { GameCanvas } from "./components/GameCanvas";
 import { GameUI } from "./components/GameUI";
@@ -115,11 +115,29 @@ export function App() {
     setScreen("title");
   }, []);
 
-  // キーボード操作（日本語IME/全角状態/物理キー判定を100%吸収）
+  // 長押し(キーリピート)による連続暴発を防ぐキーの押下状態管理
+  const activeSinglePressKeysRef = useRef<Set<string>>(new Set());
+
+  // キーボード操作 (日本語IME/全角状態/物理キー判定を100%吸収)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const action = getGameActionFromEvent(e);
       if (!action) return;
+
+      // 上キー等の即置き(hardDrop)や単発アクションは長押しによる連続暴発を防ぐ
+      if (
+        action === "hardDrop" ||
+        action === "hold" ||
+        action === "pause" ||
+        action === "bomb"
+      ) {
+        if (e.repeat || activeSinglePressKeysRef.current.has(e.code)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        activeSinglePressKeysRef.current.add(e.code);
+      }
 
       // 一時停止はゲーム画面であればポーズ中・プレイ中問わず有効
       if (action === "pause") {
@@ -142,11 +160,20 @@ export function App() {
       dispatchGameAction(engine, action);
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      activeSinglePressKeysRef.current.delete(e.code);
+    };
+
     window.addEventListener("keydown", handleKeyDown, { capture: true });
-    return () =>
+    window.addEventListener("keyup", handleKeyUp, { capture: true });
+    return () => {
       window.removeEventListener("keydown", handleKeyDown, {
         capture: true,
       });
+      window.removeEventListener("keyup", handleKeyUp, {
+        capture: true,
+      });
+    };
   }, [screen, engine]);
 
   return (
