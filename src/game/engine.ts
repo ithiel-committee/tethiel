@@ -199,26 +199,154 @@ export class GameEngine {
     this.infectedDamageTimerMs = 0;
   }
 
-  // エンドレスモード用：画面上部にスクロール追加される新しい1行を生成
+  // 決定論的擬似乱数ハッシュ (高度に基づくシード計算)
+  private pseudoRandom(seed: number): number {
+    const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  // 行内の最大連続空き幅を検査し、幅4マス以上の通路を100%保証するフェイルセーフ
+  private ensurePassableCorridor(row: Cell[]): void {
+    let maxEmptySpan = 0;
+    let currentSpan = 0;
+
+    for (let c = 0; c < GRID_WIDTH; c++) {
+      if (row[c].type !== "obstacle") {
+        currentSpan++;
+        if (currentSpan > maxEmptySpan) {
+          maxEmptySpan = currentSpan;
+        }
+      } else {
+        currentSpan = 0;
+      }
+    }
+
+    // 幅4以上の連続空きスペースがない場合、中央付近(列 4〜7)の障害物をクリアして通路を強制確保
+    if (maxEmptySpan < 4) {
+      for (let c = 4; c <= 7; c++) {
+        if (row[c].type === "obstacle") {
+          row[c] = { type: "empty" };
+        }
+      }
+    }
+  }
+
+  // エンドレスモード用：感覚的ランダムかつクリア可能な新しい1行の手続き的生成
   private generateNewEndlessRow(height: number): Cell[] {
     const row: Cell[] = [];
     for (let c = 0; c < GRID_WIDTH; c++) {
       row.push({ type: "empty" });
     }
 
-    // ボーナス星の配置：4行に1回、中央寄りの列に配置
-    if (height > 0 && height % 4 === 0) {
-      const starCol = 3 + ((height * 7) % 6);
-      row[starCol] = { type: "star" };
+    // 序盤 (0〜6m) はスタート直後の足場作りのため障害物は配置しない
+    if (height <= 6) {
+      if (height === 4) {
+        row[5] = { type: "star" };
+      }
+      return row;
     }
 
-    // トゲ障害物の配置：3行に1回、左右端寄り（列 1〜2 または 列 9〜10）に配置
-    // ※中央列（4〜7）は通り道を100%確保するため絶対に配置しない
-    if (height > 4 && height % 3 === 0) {
-      const isLeft = height % 6 === 0;
-      const obstacleCol = isLeft ? 1 + (height % 2) : 9 + (height % 2);
-      row[obstacleCol] = { type: "obstacle" };
+    // 4行ごとのセクションサイクル (0: 開始行, 1〜2: 障害物展開, 3: クールダウン行)
+    const sectionIndex = Math.floor(height / 4);
+    const step = height % 4;
+    const rnd = (offset: number) =>
+      this.pseudoRandom(sectionIndex * 19.3 + offset * 7.7);
+
+    // セクションごとにパターンを選択
+    // 0: 左端ブロック, 1: 右端ブロック, 2: 中央アイランド, 3: 左右ピンチ, 4: 斜めステップ, 5: 休憩ゾーン
+    const patternType = Math.floor(rnd(1) * 6);
+
+    // ★ 星の配置: クールダウン行(step === 3)またはパターン5の時に配置
+    if (step === 3 || patternType === 5) {
+      if (step === 3 && rnd(2) > 0.35) {
+        const starCol = 3 + Math.floor(rnd(3) * 6);
+        row[starCol] = { type: "star" };
+      }
     }
+
+    // step === 3 はクールダウン (障害物なしで通過帯を確実に保証)
+    if (step === 3) {
+      return row;
+    }
+
+    // パターンに応じた障害物の配置 (step === 1 または step === 2)
+    const obstacleCols: number[] = [];
+
+    switch (patternType) {
+      case 0: {
+        // パターン0: 左壁からの突き出し (幅 1〜2マス)
+        // 右側 (列 3〜11: 幅9マス) が広大に開通
+        const width = height > 35 && rnd(4) > 0.5 ? 2 : 1;
+        if (step === 1) {
+          obstacleCols.push(1);
+          if (width === 2) obstacleCols.push(2);
+        } else if (step === 2 && rnd(5) > 0.35) {
+          obstacleCols.push(1);
+        }
+        break;
+      }
+
+      case 1: {
+        // パターン1: 右壁からの突き出し (幅 1〜2マス)
+        // 左側 (列 0〜8: 幅9マス) が広大に開通
+        const width = height > 35 && rnd(4) > 0.5 ? 2 : 1;
+        if (step === 1) {
+          obstacleCols.push(10);
+          if (width === 2) obstacleCols.push(9);
+        } else if (step === 2 && rnd(5) > 0.35) {
+          obstacleCols.push(10);
+        }
+        break;
+      }
+
+      case 2: {
+        // パターン2: 中央アイランド (幅 2マス)
+        // 列 5, 6 に配置。左側 (幅5マス) と右側 (幅5マス) の両側が開通
+        if (step === 1) {
+          obstacleCols.push(5, 6);
+        } else if (step === 2 && height > 30 && rnd(6) > 0.55) {
+          obstacleCols.push(5, 6);
+        }
+        break;
+      }
+
+      case 3: {
+        // パターン3: 左右ピンチ (左端と右端に各1マス)
+        // 列 1 と 列 10 に配置。中央 (列 2〜9: 幅8マス) が完全に開通
+        if (step === 1) {
+          obstacleCols.push(1);
+          if (rnd(7) > 0.3) obstacleCols.push(10);
+        }
+        break;
+      }
+
+      case 4: {
+        // パターン4: 斜めスラローム / ステップ
+        const baseCol = rnd(8) > 0.5 ? 3 : 8;
+        if (step === 1) {
+          obstacleCols.push(baseCol);
+        } else if (step === 2) {
+          const shiftCol = baseCol === 3 ? 4 : 7;
+          obstacleCols.push(shiftCol);
+        }
+        break;
+      }
+
+      case 5:
+      default:
+        // パターン5: 休憩ゾーン (障害物なし、開けたエリア)
+        break;
+    }
+
+    // 障害物を適用
+    for (const col of obstacleCols) {
+      if (col >= 0 && col < GRID_WIDTH) {
+        row[col] = { type: "obstacle" };
+      }
+    }
+
+    // クリア不可能ケースの絶対防止バリデーション (幅4以上の連続空きスペースを保証)
+    this.ensurePassableCorridor(row);
 
     return row;
   }
