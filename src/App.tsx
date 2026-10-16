@@ -121,6 +121,34 @@ export function App() {
   // キーボード操作 (日本語IME/全角状態/物理キー判定を100%吸収)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // 1. フォーカスがボタンなどのインタラクティブ要素にある場合、Space/Enterはボタンの実行を優先
+      const activeEl = document.activeElement;
+      const isInteractive =
+        activeEl &&
+        activeEl !== document.body &&
+        (activeEl.tagName === "BUTTON" ||
+          activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "SELECT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.tagName === "A" ||
+          activeEl.getAttribute("role") === "button" ||
+          activeEl.getAttribute("tabindex") !== null);
+
+      if (
+        isInteractive &&
+        (e.key === " " || e.key === "Enter" || e.code === "Space")
+      ) {
+        // div role="button" 等の非button要素でSpaceキーによるスクロールを防ぎつつクリック発火
+        if (
+          activeEl.tagName !== "BUTTON" &&
+          typeof (activeEl as HTMLElement).click === "function"
+        ) {
+          e.preventDefault();
+          (activeEl as HTMLElement).click();
+        }
+        return;
+      }
+
       const action = getGameActionFromEvent(e);
       if (!action) return;
 

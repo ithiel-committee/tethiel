@@ -137,6 +137,18 @@ export const NovelScreen = ({
       }
 
       if (e.key === " " || e.key === "Enter") {
+        const active = document.activeElement;
+        // 上部コントロールボタン群(SKIP, AUTO, LOG, TITLE等)にフォーカスがある時はボタン自身の実行に任せる
+        if (
+          active &&
+          active !== document.body &&
+          (active.tagName === "BUTTON" ||
+            (active.getAttribute("role") === "button" &&
+              !active.classList.contains("novel-msg-container")))
+        ) {
+          return;
+        }
+
         e.preventDefault();
         handleNext();
       } else if (e.key === "Escape") {

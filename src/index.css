@@ -344,10 +344,28 @@ body {
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ボタンベース */
+/* ボタンベース & キーボードアクセシビリティ (Tabフォーカス & Space/Enter操作) */
 button {
   font-family: inherit;
+}
+
+/* マウスクリック時はアウトライン非表示、キーボードTabフォーカス時のみ鮮明に表示 */
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible),
+div[tabindex="0"]:focus:not(:focus-visible) {
   outline: none;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+div[tabindex="0"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #ff1a4b !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 1px #ffffff, 0 0 16px rgba(255, 26, 75, 0.95), inset 0 0 8px rgba(255, 26, 75, 0.4) !important;
+  transition: outline-offset 0.1s ease, box-shadow 0.15s ease !important;
 }
 
 button:active {
@@ -1931,7 +1949,8 @@ button:disabled {
   flex-shrink: 0;
 }
 
-.title-start-btn:hover {
+.title-start-btn:hover,
+.title-start-btn:focus-visible {
   filter: brightness(1.15);
   box-shadow: 0 0 22px rgba(255, 26, 75, 0.7);
   transform: translateY(-1px);
@@ -1948,7 +1967,8 @@ button:disabled {
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.45);
 }
 
-.title-start-btn-endless:hover {
+.title-start-btn-endless:hover,
+.title-start-btn-endless:focus-visible {
   box-shadow: 0 0 24px rgba(245, 158, 11, 0.7);
 }
 
@@ -2056,7 +2076,8 @@ button:disabled {
   transition: all 0.12s ease;
 }
 
-.title-sound-btn:hover {
+.title-sound-btn:hover,
+.title-sound-btn:focus-visible {
   border-color: rgba(255, 70, 110, 0.7);
   background: rgba(45, 12, 28, 0.9);
   color: #ffffff;
@@ -2241,7 +2262,8 @@ button:disabled {
   font-size: 14px;
 }
 
-.title-menu-btn-start:hover {
+.title-menu-btn-start:hover,
+.title-menu-btn-start:focus-visible {
   filter: brightness(1.15);
   box-shadow: 0 0 24px rgba(255, 26, 75, 0.8);
   transform: translateX(3px);
@@ -2254,7 +2276,8 @@ button:disabled {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 
-.title-menu-btn-sub:hover {
+.title-menu-btn-sub:hover,
+.title-menu-btn-sub:focus-visible {
   background: rgba(45, 12, 28, 0.95);
   color: #ffffff;
   border-color: rgba(255, 70, 110, 0.8);
@@ -2297,7 +2320,8 @@ button:disabled {
   transition: all 0.12s ease;
 }
 
-.title-back-btn:hover {
+.title-back-btn:hover,
+.title-back-btn:focus-visible {
   background: rgba(50, 14, 30, 0.95);
   border-color: rgba(255, 70, 110, 0.8);
   color: #ffffff;
@@ -2359,7 +2383,8 @@ button:disabled {
   transition: all 0.12s ease;
 }
 
-.title-modal-close-btn:hover {
+.title-modal-close-btn:hover,
+.title-modal-close-btn:focus-visible {
   color: #ffffff;
   background: rgba(255, 26, 75, 0.2);
 }
