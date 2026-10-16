@@ -154,17 +154,24 @@ export class GameEngine {
       };
     }
 
-    // 障害物の配置
-    for (const [r, c] of this.stage.initialObstacles) {
-      if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
-        this.grid[r][c] = { type: "obstacle" };
+    // 障害物と星の初期配置
+    if (this.gameMode === "endless") {
+      // エンドレスモード: 足元(行18〜21)は安全を確保し、行0〜17に上空へ向かってプロシージャル地形を初期展開
+      for (let r = 17; r >= 0; r--) {
+        const height = START_ROW - r; // 行17はh=4、行0はh=21
+        this.grid[r] = this.generateNewEndlessRow(height);
       }
-    }
-
-    // 星（★）の配置
-    for (const [r, c] of this.stage.initialStars) {
-      if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
-        this.grid[r][c] = { type: "star" };
+    } else {
+      // 通常ステージモード: ステージ定義に基づく配置
+      for (const [r, c] of this.stage.initialObstacles) {
+        if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
+          this.grid[r][c] = { type: "obstacle" };
+        }
+      }
+      for (const [r, c] of this.stage.initialStars) {
+        if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
+          this.grid[r][c] = { type: "star" };
+        }
       }
     }
 
@@ -201,7 +208,7 @@ export class GameEngine {
 
   // 決定論的擬似乱数ハッシュ (高度に基づくシード計算)
   private pseudoRandom(seed: number): number {
-    const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+    const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453123;
     return x - Math.floor(x);
   }
 
@@ -238,104 +245,56 @@ export class GameEngine {
       row.push({ type: "empty" });
     }
 
-    // 序盤 (0〜6m) はスタート直後の足場作りのため障害物は配置しない
-    if (height <= 6) {
-      if (height === 4) {
-        row[5] = { type: "star" };
-      }
+    // 序盤の超低高度 (h <= 2) はスタート直後の足場作りのため完全空き
+    if (height <= 2) {
       return row;
     }
 
-    // 4行ごとのセクションサイクル (0: 開始行, 1〜2: 障害物展開, 3: クールダウン行)
-    const sectionIndex = Math.floor(height / 4);
-    const step = height % 4;
-    const rnd = (offset: number) =>
-      this.pseudoRandom(sectionIndex * 19.3 + offset * 7.7);
-
-    // セクションごとにパターンを選択
-    // 0: 左端ブロック, 1: 右端ブロック, 2: 中央アイランド, 3: 左右ピンチ, 4: 斜めステップ, 5: 休憩ゾーン
-    const patternType = Math.floor(rnd(1) * 6);
-
-    // ★ 星の配置: クールダウン行(step === 3)またはパターン5の時に配置
-    if (step === 3 || patternType === 5) {
-      if (step === 3 && rnd(2) > 0.35) {
-        const starCol = 3 + Math.floor(rnd(3) * 6);
+    // 3行に1回 (height % 3 === 0) はクールダウン行 (トゲなし、ボーナス星配置)
+    if (height % 3 === 0) {
+      if (this.pseudoRandom(height * 3.7) > 0.25) {
+        const starCol = 3 + Math.floor(this.pseudoRandom(height * 8.9) * 6);
         row[starCol] = { type: "star" };
       }
-    }
-
-    // step === 3 はクールダウン (障害物なしで通過帯を確実に保証)
-    if (step === 3) {
       return row;
     }
 
-    // パターンに応じた障害物の配置 (step === 1 または step === 2)
+    const rnd = (off: number) => this.pseudoRandom(height * 17.1 + off * 5.3);
+    // 5種類の障害物パターン (0: 左壁, 1: 右壁, 2: 中央島, 3: オフセットピン, 4: 左右ピンチ)
+    const pattern = Math.floor(rnd(1) * 5);
+
     const obstacleCols: number[] = [];
 
-    switch (patternType) {
+    switch (pattern) {
       case 0: {
-        // パターン0: 左壁からの突き出し (幅 1〜2マス)
-        // 右側 (列 3〜11: 幅9マス) が広大に開通
-        const width = height > 35 && rnd(4) > 0.5 ? 2 : 1;
-        if (step === 1) {
-          obstacleCols.push(1);
-          if (width === 2) obstacleCols.push(2);
-        } else if (step === 2 && rnd(5) > 0.35) {
-          obstacleCols.push(1);
-        }
+        // パターン0: 左壁 (列 1 または 列 0〜1) - 右側幅10マス開通
+        obstacleCols.push(1);
+        if (height > 15 && rnd(2) > 0.55) obstacleCols.push(0);
         break;
       }
-
       case 1: {
-        // パターン1: 右壁からの突き出し (幅 1〜2マス)
-        // 左側 (列 0〜8: 幅9マス) が広大に開通
-        const width = height > 35 && rnd(4) > 0.5 ? 2 : 1;
-        if (step === 1) {
-          obstacleCols.push(10);
-          if (width === 2) obstacleCols.push(9);
-        } else if (step === 2 && rnd(5) > 0.35) {
-          obstacleCols.push(10);
-        }
+        // パターン1: 右壁 (列 10 または 列 10〜11) - 左側幅10マス開通
+        obstacleCols.push(10);
+        if (height > 15 && rnd(2) > 0.55) obstacleCols.push(11);
         break;
       }
-
       case 2: {
-        // パターン2: 中央アイランド (幅 2マス)
-        // 列 5, 6 に配置。左側 (幅5マス) と右側 (幅5マス) の両側が開通
-        if (step === 1) {
-          obstacleCols.push(5, 6);
-        } else if (step === 2 && height > 30 && rnd(6) > 0.55) {
-          obstacleCols.push(5, 6);
-        }
+        // パターン2: 中央アイランド (列 5, 6) - 左右どちらも幅5マス開通
+        obstacleCols.push(5, 6);
         break;
       }
-
       case 3: {
-        // パターン3: 左右ピンチ (左端と右端に各1マス)
-        // 列 1 と 列 10 に配置。中央 (列 2〜9: 幅8マス) が完全に開通
-        if (step === 1) {
-          obstacleCols.push(1);
-          if (rnd(7) > 0.3) obstacleCols.push(10);
-        }
+        // パターン3: オフセットピン (列 3 または 列 8) - 単独トゲ、両側迂回可能
+        const c = rnd(3) > 0.5 ? 3 : 8;
+        obstacleCols.push(c);
         break;
       }
-
       case 4: {
-        // パターン4: 斜めスラローム / ステップ
-        const baseCol = rnd(8) > 0.5 ? 3 : 8;
-        if (step === 1) {
-          obstacleCols.push(baseCol);
-        } else if (step === 2) {
-          const shiftCol = baseCol === 3 ? 4 : 7;
-          obstacleCols.push(shiftCol);
-        }
+        // パターン4: 左右ピンチ (列 1 と 列 10) - 中央幅8マス完全開通
+        obstacleCols.push(1);
+        if (rnd(4) > 0.35) obstacleCols.push(10);
         break;
       }
-
-      case 5:
-      default:
-        // パターン5: 休憩ゾーン (障害物なし、開けたエリア)
-        break;
     }
 
     // 障害物を適用
@@ -345,19 +304,31 @@ export class GameEngine {
       }
     }
 
+    // 低確率で星(★)を空きスペースに配置
+    if (rnd(5) > 0.65 && !row.some((cell) => cell.type === "star")) {
+      const freeCols: number[] = [];
+      for (let c = 2; c <= 9; c++) {
+        if (row[c].type === "empty") freeCols.push(c);
+      }
+      if (freeCols.length > 0) {
+        const picked = freeCols[Math.floor(rnd(6) * freeCols.length)];
+        row[picked] = { type: "star" };
+      }
+    }
+
     // クリア不可能ケースの絶対防止バリデーション (幅4以上の連続空きスペースを保証)
     this.ensurePassableCorridor(row);
 
     return row;
   }
 
-  // エンドレスモード用：フィールド全体を下にスクロール（イティエルが登った高度を進める）
+  // エンドレスモード用：フィールド全体を下にスクロール (イティエルが登った高度を進める)
   public scrollDown(count = 1) {
     for (let step = 0; step < count; step++) {
       this.climbedHeight++;
       this.score += 50;
 
-      // ウイルスの段階的加速（10m登るごとに120ms短縮、最小1400ms）
+      // ウイルスの段階的加速 (10m登るごとに120ms短縮、最小1400ms)
       this.currentInfectionIntervalMs = Math.max(
         1400,
         this.stage.infectionIntervalMs -
@@ -365,8 +336,11 @@ export class GameEngine {
       );
 
       // グリッドを1行下へシフト
+      // 初期グリッド (高度0〜21) の上空へ連続するように START_ROW + climbedHeight を渡す
       this.grid.pop();
-      this.grid.unshift(this.generateNewEndlessRow(this.climbedHeight));
+      this.grid.unshift(
+        this.generateNewEndlessRow(START_ROW + this.climbedHeight),
+      );
     }
 
     // エンティティの座標を下にシフト
