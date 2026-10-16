@@ -83,7 +83,7 @@ flowchart TD
 
 | コマンド | 説明 |
 | :--- | :--- |
-| `pnpm dev` | ローカル開発サーバーを起動する (デフォルト: http://localhost:5173/) |
+| `pnpm dev` | ローカル開発サーバーを起動する (デフォルト: http://localhost:5180/) |
 | `pnpm build` | TypeScript型検査および本番用静的バンドルをビルドする |
 | `pnpm preview` | ビルド成果物をローカルでプレビュー実行する |
 | `pnpm format` | Biomeを用いてプロジェクト全体のコードフォーマットを実行する |
