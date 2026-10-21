@@ -2,6 +2,8 @@ import confetti from "canvas-confetti";
 import {
   Award,
   CheckCircle2,
+  ChevronRight,
+  Play,
   RotateCcw,
   ShieldAlert,
   Sparkles,
@@ -18,8 +20,10 @@ interface ResultScreenProps {
   stage: StageData;
   stats: GameStats;
   hearts: number;
+  nextStage?: StageData | null;
   onRetry: () => void;
   onSelectStage: () => void;
+  onNextStage?: () => void;
 }
 
 export const ResultScreen = ({
@@ -29,8 +33,10 @@ export const ResultScreen = ({
   stage,
   stats,
   hearts,
+  nextStage,
   onRetry,
   onSelectStage,
+  onNextStage,
 }: ResultScreenProps) => {
   useEffect(() => {
     if (isCleared) {
@@ -193,26 +199,49 @@ export const ResultScreen = ({
         )}
       </CyberCard>
 
-      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-        <CyberButton
-          variant="primary"
-          size="lg"
-          className="flex-1"
-          icon={<RotateCcw size={16} />}
-          onClick={onRetry}
-        >
-          RETRY
-        </CyberButton>
+      <div className="space-y-3 pt-2">
+        {/* 次のレベルへ進むボタン (ステージクリア時かつ次ステージ存在時に表示・ここだけ主役として強力にハイライト) */}
+        {isCleared && nextStage && onNextStage && (
+          <button
+            type="button"
+            onClick={onNextStage}
+            className="w-full relative group overflow-hidden py-3.5 px-5 rounded-xl font-['DotGothic16',sans-serif] text-sm sm:text-base font-bold tracking-wider text-white transition-all duration-150 active:scale-[0.98] cursor-pointer border border-rose-400/90 bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 shadow-[0_0_22px_rgba(255,26,75,0.7),inset_0_0_12px_rgba(255,255,255,0.25)] hover:shadow-[0_0_32px_rgba(255,26,75,0.95),inset_0_0_16px_rgba(255,255,255,0.4)] hover:brightness-110 animate-pulse"
+          >
+            {/* サイバースキャンライン光沢演出 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
 
-        <CyberButton
-          variant="secondary"
-          size="lg"
-          className="flex-1"
-          icon={<Trophy size={16} />}
-          onClick={onSelectStage}
-        >
-          STAGE SELECT
-        </CyberButton>
+            <div className="relative flex items-center justify-center gap-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              <Play size={16} fill="currentColor" className="text-amber-300 shrink-0" />
+              <span>NEXT LEVEL : {nextStage.name}</span>
+              <ChevronRight
+                size={18}
+                className="text-amber-200 group-hover:translate-x-1 transition-transform shrink-0"
+              />
+            </div>
+          </button>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <CyberButton
+            variant={isCleared && nextStage ? "secondary" : "primary"}
+            size="lg"
+            className="flex-1"
+            icon={<RotateCcw size={16} />}
+            onClick={onRetry}
+          >
+            RETRY
+          </CyberButton>
+
+          <CyberButton
+            variant="secondary"
+            size="lg"
+            className="flex-1"
+            icon={<Trophy size={16} />}
+            onClick={onSelectStage}
+          >
+            STAGE SELECT
+          </CyberButton>
+        </div>
       </div>
     </CyberCard>
   );

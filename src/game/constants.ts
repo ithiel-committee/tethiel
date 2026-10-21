@@ -175,7 +175,7 @@ export const STAGES: StageData[] = [
     name: "STAGE 3",
     codeName: "STAGE 3",
     subtitle: "最終防衛戦",
-    description: "高速ウイルスとの最終決戦。（Coming Soon）",
+    description: "高速ウイルスとの最終決戦。(Coming Soon)",
     isUnlocked: false,
     infectionIntervalMs: 2200, // 2.2秒ごと
     goalRow: GOAL_ROW,
@@ -185,7 +185,7 @@ export const STAGES: StageData[] = [
   },
 ];
 
-// エンドレスモード設定（無限縦スクロールクライミング）
+// エンドレスモード設定 (無限縦スクロールクライミング)
 export const ENDLESS_STAGE: StageData = {
   id: 99,
   name: "ENDLESS",
@@ -195,7 +195,7 @@ export const ENDLESS_STAGE: StageData = {
     "天井のないサイバー空間をどこまでも登り続けろ！登った総高度とスコアの極限を目指すサバイバルモード。",
   isUnlocked: true,
   infectionIntervalMs: 3800, // 初期3.8秒。高度に応じて加速
-  goalRow: -999, // ゴールなし（無限進行）
+  goalRow: -999, // ゴールなし (無限進行)
   startCols: START_COLS,
   mode: "endless",
   initialObstacles: [
@@ -209,4 +209,25 @@ export const ENDLESS_STAGE: StageData = {
     [14, 6],
     [10, 5],
   ],
+};
+
+/**
+ * 現在のステージの次にプレイ可能なステージを取得する
+ */
+export const getNextStage = (currentStage: StageData): StageData | null => {
+  if (currentStage.mode === "endless" || currentStage.id === ENDLESS_STAGE.id) {
+    return null;
+  }
+  const currentIndex = STAGES.findIndex((s) => s.id === currentStage.id);
+  if (currentIndex !== -1) {
+    const nextNormalStage = STAGES[currentIndex + 1];
+    if (nextNormalStage && nextNormalStage.isUnlocked) {
+      return nextNormalStage;
+    }
+    // 次の通常ステージがない、またはロックされている場合はエンドレスモードへ
+    if (ENDLESS_STAGE.isUnlocked) {
+      return ENDLESS_STAGE;
+    }
+  }
+  return null;
 };

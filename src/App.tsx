@@ -6,7 +6,7 @@ import { NovelScreen } from "./components/NovelScreen";
 import { ResultScreen } from "./components/ResultScreen";
 import { TitleScreen } from "./components/TitleScreen";
 import { getStoryScene } from "./data/storyData";
-import { STAGES } from "./game/constants";
+import { getNextStage, STAGES } from "./game/constants";
 import { GameEngine } from "./game/engine";
 import { dispatchGameAction, getGameActionFromEvent } from "./game/input";
 import type {
@@ -94,12 +94,26 @@ export function App() {
     );
   }, [selectedStage]);
 
-  // URL直接指定で直接ゲーム画面に入った場合の自動開始
+  // ステージ切り替え後の自動開始管理
+  const pendingStartStageIdRef = useRef<number | null>(null);
+
+  // URL直接指定で直接ゲーム画面に入った場合の自動開始、またはプロローグなしステージ遷移時の自動開始
   useEffect(() => {
     if (directStage && engine.status === "ready") {
       engine.start();
     }
   }, [directStage, engine]);
+
+  useEffect(() => {
+    if (
+      pendingStartStageIdRef.current !== null &&
+      selectedStage.id === pendingStartStageIdRef.current &&
+      engine.status === "ready"
+    ) {
+      pendingStartStageIdRef.current = null;
+      engine.start();
+    }
+  }, [selectedStage, engine]);
 
   // サウンド切り替え
   const handleToggleMute = useCallback(() => {
@@ -115,9 +129,17 @@ export function App() {
       setScreen("prologue");
     } else {
       setScreen("game");
-      engine.start();
+      pendingStartStageIdRef.current = stage.id;
     }
-  }, [engine]);
+  }, []);
+
+  // 次のステージへ進む
+  const handleNextStage = useCallback(() => {
+    const next = getNextStage(selectedStage);
+    if (next) {
+      handleSelectStage(next);
+    }
+  }, [selectedStage, handleSelectStage]);
 
   // ゲーム開始
   const handleStartGame = useCallback(() => {
@@ -321,8 +343,10 @@ export function App() {
             stage={selectedStage}
             stats={stats}
             hearts={hearts}
+            nextStage={getNextStage(selectedStage)}
             onRetry={handleRetry}
             onSelectStage={handleBackToTitle}
+            onNextStage={handleNextStage}
           />
         </div>
       )}
