@@ -62,10 +62,10 @@ export const TitleScreen = ({
             <div className="title-header-area">
               <img
                 src={titleKeyVisual}
-                alt="tethiel"
+                alt="teThieL"
                 className="title-logo-img"
               />
-              <h1 className="sr-only">tethiel</h1>
+              <h1 className="sr-only">teThieL</h1>
             </div>
 
             {/* 2. メニューエリア */}
@@ -398,7 +398,7 @@ export const TitleScreen = ({
                 <div className="space-y-2 text-xs text-slate-300 leading-relaxed">
                   <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30">
                     <div className="text-rose-400 font-bold mb-1">
-                      tethiel - iTL防衛戦
+                      teThieL - iTL防衛戦
                     </div>
                     <p className="text-[11px]">
                       中央大学 国際情報学部 (iTL) 公式キャラクター
