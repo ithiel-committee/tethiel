@@ -1,5 +1,6 @@
 import ithielStandingDefault from "../assets/character/ithiel_standing_default.png";
 import ithielStandingImg from "../assets/character/ithiel_standing_smile.png";
+import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
 import ithielArmHp5 from "../assets/character/ithiel_arm_hp5_smile.png";
 import ithielArmHp4 from "../assets/character/ithiel_arm_hp4_default.png";
 import ithielArmHp3 from "../assets/character/ithiel_arm_hp3_determined.png";
@@ -16,6 +17,7 @@ import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 export const GAME_ASSET_IMAGES = [
   ithielStandingDefault,
   ithielStandingImg,
+  ithielStandingSmug,
   ithielArmHp5,
   ithielArmHp4,
   ithielArmHp3,

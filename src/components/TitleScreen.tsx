@@ -9,8 +9,12 @@ import {
   VolumeX,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { sounds } from "../audio/soundSystem";
+import ithielArmHp5 from "../assets/character/ithiel_arm_hp5_smile.png";
 import ithielStandingDefault from "../assets/character/ithiel_standing_default.png";
+import ithielStandingSmile from "../assets/character/ithiel_standing_smile.png";
+import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
 import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import type { StageData } from "../types/game";
@@ -22,6 +26,14 @@ import {
   type StageBestRecord,
 } from "../utils/scoreStorage";
 import { KeyboardGuide } from "./KeyboardGuide";
+
+// ホーム画面イティエル長押し隠し機能ポーズリスト
+const ITHIEL_SECRET_POSES = [
+  { src: ithielStandingDefault, label: "DEFAULT" },
+  { src: ithielStandingSmile, label: "SMILE" },
+  { src: ithielStandingSmug, label: "SMUG" },
+  { src: ithielArmHp5, label: "ARM_RAISED" },
+];
 
 interface TitleScreenProps {
   onSelectStage: (stage: StageData) => void;
@@ -43,6 +55,85 @@ export const TitleScreen = ({
   const [rankingTab, setRankingTab] = useState<"bests" | "logs">("bests");
   const [stageBests, setStageBests] = useState<Record<number, StageBestRecord>>({});
   const [scoreLogs, setScoreLogs] = useState<ScoreLogEntry[]>([]);
+
+  // 隠し機能: イティエル長押しポーズ差し替えステート
+  const [poseIndex, setPoseIndex] = useState(0);
+  const [isPressing, setIsPressing] = useState(false);
+  const [isChangedAnim, setIsChangedAnim] = useState(false);
+  const [floatingHearts, setFloatingHearts] = useState<
+    { id: number; x: number; y: number; text: string }[]
+  >([]);
+  const pressTimerRef = useRef<number | null>(null);
+  const longPressTriggeredRef = useRef(false);
+
+  // 長押し開始 (マウス/タッチ)
+  const handleIthielPointerDown = (e: React.PointerEvent<HTMLImageElement>) => {
+    setIsPressing(true);
+    longPressTriggeredRef.current = false;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    if (pressTimerRef.current) {
+      window.clearTimeout(pressTimerRef.current);
+    }
+
+    pressTimerRef.current = window.setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      sounds.playItemGet();
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(40);
+      }
+      setPoseIndex((prev) => (prev + 1) % ITHIEL_SECRET_POSES.length);
+      setIsChangedAnim(true);
+      setTimeout(() => setIsChangedAnim(false), 480);
+
+      // 差し替わり時の華やかなハート・キラキラ演出
+      const newHearts = [
+        { id: Date.now() + 1, x: clickX, y: clickY, text: "♥" },
+        { id: Date.now() + 2, x: clickX - 25, y: clickY - 20, text: "✦" },
+        { id: Date.now() + 3, x: clickX + 25, y: clickY - 20, text: "♥" },
+        { id: Date.now() + 4, x: clickX, y: clickY - 40, text: "★" },
+      ];
+      setFloatingHearts((prev) => [...prev, ...newHearts]);
+      setTimeout(() => {
+        setFloatingHearts((prev) =>
+          prev.filter((h) => !newHearts.some((nh) => nh.id === h.id)),
+        );
+      }, 850);
+    }, 520);
+  };
+
+  // 長押し終了 / 指離し
+  const handleIthielPointerUp = (e: React.PointerEvent<HTMLImageElement>) => {
+    setIsPressing(false);
+    if (pressTimerRef.current) {
+      window.clearTimeout(pressTimerRef.current);
+      pressTimerRef.current = null;
+    }
+    // 短いタップの場合はプチハート演出
+    if (!longPressTriggeredRef.current) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      const id = Date.now();
+      setFloatingHearts((prev) => [
+        ...prev,
+        { id, x: clickX, y: clickY, text: "♥" },
+      ]);
+      setTimeout(() => {
+        setFloatingHearts((prev) => prev.filter((h) => h.id !== id));
+      }, 850);
+    }
+  };
+
+  const handleIthielPointerCancel = () => {
+    setIsPressing(false);
+    if (pressTimerRef.current) {
+      window.clearTimeout(pressTimerRef.current);
+      pressTimerRef.current = null;
+    }
+  };
 
   useEffect(() => {
     if (activeModal === "ranking") {
@@ -138,18 +229,38 @@ export const TitleScreen = ({
             </div>
           </div>
 
-          {/* 右側カラム: イティエル立ち絵 (下部はみきれ) */}
+          {/* 右側カラム: イティエル立ち絵 (下部はみきれ・長押しで隠しポーズ差し替え) */}
           <div className="title-right-column">
-            {/* サイバーホログラムサークル演出 */}
-            <div className="title-cyber-ring">
+            {/* サイバーホログラムサークル演出 (長押し時に高速回転・発光) */}
+            <div
+              className={`title-cyber-ring ${isPressing ? "is-charging" : ""}`}
+            >
               <div className="title-cyber-ring-inner" />
             </div>
 
-            {/* 立ち絵 (下部はみきれ) */}
+            {/* 浮遊ハートエフェクト */}
+            {floatingHearts.map((heart) => (
+              <span
+                key={heart.id}
+                className="title-heart-fx text-rose-400 font-bold drop-shadow-[0_0_8px_#ff1a4b]"
+                style={{ left: heart.x, top: heart.y }}
+              >
+                {heart.text}
+              </span>
+            ))}
+
+            {/* 立ち絵 (タッチ・長押しで画像差し替え) */}
             <img
-              src={ithielStandingDefault}
+              src={ITHIEL_SECRET_POSES[poseIndex].src}
               alt="イティエル"
-              className="title-ithiel-standing"
+              onPointerDown={handleIthielPointerDown}
+              onPointerUp={handleIthielPointerUp}
+              onPointerLeave={handleIthielPointerCancel}
+              onPointerCancel={handleIthielPointerCancel}
+              className={`title-ithiel-standing ${isPressing ? "is-pressing" : ""} ${
+                isChangedAnim ? "is-changed" : ""
+              }`}
+              title="タッチし続けると...？"
             />
           </div>
         </div>
