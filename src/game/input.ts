@@ -83,14 +83,19 @@ export function getGameActionFromEvent(e: KeyboardEvent): GameAction | null {
     return "softDrop";
   }
 
-  // 6. 反時計回り / 左回転 (Z, 全角Z, かな「つ」「っ」)
+  // 6. 反時計回り / 左回転 (Z, Q, 全角Z/Q, かな「つ」「っ」「た」)
   if (
     code === "KeyZ" ||
+    code === "KeyQ" ||
     lowerKey === "z" ||
+    lowerKey === "q" ||
     key === "ｚ" ||
     key === "Ｚ" ||
+    key === "ｑ" ||
+    key === "Ｑ" ||
     key === "つ" ||
-    key === "っ"
+    key === "っ" ||
+    key === "た"
   ) {
     return "rotateCcw";
   }
@@ -111,9 +116,12 @@ export function getGameActionFromEvent(e: KeyboardEvent): GameAction | null {
     return "rotateCw";
   }
 
-  // 8. ホールド (C, 全角C, かな「そ」)
+  // 8. ホールド (C, Shift, 全角C, かな「そ」)
   if (
     code === "KeyC" ||
+    code === "ShiftLeft" ||
+    code === "ShiftRight" ||
+    key === "Shift" ||
     lowerKey === "c" ||
     key === "ｃ" ||
     key === "Ｃ" ||

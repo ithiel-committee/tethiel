@@ -220,17 +220,19 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             TAB
           </text>
 
-          {/* Q */}
+          {/* Q (左回転 - アクティブ) */}
           <rect
             x="165"
             y="58"
             width="18"
             height="18"
             rx="3"
-            fill="url(#key-idle)"
-            stroke="rgba(100, 116, 139, 0.25)"
+            fill={isPressed("keyq") ? "url(#key-pressed)" : "url(#key-active)"}
+            stroke="#ff2a6d"
+            strokeWidth={isPressed("keyq") ? "2" : "1.2"}
+            filter={isPressed("keyq") ? "url(#neon-glow)" : undefined}
           />
-          <text x="174" y="70" textAnchor="middle" fill="#64748b" fontSize="8">
+          <text x="174" y="70" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">
             Q
           </text>
 
@@ -394,17 +396,29 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
 
         {/* Row 4 (ZXCV) */}
         <g className="kb-row-4">
-          {/* Shift */}
+          {/* Shift (ホールド - アクティブゴールド) */}
           <rect
             x="138"
             y="100"
             width="34"
             height="18"
             rx="3"
-            fill="url(#key-idle)"
-            stroke="rgba(100, 116, 139, 0.25)"
+            fill={
+              isPressed("shiftleft") || isPressed("shiftright")
+                ? "url(#key-pressed)"
+                : "url(#key-gold)"
+            }
+            stroke="#f59e0b"
+            strokeWidth={
+              isPressed("shiftleft") || isPressed("shiftright") ? "2" : "1.2"
+            }
+            filter={
+              isPressed("shiftleft") || isPressed("shiftright")
+                ? "url(#neon-glow)"
+                : undefined
+            }
           />
-          <text x="155" y="112" textAnchor="middle" fill="#64748b" fontSize="7">
+          <text x="155" y="112" textAnchor="middle" fill="#fef08a" fontSize="7" fontWeight="bold">
             SHIFT
           </text>
 

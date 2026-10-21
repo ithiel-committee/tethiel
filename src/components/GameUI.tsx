@@ -375,8 +375,8 @@ export const GameUI = ({
             >
               <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex items-center justify-between px-1 font-bold">
                 <span>HOLD</span>
-                <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none">
-                  C
+                <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none px-1">
+                  C / SHIFT
                 </span>
               </div>
               <div className="w-full h-14 bg-slate-950 rounded flex items-center justify-center border border-slate-800">
@@ -428,9 +428,10 @@ export const GameUI = ({
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="ctrl-label">回転:</span>
+                <span className="keycap">Q</span>
+                <span className="keycap">W</span>
                 <span className="keycap">Z</span>
                 <span className="keycap">X</span>
-                <span className="keycap">W</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="ctrl-label">移動:</span>
@@ -447,6 +448,7 @@ export const GameUI = ({
               <div className="flex items-center gap-1.5">
                 <span className="ctrl-label">ホールド:</span>
                 <span className="keycap keycap-accent">C</span>
+                <span className="keycap keycap-accent keycap-wide">SHIFT</span>
                 <span className="ctrl-note text-[10px]">(ミノ交代)</span>
               </div>
               {engine.skills.length > 0 && (
