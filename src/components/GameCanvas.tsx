@@ -12,6 +12,7 @@ import type { GameEngine } from "../game/engine";
 import { calculateGhostY } from "../game/tetromino";
 import playerLeftImg from "../assets/character/player_left.png";
 import playerRightImg from "../assets/character/player_right.png";
+import virusImg from "../assets/obstacle/virus.png";
 
 // スプライト画像キャッシュ
 const playerSpriteLeft = new Image();
@@ -19,6 +20,9 @@ playerSpriteLeft.src = playerLeftImg;
 
 const playerSpriteRight = new Image();
 playerSpriteRight.src = playerRightImg;
+
+const virusSprite = new Image();
+virusSprite.src = virusImg;
 
 interface GameCanvasProps {
   engine: GameEngine;
@@ -461,7 +465,7 @@ function drawMinoBlock(
   ctx.strokeRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
 }
 
-// 障害物ブロックの描画（トゲトゲ・危険サイバースパイク）
+// 障害物ブロックの描画 (ウイルス画像スプライト & サイバーネオングロー)
 function drawObstacleBlock(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -472,65 +476,49 @@ function drawObstacleBlock(
   const bx = x + pad;
   const by = y + pad;
   const bs = BLOCK_SIZE - pad * 2;
-  const coreMargin = 5;
-  const cx = bx + coreMargin;
-  const cy = by + coreMargin;
-  const cw = bs - coreMargin * 2;
-  const ch = bs - coreMargin * 2;
 
-  // 1. 暗い土台
-  ctx.fillStyle = "#161b26";
+  // 1. ウイルス背後のダークサイバー台座 & 赤い警戒ネオン枠
+  ctx.fillStyle = "rgba(18, 5, 12, 0.75)";
   ctx.fillRect(bx, by, bs, bs);
 
-  // 2. トゲ（スパイク）の描画：上・右・下・左にそれぞれ鋭利な三角形のトゲ
-  const spikeW = cw / 2;
-  const pulse = (Math.sin(time / 200) + 1) / 2;
-
-  ctx.fillStyle = "#ff1744";
-  ctx.strokeStyle = "#ff5252";
+  ctx.strokeStyle = "rgba(255, 26, 75, 0.4)";
   ctx.lineWidth = 1;
+  ctx.strokeRect(bx + 0.5, by + 0.5, bs - 1, bs - 1);
 
-  ctx.beginPath();
-  // 上のトゲ（2本）
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + spikeW * 0.5, by);
-  ctx.lineTo(cx + spikeW, cy);
-  ctx.lineTo(cx + spikeW * 1.5, by);
-  ctx.lineTo(cx + cw, cy);
+  // 2. ウイルス本体の描画 (画像読み込み済みの場合)
+  if (virusSprite.complete && virusSprite.naturalWidth > 0) {
+    // 生きているような穏やかな呼吸モーション (周期600ms, ±4%の拡縮)
+    const pulse = Math.sin(time / 300);
+    const breath = 1 + pulse * 0.04;
+    const drawSize = Math.round((BLOCK_SIZE - 4) * breath);
 
-  // 右のトゲ（2本）
-  ctx.lineTo(bx + bs, cy + spikeW * 0.5);
-  ctx.lineTo(cx + cw, cy + spikeW);
-  ctx.lineTo(bx + bs, cy + spikeW * 1.5);
-  ctx.lineTo(cx + cw, cy + ch);
+    const cx = x + BLOCK_SIZE / 2;
+    const cy = y + BLOCK_SIZE / 2;
 
-  // 下のトゲ（2本）
-  ctx.lineTo(cx + spikeW * 1.5, by + bs);
-  ctx.lineTo(cx + spikeW, cy + ch);
-  ctx.lineTo(cx + spikeW * 0.5, by + bs);
-  ctx.lineTo(cx, cy + ch);
+    ctx.save();
+    // 赤いネオングロー
+    ctx.shadowColor = "#ff1a4b";
+    ctx.shadowBlur = 6 + (pulse + 1) * 3;
 
-  // 左のトゲ（2本）
-  ctx.lineTo(bx, cy + spikeW * 1.5);
-  ctx.lineTo(cx, cy + spikeW);
-  ctx.lineTo(bx, cy + spikeW * 0.5);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+    // ドット絵の鮮明さを保つためスムージング無効
+    const prevSmoothing = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
 
-  // 3. 中央の金属コアプレート
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(cx, cy, cw, ch);
-  ctx.strokeStyle = "#475569";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(cx, cy, cw, ch);
+    ctx.drawImage(
+      virusSprite,
+      Math.round(cx - drawSize / 2),
+      Math.round(cy - drawSize / 2),
+      drawSize,
+      drawSize,
+    );
 
-  // 4. 中央の危険警告インジケータ（明滅する赤いパルスアイ）
-  ctx.fillStyle = `rgba(255, 23, 68, ${0.7 + pulse * 0.3})`;
-  ctx.shadowColor = "#ff1744";
-  ctx.shadowBlur = 4 + pulse * 4;
-  ctx.fillRect(bx + bs / 2 - 2, by + bs / 2 - 2, 4, 4);
-  ctx.shadowBlur = 0;
+    ctx.imageSmoothingEnabled = prevSmoothing;
+    ctx.restore();
+  } else {
+    // 画像ロード前のフォールバック描画
+    ctx.fillStyle = "#ff1744";
+    ctx.fillRect(bx + 4, by + 4, bs - 8, bs - 8);
+  }
 }
 
 // グリッチ状態のブロック描画（消えるのではなく実態を残したまま数msおきに激しくグリッチ）
