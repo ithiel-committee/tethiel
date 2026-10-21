@@ -472,25 +472,12 @@ function drawObstacleBlock(
   y: number,
   time: number,
 ) {
-  const pad = 1;
-  const bx = x + pad;
-  const by = y + pad;
-  const bs = BLOCK_SIZE - pad * 2;
-
-  // 1. ウイルス背後のダークサイバー台座 & 赤い警戒ネオン枠
-  ctx.fillStyle = "rgba(18, 5, 12, 0.75)";
-  ctx.fillRect(bx, by, bs, bs);
-
-  ctx.strokeStyle = "rgba(255, 26, 75, 0.4)";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(bx + 0.5, by + 0.5, bs - 1, bs - 1);
-
-  // 2. ウイルス本体の描画 (画像読み込み済みの場合)
+  // ウイルス本体の描画 (画像読み込み済みの場合)
   if (virusSprite.complete && virusSprite.naturalWidth > 0) {
     // 生きているような穏やかな呼吸モーション (周期600ms, ±4%の拡縮)
     const pulse = Math.sin(time / 300);
     const breath = 1 + pulse * 0.04;
-    const drawSize = Math.round((BLOCK_SIZE - 4) * breath);
+    const drawSize = Math.round((BLOCK_SIZE - 2) * breath);
 
     const cx = x + BLOCK_SIZE / 2;
     const cy = y + BLOCK_SIZE / 2;
@@ -517,7 +504,7 @@ function drawObstacleBlock(
   } else {
     // 画像ロード前のフォールバック描画
     ctx.fillStyle = "#ff1744";
-    ctx.fillRect(bx + 4, by + 4, bs - 8, bs - 8);
+    ctx.fillRect(x + 4, y + 4, BLOCK_SIZE - 8, BLOCK_SIZE - 8);
   }
 }
 
