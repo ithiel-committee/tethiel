@@ -549,15 +549,26 @@ export class GameEngine {
       }
     }
 
-    // 3. ミノの自動落下
+    // 3. ミノの自動落下 & 接地・ロックディレイ判定
     if (this.currentPiece) {
+      const isCurrentlyGrounded = checkCollision(
+        this.currentPiece,
+        this.grid,
+        0,
+        1,
+      );
+
+      // 直下に足場がない（空中にいる）場合は直ちにロック状態を解除
+      if (!isCurrentlyGrounded) {
+        this.isLocking = false;
+        this.lockDelayTimerMs = 0;
+      }
+
       this.dropTimerMs += deltaMs;
       if (this.dropTimerMs >= this.dropIntervalMs) {
         this.dropTimerMs = 0;
-        if (!checkCollision(this.currentPiece, this.grid, 0, 1)) {
+        if (!isCurrentlyGrounded) {
           this.currentPiece.y++;
-          this.isLocking = false;
-          this.lockDelayTimerMs = 0;
         } else {
           this.isLocking = true;
         }
@@ -1052,6 +1063,13 @@ export class GameEngine {
       this.currentPiece.y++;
       this.score += 1;
       sounds.playMove();
+      // 下に移動した直後の接地判定
+      if (!checkCollision(this.currentPiece, this.grid, 0, 1)) {
+        this.isLocking = false;
+        this.lockDelayTimerMs = 0;
+      } else {
+        this.isLocking = true;
+      }
     } else {
       this.isLocking = true;
     }
@@ -1132,7 +1150,14 @@ export class GameEngine {
   }
 
   private resetLockDelay() {
-    if (this.isLocking) {
+    if (!this.currentPiece) return;
+    const isGrounded = checkCollision(this.currentPiece, this.grid, 0, 1);
+    if (!isGrounded) {
+      // 横移動や回転で空中に抜け出た場合はロック状態を解除
+      this.isLocking = false;
+      this.lockDelayTimerMs = 0;
+    } else if (this.isLocking) {
+      // 接地継続中の場合はロック猶予時間をリセット
       this.lockDelayTimerMs = 0;
     }
   }
