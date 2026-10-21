@@ -123,9 +123,16 @@ export class GameEngine {
     return Math.max(0, 2 - this.minoCount);
   }
 
-  constructor(stage: StageData, callbacks: EngineCallbacks) {
+  constructor(
+    stage: StageData,
+    callbacks: EngineCallbacks,
+    initialBestScore?: number,
+  ) {
     this.stage = stage;
     this.callbacks = callbacks;
+    if (initialBestScore !== undefined) {
+      this.bestScore = initialBestScore;
+    }
     this.bag = new TetrominoBag();
     this.totalStars = stage.initialStars.length;
     this.initGrid();

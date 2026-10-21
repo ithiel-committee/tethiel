@@ -15,6 +15,12 @@ import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import type { StageData } from "../types/game";
 import { preloadGameAssets } from "../utils/preloadAssets";
+import {
+  getScoreLogs,
+  getStageBestRecords,
+  type ScoreLogEntry,
+  type StageBestRecord,
+} from "../utils/scoreStorage";
 import { KeyboardGuide } from "./KeyboardGuide";
 
 interface TitleScreenProps {
@@ -34,6 +40,16 @@ export const TitleScreen = ({
   const [menuView, setMenuView] = useState<MenuView>("main");
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
+  const [rankingTab, setRankingTab] = useState<"bests" | "logs">("bests");
+  const [stageBests, setStageBests] = useState<Record<number, StageBestRecord>>({});
+  const [scoreLogs, setScoreLogs] = useState<ScoreLogEntry[]>([]);
+
+  useEffect(() => {
+    if (activeModal === "ranking") {
+      setStageBests(getStageBestRecords());
+      setScoreLogs(getScoreLogs());
+    }
+  }, [activeModal]);
 
   const handleStageSelectWithAnim = (stage: StageData) => {
     if (selectedStageId !== null) return;
@@ -288,7 +304,7 @@ export const TitleScreen = ({
                 <div className="title-modal-title">
                   <div className="flex items-center gap-2">
                     <Trophy size={16} className="text-amber-400" />
-                    <span>DEFENSE SYSTEM RANKING</span>
+                    <span>DEFENSE SYSTEM RANKING & LOG</span>
                   </div>
                   <button
                     type="button"
@@ -298,26 +314,140 @@ export const TitleScreen = ({
                     <X size={16} />
                   </button>
                 </div>
-                <div className="space-y-3 text-xs">
-                  <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
-                    <div className="text-amber-300 font-bold">
-                      STAGE 1: 入門・回路接続
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span>BEST SCORE: 987,654 pts</span>
-                      <span>CLEAR TIME: 00:42.50</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-slate-900/80 rounded border border-amber-500/30 space-y-1">
-                    <div className="text-rose-400 font-bold">
-                      ★ ENDLESS MODE: 無限クライミング
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span>MAX ALTITUDE: 1,280 m</span>
-                      <span>RECORD TIME: 05:14.20</span>
-                    </div>
-                  </div>
+
+                {/* タブ切り替え */}
+                <div className="flex gap-2 border-b border-rose-950/60 pb-2">
+                  <button
+                    type="button"
+                    onClick={() => setRankingTab("bests")}
+                    className={`px-3 py-1 text-xs rounded font-bold transition-colors cursor-pointer ${
+                      rankingTab === "bests"
+                        ? "bg-rose-600 text-white shadow-[0_0_10px_rgba(255,26,75,0.5)]"
+                        : "bg-slate-900/90 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    BEST RECORDS (自己ベスト)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRankingTab("logs")}
+                    className={`px-3 py-1 text-xs rounded font-bold transition-colors cursor-pointer ${
+                      rankingTab === "logs"
+                        ? "bg-rose-600 text-white shadow-[0_0_10px_rgba(255,26,75,0.5)]"
+                        : "bg-slate-900/90 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    SCORE LOGS (プレイ履歴)
+                  </button>
                 </div>
+
+                {/* BEST RECORDS タブ */}
+                {rankingTab === "bests" && (
+                  <div className="space-y-2.5 text-xs">
+                    {/* STAGE 1 */}
+                    <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-amber-300 font-bold">STAGE 1: 入門・回路接続</span>
+                        {stageBests[1]?.bestRank && (
+                          <span className="px-1.5 py-0.5 bg-amber-500/20 border border-amber-400 text-amber-300 rounded text-[10px] font-bold">
+                            RANK {stageBests[1].bestRank}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex justify-between text-slate-300 text-[11px]">
+                        <span>BEST SCORE: {(stageBests[1]?.highScore ?? 987654).toLocaleString()} pts</span>
+                        <span>
+                          CLEAR TIME: {stageBests[1]?.bestTimeSeconds ? `${Math.floor(stageBests[1].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[1].bestTimeSeconds % 60).toString().padStart(2, "0")}.00` : "00:42.50"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* STAGE 2 */}
+                    <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-rose-300 font-bold">STAGE 2: サイバー迂回ルート</span>
+                        {stageBests[2]?.bestRank && (
+                          <span className="px-1.5 py-0.5 bg-rose-500/20 border border-rose-400 text-rose-300 rounded text-[10px] font-bold">
+                            RANK {stageBests[2].bestRank}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex justify-between text-slate-300 text-[11px]">
+                        <span>BEST SCORE: {(stageBests[2]?.highScore ?? 854320).toLocaleString()} pts</span>
+                        <span>
+                          CLEAR TIME: {stageBests[2]?.bestTimeSeconds ? `${Math.floor(stageBests[2].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[2].bestTimeSeconds % 60).toString().padStart(2, "0")}.00` : "01:08.20"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* ENDLESS */}
+                    <div className="p-2.5 bg-slate-900/80 rounded border border-amber-500/40 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-amber-400 font-bold">★ ENDLESS MODE: 無限クライミング</span>
+                        <span className="text-[10px] text-amber-300">サバイバル</span>
+                      </div>
+                      <div className="flex justify-between text-slate-300 text-[11px]">
+                        <span>MAX ALTITUDE: {(stageBests[99]?.maxAltitude ?? 1280).toLocaleString()} m</span>
+                        <span>BEST SCORE: {(stageBests[99]?.highScore ?? 128000).toLocaleString()} pts</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SCORE LOGS タブ */}
+                {rankingTab === "logs" && (
+                  <div className="space-y-2 text-xs max-h-[280px] overflow-y-auto pr-1">
+                    {scoreLogs.length === 0 ? (
+                      <div className="p-6 text-center text-slate-400 bg-slate-900/40 rounded border border-slate-800">
+                        <p>プレイ履歴がまだありません。</p>
+                        <p className="text-[10px] text-slate-500 mt-1">ゲームをプレイすると直近30件のログがここに記録されます。</p>
+                      </div>
+                    ) : (
+                      scoreLogs.map((log) => {
+                        const date = new Date(log.timestamp);
+                        const timeStr = `${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+                        return (
+                          <div
+                            key={log.id}
+                            className="p-2 bg-slate-900/80 rounded border border-slate-800 hover:border-rose-500/40 transition-colors flex justify-between items-center"
+                          >
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
+                                  log.isCleared
+                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                    : "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                                }`}>
+                                  {log.isCleared ? (log.isBonusClear ? "BONUS" : "CLEAR") : "FAIL"}
+                                </span>
+                                <span className="font-bold text-slate-200">{log.stageName}</span>
+                                <span className="text-[10px] text-slate-500">{timeStr}</span>
+                              </div>
+                              <div className="text-[10px] text-slate-400 flex gap-2">
+                                <span>TIME: {Math.floor(log.clearTimeSeconds / 60)}:{(log.clearTimeSeconds % 60).toString().padStart(2, "0")}</span>
+                                {log.climbedHeight ? (
+                                  <span>高度: {log.climbedHeight}m</span>
+                                ) : (
+                                  <span>ミノ: {log.minoCount}手</span>
+                                )}
+                                <span>★ {log.bonusStars}</span>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              <div className="text-yellow-400 font-bold font-mono">
+                                {log.score.toLocaleString()} pts
+                              </div>
+                              <div className="text-[10px] text-rose-300 font-bold">
+                                RANK {log.rank}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </>
             )}
 

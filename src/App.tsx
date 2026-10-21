@@ -15,6 +15,7 @@ import type {
   StageData,
   TetrominoType,
 } from "./types/game";
+import { getStageBestRecords, saveGameResult } from "./utils/scoreStorage";
 import { cleanStageUrl, parseStageFromUrl } from "./utils/url";
 
 type Screen = "title" | "prologue" | "game" | "epilogue" | "result";
@@ -49,27 +50,48 @@ export function App() {
 
   // GameEngineの初期化
   const engine = useMemo(() => {
-    return new GameEngine(selectedStage, {
-      onStatusChange: (status) => setGameStatus(status),
-      onHeartsChange: (newHearts) => setHearts(newHearts),
-      onCharacterMove: () => {},
-      onHoldChange: (piece) => setHoldPiece(piece),
-      onNextChange: (next) => setNextPieces(next),
-      onStatsChange: (newStats) => setStats(newStats),
-      onStageClear: (isBonus) => {
-        setIsBonusClear(isBonus);
-        const epilogue = getStoryScene(selectedStage.id, "epilogue");
-        if (epilogue) {
-          setScreen("epilogue");
-        } else {
+    const stageBests = getStageBestRecords();
+    const initialBestScore = stageBests[selectedStage.id]?.highScore ?? 0;
+
+    return new GameEngine(
+      selectedStage,
+      {
+        onStatusChange: (status) => setGameStatus(status),
+        onHeartsChange: (newHearts) => setHearts(newHearts),
+        onCharacterMove: () => {},
+        onHoldChange: (piece) => setHoldPiece(piece),
+        onNextChange: (next) => setNextPieces(next),
+        onStatsChange: (newStats) => setStats(newStats),
+        onStageClear: (isBonus, finalStats) => {
+          setIsBonusClear(isBonus);
+          saveGameResult({
+            stage: selectedStage,
+            stats: finalStats,
+            hearts: 5, // クリア時のハート数 (クリアボーナス計算済)
+            isCleared: true,
+            isBonusClear: isBonus,
+          });
+          const epilogue = getStoryScene(selectedStage.id, "epilogue");
+          if (epilogue) {
+            setScreen("epilogue");
+          } else {
+            setScreen("result");
+          }
+        },
+        onGameOver: (reason, finalStats) => {
+          setGameOverReason(reason);
+          saveGameResult({
+            stage: selectedStage,
+            stats: finalStats,
+            hearts: 0,
+            isCleared: false,
+            gameOverReason: reason,
+          });
           setScreen("result");
-        }
+        },
       },
-      onGameOver: (reason) => {
-        setGameOverReason(reason);
-        setScreen("result");
-      },
-    });
+      initialBestScore,
+    );
   }, [selectedStage]);
 
   // URL直接指定で直接ゲーム画面に入った場合の自動開始
