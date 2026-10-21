@@ -1,10 +1,7 @@
 import {
-  Bomb,
   Heart,
   Pause,
   Play,
-  RotateCcw,
-  RotateCw,
   Volume2,
   VolumeX,
 } from "lucide-react";
@@ -413,14 +410,14 @@ export const GameUI = ({
             />
           </CyberCard>
 
-          {/* 操作説明枠 & オンスクリーンコントローラー */}
+          {/* 操作説明枠 (キーボード操作ガイド) */}
           <CyberCard
             variant="default"
             className="p-2.5 text-left space-y-2 shadow-[0_0_15px_rgba(255,26,75,0.1)]"
           >
             <div className="title-controls-header border-b border-slate-800 pb-1 flex justify-between items-center text-[10px]">
               <span className="text-rose-400 font-bold font-['DotGothic16'] text-xs">操作ガイド</span>
-              <span className="title-controls-sub text-[9px]">KEY & TOUCH</span>
+              <span className="title-controls-sub text-[9px]">KEYBOARD</span>
             </div>
 
             <div className="flex flex-col gap-1 text-[11px] pt-0.5">
@@ -450,73 +447,15 @@ export const GameUI = ({
               <div className="flex items-center gap-1.5">
                 <span className="ctrl-label">ホールド:</span>
                 <span className="keycap keycap-accent">C</span>
-                <span className="ctrl-note text-[10px]">(キープしたミノと交代)</span>
+                <span className="ctrl-note text-[10px]">(ミノ交代)</span>
               </div>
-            </div>
-
-            {/* 展示PC用タッチ/マウスクリックボタン（統一デザイン） */}
-            <div className="pt-2 border-t border-slate-800 grid grid-cols-3 gap-1.5">
-              <CyberButton
-                variant="touch"
-                onClick={() => engine.moveLeft()}
-              >
-                ◀ LEFT
-              </CyberButton>
-              <CyberButton
-                variant="touch"
-                onClick={() => engine.softDrop()}
-              >
-                ▼ DOWN
-              </CyberButton>
-              <CyberButton
-                variant="touch"
-                onClick={() => engine.moveRight()}
-              >
-                RIGHT ▶
-              </CyberButton>
-              <CyberButton
-                variant="touch"
-                onClick={() => engine.rotate(false)}
-                icon={<RotateCcw size={12} />}
-              >
-                ROT L
-              </CyberButton>
-              <CyberButton
-                variant="touch"
-                onClick={() => engine.rotate(true)}
-                icon={<RotateCw size={12} />}
-              >
-                ROT R
-              </CyberButton>
-              <CyberButton
-                variant="touch"
-                onClick={() => engine.hardDrop()}
-              >
-                ⚡ DROP
-              </CyberButton>
-              <CyberButton
-                variant="touch"
-                onClick={() => engine.hold()}
-                className={
-                  engine.skills.length > 0
-                    ? "col-span-1"
-                    : "col-span-3 flex items-center justify-center gap-1.5"
-                }
-              >
-                <span>HOLD</span>
-                <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none">
-                  C
-                </span>
-              </CyberButton>
               {engine.skills.length > 0 && (
-                <CyberButton
-                  variant="touch"
-                  onClick={() => engine.useBomb()}
-                  className="col-span-2"
-                  icon={<Bomb size={12} />}
-                >
-                  BOMB!
-                </CyberButton>
+                <div className="flex items-center gap-1.5">
+                  <span className="ctrl-label">ボム:</span>
+                  <span className="keycap keycap-accent">B</span>
+                  <span className="keycap">1</span>
+                  <span className="ctrl-note text-[10px]">(ウイルス爆破)</span>
+                </div>
               )}
             </div>
           </CyberCard>
