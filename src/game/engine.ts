@@ -168,14 +168,6 @@ export class GameEngine {
         const height = START_ROW - r; // 行17はh=4、行0はh=21
         this.grid[r] = this.generateNewEndlessRow(height);
       }
-      // 上部スポーンゾーン(行0〜1、列3〜8)の安全を完全確保
-      for (let r = 0; r <= 1; r++) {
-        for (let c = 3; c <= 8; c++) {
-          if (this.grid[r][c].type === "obstacle") {
-            this.grid[r][c] = { type: "empty" };
-          }
-        }
-      }
     } else {
       // 通常ステージモード: ステージ定義に基づく配置
       for (const [r, c] of this.stage.initialObstacles) {
@@ -227,15 +219,8 @@ export class GameEngine {
     return x - Math.floor(x);
   }
 
-  // 行内の最大連続空き幅を検査し、幅4マス以上の通路およびスポーンゾーン(列4〜7)の安全を100%保証するフェイルセーフ
+  // 行内の最大連続空き幅を検査し、幅4マス以上の通路を100%保証するフェイルセーフ
   private ensurePassableCorridor(row: Cell[]): void {
-    // ミノのスポーンゾーン(列4〜7)は100%安全に保護 (上部スポーン直後の即死防止)
-    for (let c = 4; c <= 7; c++) {
-      if (row[c].type === "obstacle") {
-        row[c] = { type: "empty" };
-      }
-    }
-
     let maxEmptySpan = 0;
     let currentSpan = 0;
 
@@ -250,7 +235,7 @@ export class GameEngine {
       }
     }
 
-    // 幅4以上の連続空きスペースがない場合、中央付近(列 4〜7)の空きを強制確保
+    // 幅4以上の連続空きスペースがない場合のみ、中央付近(列 4〜7)の空きを強制確保して詰みを防止
     if (maxEmptySpan < 4) {
       for (let c = 4; c <= 7; c++) {
         row[c] = { type: "empty" };
@@ -280,7 +265,7 @@ export class GameEngine {
     }
 
     const rnd = (off: number) => this.pseudoRandom(height * 17.1 + off * 5.3);
-    // 5種類の障害物パターン (0: 左壁, 1: 右壁, 2: サイド島, 3: オフセットピン, 4: 左右ピンチ)
+    // 5種類の障害物パターン (0: 左壁, 1: 右壁, 2: 中央島, 3: オフセットピン, 4: 左右ピンチ)
     const pattern = Math.floor(rnd(1) * 5);
 
     const obstacleCols: number[] = [];
@@ -299,10 +284,12 @@ export class GameEngine {
         break;
       }
       case 2: {
-        // パターン2: サイドアイランド (列 2〜3 または 列 8〜9) - スポーン列(4〜7)を塞がない
-        const side = rnd(2) > 0.5 ? 2 : 8;
-        obstacleCols.push(side);
-        if (rnd(3) > 0.6) obstacleCols.push(side + 1);
+        // パターン2: 中央アイランド (列 5, 6 または 列 4, 7) - 中央即配置を阻み左右迂回ルートを要求
+        if (rnd(2) > 0.4) {
+          obstacleCols.push(5, 6);
+        } else {
+          obstacleCols.push(rnd(3) > 0.5 ? 4 : 7);
+        }
         break;
       }
       case 3: {
@@ -436,10 +423,10 @@ export class GameEngine {
     this.lockDelayTimerMs = 0;
     this.dropTimerMs = 0;
 
-    // 出現位置で衝突する場合の安全回避処理
+    // 出現位置で衝突する場合の安全スポーン処理
     if (checkCollision(this.currentPiece, this.grid)) {
-      // 1. わずかに左右(dx = -1, 1, -2, 2)へシフトして安全に出現できる位置を探索
-      const shiftOffsets = [-1, 1, -2, 2];
+      // 1. 左右の安全な空きスペース(dx = -1, 1, -2, 2, -3, 3, -4, 4)からの出現を試みる
+      const shiftOffsets = [-1, 1, -2, 2, -3, 3, -4, 4];
       let shifted = false;
       for (const dx of shiftOffsets) {
         if (!checkCollision(this.currentPiece, this.grid, dx, 0)) {
@@ -449,7 +436,25 @@ export class GameEngine {
         }
       }
 
-      // 2. シフトしてもなお重なる場合のフェイルセーフ
+      // 2. 水平シフトで空きがない場合、画面外上空(y = -1)からの出現を試みる
+      if (!shifted && !checkCollision(this.currentPiece, this.grid, 0, -1)) {
+        this.currentPiece.y = -1;
+        shifted = true;
+      }
+
+      // 3. 画面外上空かつ左右シフト(dx, y = -1)を試みる
+      if (!shifted) {
+        for (const dx of shiftOffsets) {
+          if (!checkCollision(this.currentPiece, this.grid, dx, -1)) {
+            this.currentPiece.x += dx;
+            this.currentPiece.y = -1;
+            shifted = true;
+            break;
+          }
+        }
+      }
+
+      // 4. シフトしてもなお重なる場合のフェイルセーフ
       if (!shifted) {
         // エンドレスモードで障害物に阻まれている場合は、出現領域の障害物をクリアして即死を防止
         if (this.gameMode === "endless") {
