@@ -252,14 +252,14 @@ export class GameEngine {
       row.push({ type: "empty" });
     }
 
-    // 序盤の超低高度 (h <= 2) はスタート直後の足場作りのため完全空き
-    if (height <= 2) {
+    // 序盤の低高度 (h <= 4) はスタート直後の足場作りのため完全空き
+    if (height <= 4) {
       return row;
     }
 
-    // 3行に1回 (height % 3 === 0) はクールダウン行 (トゲなし、ボーナス星配置)
-    if (height % 3 === 0) {
-      if (this.pseudoRandom(height * 3.7) > 0.25) {
+    // クールダウン行 (3行に1回、または全体の約30%をスキップして障害物数を従来の0.7倍に調整)
+    if (height % 3 === 0 || this.pseudoRandom(height * 5.1) > 0.7) {
+      if (this.pseudoRandom(height * 3.7) > 0.3) {
         const starCol = 3 + Math.floor(this.pseudoRandom(height * 8.9) * 6);
         row[starCol] = { type: "star" };
       }
@@ -276,18 +276,22 @@ export class GameEngine {
       case 0: {
         // パターン0: 左壁 (列 1 または 列 0〜1) - 右側幅10マス開通
         obstacleCols.push(1);
-        if (height > 15 && rnd(2) > 0.55) obstacleCols.push(0);
+        if (height > 20 && rnd(2) > 0.7) obstacleCols.push(0);
         break;
       }
       case 1: {
         // パターン1: 右壁 (列 10 または 列 10〜11) - 左側幅10マス開通
         obstacleCols.push(10);
-        if (height > 15 && rnd(2) > 0.55) obstacleCols.push(11);
+        if (height > 20 && rnd(2) > 0.7) obstacleCols.push(11);
         break;
       }
       case 2: {
-        // パターン2: 中央アイランド (列 5, 6) - 左右どちらも幅5マス開通
-        obstacleCols.push(5, 6);
+        // パターン2: 中央アイランド (幅を抑えて1〜2マス) - 左右どちらも幅5マス開通
+        if (rnd(2) > 0.5) {
+          obstacleCols.push(5, 6);
+        } else {
+          obstacleCols.push(rnd(3) > 0.5 ? 5 : 6);
+        }
         break;
       }
       case 3: {
@@ -299,7 +303,7 @@ export class GameEngine {
       case 4: {
         // パターン4: 左右ピンチ (列 1 と 列 10) - 中央幅8マス完全開通
         obstacleCols.push(1);
-        if (rnd(4) > 0.35) obstacleCols.push(10);
+        if (rnd(4) > 0.55) obstacleCols.push(10);
         break;
       }
     }
