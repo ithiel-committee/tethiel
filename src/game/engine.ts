@@ -558,7 +558,7 @@ export class GameEngine {
         1,
       );
 
-      // 直下に足場がない（空中にいる）場合は直ちにロック状態を解除
+      // 直下に足場がない(空中にいる)場合は直ちにロック状態を解除
       if (!isCurrentlyGrounded) {
         this.isLocking = false;
         this.lockDelayTimerMs = 0;
