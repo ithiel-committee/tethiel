@@ -168,6 +168,14 @@ export class GameEngine {
         const height = START_ROW - r; // 行17はh=4、行0はh=21
         this.grid[r] = this.generateNewEndlessRow(height);
       }
+      // 上部スポーンゾーン(行0〜1、列3〜8)の安全を完全確保
+      for (let r = 0; r <= 1; r++) {
+        for (let c = 3; c <= 8; c++) {
+          if (this.grid[r][c].type === "obstacle") {
+            this.grid[r][c] = { type: "empty" };
+          }
+        }
+      }
     } else {
       // 通常ステージモード: ステージ定義に基づく配置
       for (const [r, c] of this.stage.initialObstacles) {
@@ -219,8 +227,15 @@ export class GameEngine {
     return x - Math.floor(x);
   }
 
-  // 行内の最大連続空き幅を検査し、幅4マス以上の通路を100%保証するフェイルセーフ
+  // 行内の最大連続空き幅を検査し、幅4マス以上の通路およびスポーンゾーン(列4〜7)の安全を100%保証するフェイルセーフ
   private ensurePassableCorridor(row: Cell[]): void {
+    // ミノのスポーンゾーン(列4〜7)は100%安全に保護 (上部スポーン直後の即死防止)
+    for (let c = 4; c <= 7; c++) {
+      if (row[c].type === "obstacle") {
+        row[c] = { type: "empty" };
+      }
+    }
+
     let maxEmptySpan = 0;
     let currentSpan = 0;
 
@@ -235,12 +250,10 @@ export class GameEngine {
       }
     }
 
-    // 幅4以上の連続空きスペースがない場合、中央付近(列 4〜7)の障害物をクリアして通路を強制確保
+    // 幅4以上の連続空きスペースがない場合、中央付近(列 4〜7)の空きを強制確保
     if (maxEmptySpan < 4) {
       for (let c = 4; c <= 7; c++) {
-        if (row[c].type === "obstacle") {
-          row[c] = { type: "empty" };
-        }
+        row[c] = { type: "empty" };
       }
     }
   }
@@ -267,7 +280,7 @@ export class GameEngine {
     }
 
     const rnd = (off: number) => this.pseudoRandom(height * 17.1 + off * 5.3);
-    // 5種類の障害物パターン (0: 左壁, 1: 右壁, 2: 中央島, 3: オフセットピン, 4: 左右ピンチ)
+    // 5種類の障害物パターン (0: 左壁, 1: 右壁, 2: サイド島, 3: オフセットピン, 4: 左右ピンチ)
     const pattern = Math.floor(rnd(1) * 5);
 
     const obstacleCols: number[] = [];
@@ -286,12 +299,10 @@ export class GameEngine {
         break;
       }
       case 2: {
-        // パターン2: 中央アイランド (幅を抑えて1〜2マス) - 左右どちらも幅5マス開通
-        if (rnd(2) > 0.5) {
-          obstacleCols.push(5, 6);
-        } else {
-          obstacleCols.push(rnd(3) > 0.5 ? 5 : 6);
-        }
+        // パターン2: サイドアイランド (列 2〜3 または 列 8〜9) - スポーン列(4〜7)を塞がない
+        const side = rnd(2) > 0.5 ? 2 : 8;
+        obstacleCols.push(side);
+        if (rnd(3) > 0.6) obstacleCols.push(side + 1);
         break;
       }
       case 3: {
@@ -425,12 +436,51 @@ export class GameEngine {
     this.lockDelayTimerMs = 0;
     this.dropTimerMs = 0;
 
-    // 出現位置で衝突＝進行不能ゲームオーバー
+    // 出現位置で衝突する場合の安全回避処理
     if (checkCollision(this.currentPiece, this.grid)) {
-      this.triggerGameOver(
-        "ミノ上部に障害物があり置けない進行不能状態になりました",
-      );
-      return;
+      // 1. わずかに左右(dx = -1, 1, -2, 2)へシフトして安全に出現できる位置を探索
+      const shiftOffsets = [-1, 1, -2, 2];
+      let shifted = false;
+      for (const dx of shiftOffsets) {
+        if (!checkCollision(this.currentPiece, this.grid, dx, 0)) {
+          this.currentPiece.x += dx;
+          shifted = true;
+          break;
+        }
+      }
+
+      // 2. シフトしてもなお重なる場合のフェイルセーフ
+      if (!shifted) {
+        // エンドレスモードで障害物に阻まれている場合は、出現領域の障害物をクリアして即死を防止
+        if (this.gameMode === "endless") {
+          const { matrix, x, y } = this.currentPiece;
+          let clearedAny = false;
+          for (let r = 0; r < matrix.length; r++) {
+            for (let c = 0; c < matrix[r].length; c++) {
+              if (matrix[r][c] !== 0) {
+                const tr = y + r;
+                const tc = x + c;
+                if (tr >= 0 && tr < GRID_HEIGHT && tc >= 0 && tc < GRID_WIDTH) {
+                  if (this.grid[tr][tc].type === "obstacle") {
+                    this.grid[tr][tc] = { type: "empty" };
+                    clearedAny = true;
+                  }
+                }
+              }
+            }
+          }
+          if (clearedAny && !checkCollision(this.currentPiece, this.grid)) {
+            this.callbacks.onNextChange(this.nextPieces);
+            return;
+          }
+        }
+
+        // 設置済みミノで完全に天井まで埋まっている場合は進行不能ゲームオーバー
+        this.triggerGameOver(
+          "ブロックが天井まで積み上がり置けなくなりました",
+        );
+        return;
+      }
     }
 
     this.callbacks.onNextChange(this.nextPieces);
