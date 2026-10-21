@@ -20,54 +20,14 @@ import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
 import { CyberButton, CyberCard } from "./ui";
 
-// 現在HPに応じたイティエルの腕上げ立ち絵と表情状態を取得
-const getIthielExpression = (currentHearts: number) => {
-  if (currentHearts >= 5) {
-    return {
-      src: ithielArmHp5,
-      label: "EXCELLENT",
-      subLabel: "絶好調！",
-      colorClass: "text-emerald-400 border-emerald-500/40 bg-emerald-950/40",
-    };
-  }
-  if (currentHearts === 4) {
-    return {
-      src: ithielArmHp4,
-      label: "STABLE",
-      subLabel: "良好",
-      colorClass: "text-cyan-400 border-cyan-500/40 bg-cyan-950/40",
-    };
-  }
-  if (currentHearts === 3) {
-    return {
-      src: ithielArmHp3,
-      label: "ALERT",
-      subLabel: "警戒中",
-      colorClass: "text-yellow-400 border-yellow-500/40 bg-yellow-950/40",
-    };
-  }
-  if (currentHearts === 2) {
-    return {
-      src: ithielArmHp2,
-      label: "WARNING",
-      subLabel: "被弾！焦り",
-      colorClass: "text-orange-400 border-orange-500/40 bg-orange-950/40",
-    };
-  }
-  if (currentHearts === 1) {
-    return {
-      src: ithielArmHp1,
-      label: "CRITICAL",
-      subLabel: "大ピンチ！涙目",
-      colorClass: "text-rose-400 border-rose-500/60 bg-rose-950/60 animate-pulse",
-    };
-  }
-  return {
-    src: ithielArmHp0,
-    label: "DOWN",
-    subLabel: "力尽きた...",
-    colorClass: "text-slate-400 border-slate-500/40 bg-slate-900/60",
-  };
+// 現在HPに応じたイティエルの腕上げ立ち絵を取得
+const getIthielStandingImage = (currentHearts: number) => {
+  if (currentHearts >= 5) return ithielArmHp5;
+  if (currentHearts === 4) return ithielArmHp4;
+  if (currentHearts === 3) return ithielArmHp3;
+  if (currentHearts === 2) return ithielArmHp2;
+  if (currentHearts === 1) return ithielArmHp1;
+  return ithielArmHp0;
 };
 
 interface GameUIProps {
@@ -433,40 +393,25 @@ export const GameUI = ({
           </div>
 
           {/* イティエル立ち絵表示枠 (HP連動表情・腕上げポーズ) */}
-          {(() => {
-            const expr = getIthielExpression(hearts);
-            return (
-              <CyberCard
-                variant="default"
-                className="relative w-full h-44 overflow-hidden flex flex-col items-center justify-end p-2 border-rose-500/30"
-              >
-                {/* サイバー背景エフェクト */}
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ff1a4b_1px,transparent_1px)] [background-size:12px_12px]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,26,75,0.2)_0%,transparent_70%)] pointer-events-none" />
+          <CyberCard
+            variant="default"
+            className="relative w-full h-44 overflow-hidden flex flex-col items-center justify-end p-2 border-rose-500/30"
+          >
+            {/* サイバー背景エフェクト */}
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ff1a4b_1px,transparent_1px)] [background-size:12px_12px]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,26,75,0.2)_0%,transparent_70%)] pointer-events-none" />
 
-                {/* HP状態インジケーターバッジ */}
-                <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5">
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-['DotGothic16'] font-bold border tracking-wider backdrop-blur-sm shadow-sm transition-colors duration-300 ${expr.colorClass}`}
-                  >
-                    {expr.label} : {expr.subLabel}
-                  </span>
-                </div>
-
-                {/* イティエル公式立ち絵イラスト (HP連動) */}
-                <img
-                  key={expr.src}
-                  src={expr.src}
-                  alt={`イティエル HP:${hearts}`}
-                  loading="eager"
-                  decoding="async"
-                  className={`relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_0_14px_rgba(255,26,75,0.35)] select-none pointer-events-none transition-all duration-300 ${
-                    isShaking ? "scale-95 brightness-125 filter drop-shadow-[0_0_20px_#ff1a4b]" : "scale-100"
-                  }`}
-                />
-              </CyberCard>
-            );
-          })()}
+            {/* イティエル公式立ち絵イラスト (HP連動) */}
+            <img
+              src={getIthielStandingImage(hearts)}
+              alt="イティエル"
+              loading="eager"
+              decoding="async"
+              className={`relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_0_14px_rgba(255,26,75,0.35)] select-none pointer-events-none transition-all duration-300 ${
+                isShaking ? "scale-95 brightness-125 filter drop-shadow-[0_0_20px_#ff1a4b]" : "scale-100"
+              }`}
+            />
+          </CyberCard>
 
           {/* 操作説明枠 & オンスクリーンコントローラー */}
           <CyberCard
