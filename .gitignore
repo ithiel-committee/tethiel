@@ -31,3 +31,4 @@ Thumbs.db
 # Custom
 .agent/
 plan.pdf
+output/
