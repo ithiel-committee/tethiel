@@ -4,9 +4,6 @@ import {
   Play,
   Settings,
   Trophy,
-  Volume2,
-  VolumeX,
-  X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { sounds } from "../audio/soundSystem";
@@ -27,7 +24,7 @@ import {
   type ScoreLogEntry,
   type StageBestRecord,
 } from "../utils/scoreStorage";
-import { KeyboardGuide } from "./KeyboardGuide";
+import { CreditModal, OptionModal, RankingModal } from "./modals";
 import { UIModeToggle } from "./ui";
 import { useOverflowCheck } from "../utils/overflowChecker";
 
@@ -64,7 +61,6 @@ export const TitleScreen = ({
   }, [initialMenuView]);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
-  const [rankingTab, setRankingTab] = useState<"bests" | "logs">("bests");
   const [stageBests, setStageBests] = useState<Record<number, StageBestRecord>>({});
   const [scoreLogs, setScoreLogs] = useState<ScoreLogEntry[]>([]);
 
@@ -478,433 +474,30 @@ export const TitleScreen = ({
         </div>
       )}
 
-      {/* モーダル群: RANKING, OPTION, CREDIT, CONTROLS */}
-      {activeModal && (
-        <div
-          className="title-modal-overlay"
-          onClick={() => setActiveModal(null)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setActiveModal(null);
-          }}
-          role="presentation"
-        >
-          <div
-            className={`title-modal-box ${
-              activeModal === "option" ? "title-modal-box-wide" : ""
-            }`}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            {/* RANKING モーダル */}
-            {activeModal === "ranking" && (
-              <>
-                <div className="title-modal-title">
-                  <div className="flex items-center gap-2">
-                    <Trophy size={16} className="text-amber-400" />
-                    <span>DEFENSE SYSTEM RANKING & LOG</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="title-modal-close-btn"
-                    onClick={() => setActiveModal(null)}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
+      {/* モーダル群: RANKING, OPTION, CREDIT */}
+      <RankingModal
+        isOpen={activeModal === "ranking"}
+        onClose={() => setActiveModal(null)}
+        stageBests={stageBests}
+        scoreLogs={scoreLogs}
+        onResetRecords={() => {
+          resetAllRecords();
+          setStageBests(getStageBestRecords());
+          setScoreLogs(getScoreLogs());
+        }}
+      />
 
-                {/* タブ切り替え */}
-                <div className="ranking-tabs-bar">
-                  <button
-                    type="button"
-                    onClick={() => setRankingTab("bests")}
-                    className={`ranking-tab-btn ${
-                      rankingTab === "bests"
-                        ? "ranking-tab-btn-active"
-                        : "ranking-tab-btn-inactive"
-                    }`}
-                  >
-                    {isKids ? "さいこう きろく" : "BEST RECORDS (自己ベスト)"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRankingTab("logs")}
-                    className={`ranking-tab-btn ${
-                      rankingTab === "logs"
-                        ? "ranking-tab-btn-active"
-                        : "ranking-tab-btn-inactive"
-                    }`}
-                  >
-                    {isKids ? "あそんだ りれき" : "SCORE LOGS (プレイ履歴)"}
-                  </button>
-                </div>
+      <OptionModal
+        isOpen={activeModal === "option"}
+        onClose={() => setActiveModal(null)}
+        isMuted={isMuted}
+        onToggleMute={onToggleMute}
+      />
 
-                {/* BEST RECORDS タブ */}
-                {rankingTab === "bests" && (
-                  <div className="space-y-2 text-xs">
-                    {[
-                      {
-                        id: 1,
-                        name: isKids ? "ステージ 1: はじめての みちづくり" : "STAGE 1: 入門・回路接続",
-                        isEndless: false,
-                      },
-                      {
-                        id: 2,
-                        name: isKids ? "ステージ 2: トゲをよけて すすもう" : "STAGE 2: サイバー迂回ルート",
-                        isEndless: false,
-                      },
-                      {
-                        id: 3,
-                        name: isKids ? "ステージ 3: さいごの たたかい" : "STAGE 3: 最終防衛戦",
-                        isEndless: false,
-                      },
-                      {
-                        id: 99,
-                        name: isKids ? "★ エンドレス: どこまでも のぼろう" : "★ ENDLESS MODE: 無限クライミング",
-                        isEndless: true,
-                      },
-                    ].map((stg) => {
-                      const best = stageBests[stg.id];
-                      const hasRecord = Boolean(
-                        best &&
-                          ((best.highScore ?? 0) > 0 || (best.maxAltitude ?? 0) > 0),
-                      );
-
-                      // 統一バッジ判定
-                      let badgeClass = "ranking-badge-none";
-                      let badgeText = isKids ? "きろくなし" : "NO RECORD";
-
-                      if (stg.isEndless) {
-                        if (hasRecord) {
-                          badgeClass = "ranking-badge-purple";
-                          badgeText = isKids ? "サバイバー" : "SURVIVOR";
-                        }
-                      } else if (hasRecord && best?.bestRank) {
-                        badgeText = `RANK ${best.bestRank}`;
-                        if (best.bestRank === "S+" || best.bestRank === "S") {
-                          badgeClass = "ranking-badge-gold";
-                        } else if (best.bestRank === "A") {
-                          badgeClass = "ranking-badge-rose";
-                        } else {
-                          badgeClass = "ranking-badge-cyan";
-                        }
-                      }
-
-                      return (
-                        <div key={stg.id} className="ranking-card">
-                          <div className="ranking-card-header">
-                            <span className="ranking-card-title">{stg.name}</span>
-                            <span className={`ranking-badge ${badgeClass}`}>
-                              {badgeText}
-                            </span>
-                          </div>
-                          <div className="ranking-card-metrics">
-                            <div className="ranking-metric-item">
-                              <span className="ranking-metric-label">
-                                {isKids ? "さいこう てんすう:" : "BEST SCORE:"}
-                              </span>
-                              <span
-                                className={`ranking-metric-value ${
-                                  hasRecord && best?.highScore
-                                    ? "text-amber-400"
-                                    : "text-slate-600"
-                                }`}
-                              >
-                                {hasRecord && best?.highScore
-                                  ? `${best.highScore.toLocaleString()} pts`
-                                  : "--"}
-                              </span>
-                            </div>
-                            <div className="ranking-metric-item">
-                              <span className="ranking-metric-label">
-                                {stg.isEndless
-                                  ? (isKids ? "さいこう たかさ:" : "MAX ALTITUDE:")
-                                  : (isKids ? "クリア じかん:" : "CLEAR TIME:")}
-                              </span>
-                              <span
-                                className={`ranking-metric-value ${
-                                  hasRecord
-                                    ? stg.isEndless
-                                      ? "text-emerald-400"
-                                      : "text-sky-300"
-                                    : "text-slate-600"
-                                }`}
-                              >
-                                {stg.isEndless
-                                  ? hasRecord && best?.maxAltitude
-                                    ? `${best.maxAltitude.toLocaleString()} m`
-                                    : "--"
-                                  : hasRecord && best?.bestTimeSeconds
-                                    ? `${Math.floor(best.bestTimeSeconds / 60)
-                                        .toString()
-                                        .padStart(2, "0")}:${(
-                                        best.bestTimeSeconds % 60
-                                      )
-                                        .toString()
-                                        .padStart(2, "0")}`
-                                    : "--:--"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* SCORE LOGS タブ */}
-                {rankingTab === "logs" && (
-                  <div className="space-y-2 text-xs max-h-[280px] overflow-y-auto pr-1">
-                    {scoreLogs.length === 0 ? (
-                      <div className="p-6 text-center text-slate-400 bg-slate-900/40 rounded-lg border border-slate-800">
-                        <p>
-                          {isKids
-                            ? "あそんだ りれきが まだありません。"
-                            : "プレイ履歴がまだありません。"}
-                        </p>
-                        <p className="text-[10px] text-slate-500 mt-1">
-                          {isKids
-                            ? "ゲームをあそぶと、さいごの30かいの きろくが ここにのこるよ。"
-                            : "ゲームをプレイすると直近30件のログがここに記録されます。"}
-                        </p>
-                      </div>
-                    ) : (
-                      scoreLogs.map((log) => {
-                        const date = new Date(log.timestamp);
-                        const timeStr = `${(date.getMonth() + 1)
-                          .toString()
-                          .padStart(2, "0")}/${date
-                          .getDate()
-                          .toString()
-                          .padStart(2, "0")} ${date
-                          .getHours()
-                          .toString()
-                          .padStart(2, "0")}:${date
-                          .getMinutes()
-                          .toString()
-                          .padStart(2, "0")}`;
-
-                        const statusBadgeClass = log.isCleared
-                          ? log.isBonusClear
-                            ? "ranking-badge-gold"
-                            : "ranking-badge-rose"
-                          : "ranking-badge-none";
-
-                        const statusText = log.isCleared
-                          ? log.isBonusClear
-                            ? "BONUS"
-                            : "CLEAR"
-                          : "FAIL";
-
-                        return (
-                          <div key={log.id} className="ranking-card">
-                            <div className="ranking-card-header">
-                              <div className="flex items-center gap-2">
-                                <span className={`ranking-badge ${statusBadgeClass}`}>
-                                  {statusText}
-                                </span>
-                                <span className="ranking-card-title text-[11px]">
-                                  {log.stageName}
-                                </span>
-                                <span className="text-[10px] text-slate-500">
-                                  {timeStr}
-                                </span>
-                              </div>
-                              <span className="text-amber-400 font-bold font-mono text-[11px]">
-                                {log.score.toLocaleString()} pts
-                              </span>
-                            </div>
-                            <div className="ranking-card-metrics text-[10px] text-slate-400">
-                              <div className="flex items-center gap-3">
-                                <span>
-                                  TIME:{" "}
-                                  {Math.floor(log.clearTimeSeconds / 60)}:
-                                  {(log.clearTimeSeconds % 60)
-                                    .toString()
-                                    .padStart(2, "0")}
-                                </span>
-                                {log.climbedHeight ? (
-                                  <span>
-                                    {isKids ? "たかさ" : "高度"}: {log.climbedHeight}m
-                                  </span>
-                                ) : (
-                                  <span>
-                                    {isKids ? "ブロック" : "ミノ"}: {log.minoCount}
-                                    {isKids ? "かい" : "手"}
-                                  </span>
-                                )}
-                                <span>★ {log.bonusStars}</span>
-                              </div>
-                              <span className="text-rose-300 font-bold text-[10px]">
-                                RANK {log.rank}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* OPTION モーダル */}
-            {activeModal === "option" && (
-              <>
-                <div className="title-modal-title">
-                  <div className="flex items-center gap-2">
-                    <Settings size={16} className="text-rose-400" />
-                    <span>
-                      {isKids ? "せってい" : "SYSTEM SETTINGS (オプション)"}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="title-modal-close-btn"
-                    onClick={() => setActiveModal(null)}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <div className="space-y-3 text-xs">
-                  {/* 表示モード設定 (未就学児〜大人) */}
-                  <div className="flex items-center justify-between p-3 bg-slate-900/80 rounded border border-rose-500/30">
-                    <div>
-                      <div className="font-bold text-slate-200">
-                        {t("uiModeSetting")}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        {isKids
-                          ? "ひらがなで よみやすい ひょうじ"
-                          : "通常 (英語・漢字) / ひらがな (キッズ)"}
-                      </div>
-                    </div>
-                    <UIModeToggle size="sm" />
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-slate-900/80 rounded border border-rose-500/30">
-                    <div>
-                      <div className="font-bold text-slate-200">
-                        {isKids ? "おとの せってい" : "オーディオ設定"}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        {isKids ? "こうかおん" : "シンセ効果音 / SE"}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="title-sound-btn"
-                      onClick={onToggleMute}
-                    >
-                      {isMuted ? (
-                        <VolumeX size={13} className="text-rose-400" />
-                      ) : (
-                        <Volume2 size={13} className="text-rose-400" />
-                      )}
-                      <span>
-                        {isMuted
-                          ? (isKids ? "おと: なし" : "SOUND: OFF")
-                          : (isKids ? "おと: あり" : "SOUND: ON")}
-                      </span>
-                    </button>
-                  </div>
-
-                  {/* キーボード操作ガイド */}
-                  <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="font-bold text-slate-200">
-                        {isKids
-                          ? "キーボードの つかいかた"
-                          : "キーボード操作ガイド (CONTROLS)"}
-                      </div>
-                      <div className="text-[11px] text-rose-400">
-                        {isKids
-                          ? "やじるしキーでも うごかせるよ"
-                          : "QWERTY & 十字キー対応"}
-                      </div>
-                    </div>
-                    <div className="title-controls-modal-body">
-                      <KeyboardGuide />
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* CREDIT モーダル */}
-            {activeModal === "credit" && (
-              <>
-                <div className="title-modal-title">
-                  <div className="flex items-center gap-2">
-                    <Info size={16} className="text-sky-400" />
-                    <span>
-                      {isKids ? "クレジット" : "PRODUCTION CREDITS (クレジット)"}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="title-modal-close-btn"
-                    onClick={() => setActiveModal(null)}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <div className="space-y-2 text-xs text-slate-300 leading-relaxed">
-                  <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30">
-                    <div className="text-rose-400 font-bold mb-1">
-                      teThieL - iTL防衛戦
-                    </div>
-                    <p className="text-[11px]">
-                      中央大学 国際情報学部 (iTL) 公式キャラクター
-                      「イティエル」をモチーフにした逆テトリス型アクションパズル
-                    </p>
-                  </div>
-                  <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1 text-[11px]">
-                    <div>企画・開発: iTL 委員会</div>
-                    <div>キャラクターイラスト・原案: iTL 公式</div>
-                    <div>サウンド: Web Audio API Synthesizer Engine</div>
-                    <div className="pt-1 text-slate-400">
-                      SPECIAL THANKS: プレイヤーの皆様
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="ranking-footer">
-              {activeModal === "ranking" ? (
-                <button
-                  type="button"
-                  className="ranking-reset-btn"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        isKids
-                          ? "これまでの きろくを ぜんぶ けしても いいですか？"
-                          : "これまでの記録を初期化しますか？",
-                      )
-                    ) {
-                      resetAllRecords();
-                      setStageBests(getStageBestRecords());
-                      setScoreLogs(getScoreLogs());
-                    }
-                  }}
-                >
-                  {isKids ? "きろくを けす" : "RESET RECORDS (記録初期化)"}
-                </button>
-              ) : (
-                <div />
-              )}
-              <button
-                type="button"
-                className="ranking-close-btn"
-                onClick={() => setActiveModal(null)}
-              >
-                {isKids ? "とじる" : "CLOSE (閉じる)"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreditModal
+        isOpen={activeModal === "credit"}
+        onClose={() => setActiveModal(null)}
+      />
     </div>
   );
 };
