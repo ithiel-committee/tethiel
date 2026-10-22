@@ -13,6 +13,7 @@ import ithielArmHp3 from "../assets/character/ithiel_arm_hp3_determined.png";
 import ithielArmHp4 from "../assets/character/ithiel_arm_hp4_default.png";
 import ithielArmHp5 from "../assets/character/ithiel_arm_hp5_smile.png";
 import { TETROMINO_SHAPES } from "../game/constants";
+import { useUIText } from "../context/UIModeContext";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
 import { CyberButton, CyberCard } from "./ui";
@@ -50,6 +51,7 @@ export const GameUI = ({
   onExitGame,
   children,
 }: GameUIProps) => {
+  const { t, isKids } = useUIText();
   const [isPaused, setIsPaused] = useState(engine.status === "paused");
   const [floatingScores, setFloatingScores] = useState<
     { id: number; text: string }[]
@@ -157,8 +159,10 @@ export const GameUI = ({
           >
             <div className="font-pixel-en text-rose-400 text-xs font-bold tracking-wider">
               {stats.gameMode === "endless"
-                ? "ENDLESS"
-                : `STAGE ${stats.stageNumber.toString().padStart(2, "0")}`}
+                ? (isKids ? "エンドレス" : "ENDLESS")
+                : (isKids
+                    ? `ステージ ${stats.stageNumber.toString().padStart(2, "0")}`
+                    : `STAGE ${stats.stageNumber.toString().padStart(2, "0")}`)}
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -169,7 +173,7 @@ export const GameUI = ({
                   engine.togglePause();
                   setIsPaused(engine.status === "paused");
                 }}
-                title={isPaused ? "再開" : "一時停止"}
+                title={isKids ? (isPaused ? "つづける" : "ひとやすみ") : (isPaused ? "再開" : "一時停止")}
                 className="px-1.5 py-0.5 text-[10px]"
               >
                 {isPaused ? <Play size={11} fill="currentColor" /> : <Pause size={11} />}
@@ -179,7 +183,7 @@ export const GameUI = ({
                 variant="secondary"
                 size="xs"
                 onClick={onToggleMute}
-                title={isMuted ? "ミュート解除" : "ミュート"}
+                title={isKids ? (isMuted ? "おとをだす" : "おとをけす") : (isMuted ? "ミュート解除" : "ミュート")}
                 className="px-1.5 py-0.5 text-[10px]"
               >
                 {isMuted ? <VolumeX size={12} className="text-rose-400" /> : <Volume2 size={12} className="text-rose-400" />}
@@ -189,10 +193,10 @@ export const GameUI = ({
                 variant="danger"
                 size="xs"
                 onClick={onExitGame}
-                title="タイトルへ戻る"
+                title={isKids ? "おわる" : "タイトルへ戻る"}
                 className="px-2 py-0.5 text-[10px] font-bold"
               >
-                EXIT
+                {t("exit")}
               </CyberButton>
             </div>
           </CyberCard>
@@ -249,7 +253,7 @@ export const GameUI = ({
 
             {/* SCORE */}
             <div className="relative">
-              <div className="text-slate-400 text-[11px]">SCORE</div>
+              <div className="text-slate-400 text-[11px]">{t("score")}</div>
               <div className="relative flex items-center gap-2">
                 <div
                   className={`font-pixel-en text-yellow-400 text-sm tracking-wider transition-transform ${
@@ -276,7 +280,7 @@ export const GameUI = ({
 
             {/* TIME */}
             <div>
-              <div className="text-slate-400 text-[11px]">TIME</div>
+              <div className="text-slate-400 text-[11px]">{t("time")}</div>
               <div className="font-['Press_Start_2P'] text-rose-200 text-xs tracking-wider">
                 {formatTime(stats.clearTimeMs)}
               </div>
@@ -284,7 +288,7 @@ export const GameUI = ({
 
             {/* MINO COUNT */}
             <div>
-              <div className="text-slate-400 text-[11px]">MINO COUNT</div>
+              <div className="text-slate-400 text-[11px]">{t("minoCount")}</div>
               <div className="font-['Press_Start_2P'] text-pink-400 text-xs tracking-wider">
                 {stats.minoCount.toString().padStart(3, "0")}
               </div>
@@ -293,11 +297,11 @@ export const GameUI = ({
             {/* STAGE or MODE */}
             <div>
               <div className="text-slate-400 text-[11px]">
-                {engine.gameMode === "endless" ? "MODE" : "STAGE"}
+                {engine.gameMode === "endless" ? t("mode") : t("stage")}
               </div>
               <div className="font-['Press_Start_2P'] text-rose-400 text-xs tracking-wider">
                 {engine.gameMode === "endless"
-                  ? "ENDLESS"
+                  ? (isKids ? "エンドレス" : "ENDLESS")
                   : stats.stageNumber.toString().padStart(2, "0")}
               </div>
             </div>
@@ -305,14 +309,14 @@ export const GameUI = ({
             {/* HEIGHT (エンドレス時) または BONUS (ステージ時) */}
             {engine.gameMode === "endless" ? (
               <div>
-                <div className="text-slate-400 text-[11px]">HEIGHT</div>
+                <div className="text-slate-400 text-[11px]">{t("height")}</div>
                 <div className="font-['Press_Start_2P'] text-amber-300 text-xs font-bold tracking-wider">
                   {engine.climbedHeight} m
                 </div>
               </div>
             ) : (
               <div>
-                <div className="text-slate-400 text-[11px]">BONUS</div>
+                <div className="text-slate-400 text-[11px]">{t("bonus")}</div>
                 <div className="font-['Press_Start_2P'] text-amber-300 text-xs flex items-center gap-1">
                   <span>★</span>
                   <span>{`${stats.bonusStars}/${stats.totalStars}`}</span>
@@ -322,21 +326,23 @@ export const GameUI = ({
 
             {/* VIRUS STATUS */}
             <div>
-              <div className="text-slate-400 text-[11px]">VIRUS</div>
+              <div className="text-slate-400 text-[11px]">{t("virus")}</div>
               {engine.minosUntilInfection > 0 ? (
                 <div className="text-amber-300 text-xs font-bold animate-pulse">
-                  待機中 (あと{engine.minosUntilInfection}手)
+                  {isKids
+                    ? `まってます (あと${engine.minosUntilInfection}かい)`
+                    : `待機中 (あと${engine.minosUntilInfection}手)`}
                 </div>
               ) : (
                 <div className="text-rose-400 text-xs font-bold">
-                  ▲ 感染進行中 ▲
+                  {t("virusAdvancing")}
                 </div>
               )}
             </div>
 
             {/* BEST SCORE */}
             <div className="pt-1 border-t border-slate-800">
-              <div className="text-slate-500 text-[10px]">BEST SCORE</div>
+              <div className="text-slate-500 text-[10px]">{t("bestScore")}</div>
               <div className="font-['Press_Start_2P'] text-purple-400 text-xs tracking-wider">
                 {stats.bestScore.toLocaleString()}
               </div>
@@ -357,7 +363,7 @@ export const GameUI = ({
               className="p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]"
             >
               <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 font-bold">
-                NEXT
+                {t("next")}
               </div>
               <div className="w-full h-14 bg-slate-950 rounded flex items-center justify-center border border-slate-800">
                 {nextPieces[0] ? (
@@ -374,7 +380,7 @@ export const GameUI = ({
               className="p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]"
             >
               <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex items-center justify-between px-1 font-bold">
-                <span>HOLD</span>
+                <span>{t("hold")}</span>
                 <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none px-1">
                   C / SHIFT
                 </span>
@@ -416,47 +422,51 @@ export const GameUI = ({
             className="p-2.5 text-left space-y-2 shadow-[0_0_15px_rgba(255,26,75,0.1)]"
           >
             <div className="title-controls-header border-b border-slate-800 pb-1 flex justify-between items-center text-[10px]">
-              <span className="text-rose-400 font-bold font-['DotGothic16'] text-xs">操作ガイド</span>
-              <span className="title-controls-sub text-[9px]">KEYBOARD</span>
+              <span className="text-rose-400 font-bold font-['DotGothic16'] text-xs">
+                {t("controlsGuide")}
+              </span>
+              <span className="title-controls-sub text-[9px]">{t("keyboard")}</span>
             </div>
 
             <div className="flex flex-col gap-1 text-[11px] pt-0.5">
               <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">即置き:</span>
+                <span className="ctrl-label">{t("hardDrop")}</span>
                 <span className="keycap">↑</span>
                 <span className="keycap keycap-wide">SPACE</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">回転:</span>
+                <span className="ctrl-label">{t("rotate")}</span>
                 <span className="keycap">Q</span>
                 <span className="keycap">W</span>
                 <span className="keycap">Z</span>
                 <span className="keycap">X</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">移動:</span>
+                <span className="ctrl-label">{t("move")}</span>
                 <span className="keycap">←</span>
                 <span className="keycap">→</span>
                 <span className="keycap">A</span>
                 <span className="keycap">D</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">落下:</span>
+                <span className="ctrl-label">{t("softDrop")}</span>
                 <span className="keycap">↓</span>
                 <span className="keycap">S</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">ホールド:</span>
+                <span className="ctrl-label">{t("holdLabel")}</span>
                 <span className="keycap keycap-accent">C</span>
                 <span className="keycap keycap-accent keycap-wide">SHIFT</span>
-                <span className="ctrl-note text-[10px]">(ミノ交代)</span>
+                <span className="ctrl-note text-[10px]">{t("minoExchange")}</span>
               </div>
               {engine.skills.length > 0 && (
                 <div className="flex items-center gap-1.5">
                   <span className="ctrl-label">ボム:</span>
                   <span className="keycap keycap-accent">B</span>
                   <span className="keycap">1</span>
-                  <span className="ctrl-note text-[10px]">(ウイルス爆破)</span>
+                  <span className="ctrl-note text-[10px]">
+                    {isKids ? "(ウイルスばくは)" : "(ウイルス爆破)"}
+                  </span>
                 </div>
               )}
             </div>

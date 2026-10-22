@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import tethielCursor from "../assets/character/tethiel_cursor.png";
 import { useUIText } from "../context/UIModeContext";
 import type { GameStats, StageData } from "../types/game";
+import { STAGE_TEXTS } from "../data/uiTexts";
 import { calculateRank } from "../utils/scoreStorage";
 import { CyberCard, UIModeToggle } from "./ui";
 
@@ -53,6 +54,27 @@ export const ResultScreen = ({
   }, [isCleared, isBonusClear]);
 
   const { t, isKids } = useUIText();
+
+  const stageInfo = STAGE_TEXTS[stage.id];
+  const stageName = stageInfo
+    ? isKids
+      ? stageInfo.name.kids
+      : stageInfo.name.standard
+    : stage.name;
+  const stageSubtitle = stageInfo
+    ? isKids
+      ? stageInfo.subtitle.kids
+      : stageInfo.subtitle.standard
+    : stage.subtitle;
+
+  const nextStageInfo = nextStage ? STAGE_TEXTS[nextStage.id] : undefined;
+  const nextStageName = nextStage
+    ? nextStageInfo
+      ? isKids
+        ? nextStageInfo.name.kids
+        : nextStageInfo.name.standard
+      : nextStage.name
+    : "";
 
   const rank = calculateRank(
     isCleared,
@@ -123,9 +145,9 @@ export const ResultScreen = ({
       </div>
 
       <div className="text-xs text-slate-400">
-        {stage.subtitle
-          ? `// ${stage.name}: ${stage.subtitle}`
-          : `// ${stage.name}`}
+        {stageSubtitle
+          ? `// ${stageName}: ${stageSubtitle}`
+          : `// ${stageName}`}
       </div>
 
       <CyberCard variant="subtle" className="p-4 text-left space-y-3">
@@ -219,8 +241,8 @@ export const ResultScreen = ({
             <Play size={16} fill="currentColor" className="text-amber-300 shrink-0" />
             <span>
               {isKids
-                ? `${t("nextLevel")} (${nextStage.name})`
-                : `${t("nextLevel")} : ${nextStage.name}`}
+                ? `${t("nextLevel")} (${nextStageName})`
+                : `${t("nextLevel")} : ${nextStageName}`}
             </span>
             <ChevronRight size={18} className="text-amber-200 shrink-0" />
           </button>

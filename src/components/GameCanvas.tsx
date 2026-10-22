@@ -13,6 +13,7 @@ import { calculateGhostY } from "../game/tetromino";
 import playerLeftImg from "../assets/character/player_left.png";
 import playerRightImg from "../assets/character/player_right.png";
 import virusImg from "../assets/obstacle/virus.png";
+import { useUIText } from "../context/UIModeContext";
 
 // スプライト画像キャッシュ
 const playerSpriteLeft = new Image();
@@ -34,6 +35,12 @@ const CANVAS_HEIGHT = GRID_HEIGHT * BLOCK_SIZE; // 616px
 
 export const GameCanvas = ({ engine }: GameCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { isKids } = useUIText();
+  const isKidsRef = useRef(isKids);
+
+  useEffect(() => {
+    isKidsRef.current = isKids;
+  }, [isKids]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -83,7 +90,9 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.font = '11px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText(
-          `▲ CLIMB: ${engine.climbedHeight}m ▲`,
+          isKidsRef.current
+            ? `▲ たかさ: ${engine.climbedHeight}m ▲`
+            : `▲ CLIMB: ${engine.climbedHeight}m ▲`,
           CANVAS_WIDTH / 2,
           18,
         );
@@ -102,7 +111,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.font = '11px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText(
-          "G  O  A  L",
+          isKidsRef.current ? "ゴ　ー　ル" : "G  O  A  L",
           ((GRID_WIDTH - BONUS_GOAL_COLS.length) * BLOCK_SIZE) / 2,
           goalY + 17,
         );
@@ -120,7 +129,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.fillStyle = "#0a0407";
         ctx.font = '9px "DotGothic16", monospace';
         ctx.fillText(
-          "BONUS",
+          isKidsRef.current ? "ボーナス" : "BONUS",
           bonusStartX + (BONUS_GOAL_COLS.length * BLOCK_SIZE) / 2,
           goalY + 16,
         );
@@ -277,7 +286,13 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.font = '13px "DotGothic16", monospace';
         ctx.textAlign = "center";
         ctx.fillText(
-          engine.isBonusGoal ? "★ BONUS GOAL! ★" : "★ GOAL! ★",
+          engine.isBonusGoal
+            ? isKidsRef.current
+              ? "★ とくべつなゴール！ ★"
+              : "★ BONUS GOAL! ★"
+            : isKidsRef.current
+              ? "★ ゴール！ ★"
+              : "★ GOAL! ★",
           cx,
           cy - 22,
         );
@@ -322,14 +337,20 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
           ctx.stroke();
         }
 
-        // 警告ラベル "▲ VIRUS HAZARD LINE ▲"（静止、ドットフォント）
+        // 警告ラベル "▲ VIRUS HAZARD LINE ▲"
         const pulse = 0.7 + Math.sin(time / 200) * 0.3;
         ctx.font = '10px "DotGothic16", monospace';
         ctx.fillStyle = `rgba(255, 80, 110, ${pulse})`;
         ctx.shadowColor = "#ff0055";
         ctx.shadowBlur = 4;
         ctx.textAlign = "left";
-        ctx.fillText("▲ VIRUS HAZARD LINE ▲", 6, magmaY - 6);
+        ctx.fillText(
+          isKidsRef.current
+            ? "▲ ウイルス きけんライン ▲"
+            : "▲ VIRUS HAZARD LINE ▲",
+          6,
+          magmaY - 6,
+        );
         ctx.restore();
       }
 
@@ -377,7 +398,11 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
             ctx.shadowColor = "#ff0055";
             ctx.shadowBlur = 6;
             ctx.textAlign = "center";
-            ctx.fillText("TRAP!", px, py - radius * 0.6 - 4);
+            ctx.fillText(
+              isKidsRef.current ? "わな！" : "TRAP!",
+              px,
+              py - radius * 0.6 - 4,
+            );
           }
           ctx.restore();
 
@@ -392,7 +417,11 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         ctx.fillStyle = "#ff2a55";
         ctx.font = '18px "DotGothic16", monospace';
         ctx.textAlign = "center";
-        ctx.fillText("PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+        ctx.fillText(
+          isKidsRef.current ? "ひとやすみ" : "PAUSED",
+          CANVAS_WIDTH / 2,
+          CANVAS_HEIGHT / 2,
+        );
       }
 
       animationId = requestAnimationFrame(render);

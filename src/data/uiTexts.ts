@@ -38,6 +38,10 @@ export const UI_TEXTS = {
     standard: "BACK",
     kids: "もどる",
   },
+  exit: {
+    standard: "EXIT",
+    kids: "おわる",
+  },
   pause: {
     standard: "PAUSE",
     kids: "ひとやすみ",
@@ -49,6 +53,26 @@ export const UI_TEXTS = {
   close: {
     standard: "CLOSE",
     kids: "とじる",
+  },
+  skip: {
+    standard: "SKIP",
+    kids: "スキップ",
+  },
+  auto: {
+    standard: "AUTO",
+    kids: "じどう",
+  },
+  log: {
+    standard: "LOG",
+    kids: "きろく",
+  },
+  title: {
+    standard: "TITLE",
+    kids: "タイトル",
+  },
+  locked: {
+    standard: "LOCKED",
+    kids: "まだだよ",
   },
 
   // 画面タイトル・ステータス
@@ -81,7 +105,11 @@ export const UI_TEXTS = {
     kids: "ウイルスにおいつかれちゃった",
   },
 
-  // リザルト・スコア項目
+  // ゲーム中UI・スコア項目
+  score: {
+    standard: "SCORE",
+    kids: "てんすう",
+  },
   evaluationRank: {
     standard: "EVALUATION RANK",
     kids: "けっか",
@@ -89,6 +117,10 @@ export const UI_TEXTS = {
   finalScore: {
     standard: "FINAL SCORE",
     kids: "てんすう",
+  },
+  bestScore: {
+    standard: "BEST SCORE",
+    kids: "さいこう てんすう",
   },
   time: {
     standard: "TIME",
@@ -98,9 +130,33 @@ export const UI_TEXTS = {
     standard: "MINO COUNT",
     kids: "おいたブロック",
   },
+  stage: {
+    standard: "STAGE",
+    kids: "ステージ",
+  },
+  mode: {
+    standard: "MODE",
+    kids: "モード",
+  },
+  height: {
+    standard: "HEIGHT",
+    kids: "たかさ",
+  },
+  bonus: {
+    standard: "BONUS",
+    kids: "ボーナス",
+  },
   bonusStars: {
     standard: "BONUS STARS",
     kids: "ボーナススター",
+  },
+  virus: {
+    standard: "VIRUS",
+    kids: "ウイルス",
+  },
+  virusAdvancing: {
+    standard: "▲ 感染進行中 ▲",
+    kids: "▲ ウイルスが ちかづいてるよ！ ▲",
   },
   timePenalty: {
     standard: "タイム減点補正",
@@ -109,6 +165,48 @@ export const UI_TEXTS = {
   minoBonus: {
     standard: "ミノ節約ボーナス",
     kids: "ブロック せつやくボーナス",
+  },
+
+  // スロット・操作ガイド
+  next: {
+    standard: "NEXT",
+    kids: "つぎのブロック",
+  },
+  hold: {
+    standard: "HOLD",
+    kids: "キープ",
+  },
+  controlsGuide: {
+    standard: "操作ガイド",
+    kids: "あそびかた",
+  },
+  keyboard: {
+    standard: "KEYBOARD",
+    kids: "キーボード",
+  },
+  hardDrop: {
+    standard: "即置き:",
+    kids: "すぐにおく:",
+  },
+  rotate: {
+    standard: "回転:",
+    kids: "まわす:",
+  },
+  move: {
+    standard: "移動:",
+    kids: "うごかす:",
+  },
+  softDrop: {
+    standard: "落下:",
+    kids: "おとす:",
+  },
+  holdLabel: {
+    standard: "ホールド:",
+    kids: "キープ:",
+  },
+  minoExchange: {
+    standard: "(ミノ交代)",
+    kids: "(ブロックこうたい)",
   },
 
   // モード切替ラベル
@@ -127,3 +225,76 @@ export const UI_TEXTS = {
 } as const;
 
 export type UITextKey = keyof typeof UI_TEXTS;
+
+// ステージ情報の多言語辞書
+export const STAGE_TEXTS: Record<
+  number,
+  {
+    name: { standard: string; kids: string };
+    subtitle: { standard: string; kids: string };
+    description: { standard: string; kids: string };
+  }
+> = {
+  1: {
+    name: {
+      standard: "STAGE 1",
+      kids: "ステージ 1",
+    },
+    subtitle: {
+      standard: "入門・回路接続",
+      kids: "はじめての みちづくり",
+    },
+    description: {
+      standard:
+        "回路を繋いでイティエルをGOALへ導こう！小さなお子様やご家族連れでも楽しめるやさしい難易度。",
+      kids:
+        "ブロックをおいて みちをつなげよう！イティエルを ゴールへつれていってね。",
+    },
+  },
+  2: {
+    name: {
+      standard: "STAGE 2",
+      kids: "ステージ 2",
+    },
+    subtitle: {
+      standard: "サイバー迂回ルート",
+      kids: "トゲをよけて すすもう",
+    },
+    description: {
+      standard:
+        "トゲ障害物を巧みに回避しながら回路を繋ぎ、迫り来るウイルスからイティエルを守り抜け！",
+      kids:
+        "あかいトゲにあたらないように みちをつくろう！おいかけてくる ウイルスから にげよう！",
+    },
+  },
+  3: {
+    name: {
+      standard: "STAGE 3",
+      kids: "ステージ 3",
+    },
+    subtitle: {
+      standard: "最終防衛戦",
+      kids: "さいごの たたかい",
+    },
+    description: {
+      standard: "高速ウイルスとの最終決戦。(Coming Soon)",
+      kids: "ウイルスとの さいごのたたかい。(まだあそべないよ)",
+    },
+  },
+  99: {
+    name: {
+      standard: "ENDLESS",
+      kids: "エンドレス",
+    },
+    subtitle: {
+      standard: "無限クライミング",
+      kids: "どこまでも のぼろう",
+    },
+    description: {
+      standard:
+        "天井のないサイバー空間をどこまでも登り続けろ！登った総高度とスコアの極限を目指すサバイバルモード。",
+      kids:
+        "てんじょうがない せかいを どこまでものぼろう！たかいところを めざしてね。",
+    },
+  },
+};

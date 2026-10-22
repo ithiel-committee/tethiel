@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useUIText } from "../context/UIModeContext";
 import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 import type { StoryDialogue, StoryScene } from "../types/story";
 import { CyberBadge, CyberButton } from "./ui";
@@ -29,6 +30,7 @@ export const NovelScreen = ({
   isMuted = false,
   onToggleMute,
 }: NovelScreenProps) => {
+  const { t, isKids } = useUIText();
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
@@ -178,7 +180,12 @@ export const NovelScreen = ({
           variant="red"
           icon={<Terminal size={13} className="text-rose-400" />}
         >
-          {scene.title}
+          {isKids
+            ? scene.title
+                .replace(/^STAGE\s*0?(\d+)/i, "ステージ $1")
+                .replace("プロローグ", "はじまり")
+                .replace("エピローグ", "おしまい")
+            : scene.title}
         </CyberBadge>
 
         {/* コントロールボタン群 */}
@@ -200,7 +207,7 @@ export const NovelScreen = ({
             className="novel-ctrl-btn"
           >
             <History size={13} />
-            <span className="hidden sm:inline">LOG</span>
+            <span className="hidden sm:inline">{t("log")}</span>
           </button>
 
           <button
@@ -211,7 +218,7 @@ export const NovelScreen = ({
             }`}
           >
             <Play size={12} fill={isAuto ? "currentColor" : "none"} />
-            <span>AUTO</span>
+            <span>{t("auto")}</span>
           </button>
 
           <button
@@ -220,7 +227,7 @@ export const NovelScreen = ({
             className="novel-ctrl-btn novel-ctrl-btn-skip"
           >
             <FastForward size={13} />
-            <span>SKIP</span>
+            <span>{t("skip")}</span>
           </button>
 
           {onBackToTitle && (
@@ -230,7 +237,7 @@ export const NovelScreen = ({
               className="novel-ctrl-btn novel-ctrl-btn-title"
             >
               <RotateCcw size={12} />
-              <span className="hidden sm:inline">TITLE</span>
+              <span className="hidden sm:inline">{t("title")}</span>
             </button>
           )}
         </div>
@@ -281,7 +288,7 @@ export const NovelScreen = ({
               </span>
               <span className="novel-footer-hint">|</span>
               <span className="novel-footer-hint">
-                [SPACE / クリック] 次へ
+                {isKids ? "[SPACE / タップ] つぎへ" : "[SPACE / クリック] 次へ"}
               </span>
             </div>
 
@@ -303,7 +310,7 @@ export const NovelScreen = ({
           <div className="novel-log-header">
             <div className="novel-log-title">
               <History size={16} />
-              <span>DIALOGUE LOG</span>
+              <span>{isKids ? "おはなしの きろく" : "DIALOGUE LOG"}</span>
             </div>
             <button
               type="button"
@@ -337,7 +344,7 @@ export const NovelScreen = ({
               size="sm"
               onClick={() => setShowLog(false)}
             >
-              閉じる
+              {t("close")}
             </CyberButton>
           </div>
         </div>

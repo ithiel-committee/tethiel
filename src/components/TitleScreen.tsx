@@ -18,6 +18,7 @@ import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
 import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import { useUIText } from "../context/UIModeContext";
+import { STAGE_TEXTS } from "../data/uiTexts";
 import type { StageData } from "../types/game";
 import { preloadGameAssets } from "../utils/preloadAssets";
 import {
@@ -358,12 +359,16 @@ export const TitleScreen = ({
               >
                 <div className="title-stage-info">
                   <div className="title-stage-name-row">
-                    <span className="title-stage-name">{STAGES[0].name}</span>
+                    <span className="title-stage-name">
+                      {STAGE_TEXTS[1]?.name[isKids ? "kids" : "standard"] ?? STAGES[0].name}
+                    </span>
                     <span className="title-stage-sub">
-                      {STAGES[0].subtitle}
+                      {STAGE_TEXTS[1]?.subtitle[isKids ? "kids" : "standard"] ?? STAGES[0].subtitle}
                     </span>
                   </div>
-                  <p className="title-stage-desc">{STAGES[0].description}</p>
+                  <p className="title-stage-desc">
+                    {STAGE_TEXTS[1]?.description[isKids ? "kids" : "standard"] ?? STAGES[0].description}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -385,12 +390,16 @@ export const TitleScreen = ({
               >
                 <div className="title-stage-info">
                   <div className="title-stage-name-row">
-                    <span className="title-stage-name">{STAGES[1].name}</span>
+                    <span className="title-stage-name">
+                      {STAGE_TEXTS[2]?.name[isKids ? "kids" : "standard"] ?? STAGES[1].name}
+                    </span>
                     <span className="title-stage-sub">
-                      {STAGES[1].subtitle}
+                      {STAGE_TEXTS[2]?.subtitle[isKids ? "kids" : "standard"] ?? STAGES[1].subtitle}
                     </span>
                   </div>
-                  <p className="title-stage-desc">{STAGES[1].description}</p>
+                  <p className="title-stage-desc">
+                    {STAGE_TEXTS[2]?.description[isKids ? "kids" : "standard"] ?? STAGES[1].description}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -407,19 +416,19 @@ export const TitleScreen = ({
                 <div className="title-stage-info">
                   <div className="title-stage-name-row">
                     <span className="title-stage-name text-slate-500">
-                      {STAGES[2].name}
+                      {STAGE_TEXTS[3]?.name[isKids ? "kids" : "standard"] ?? STAGES[2].name}
                     </span>
                     <span className="title-stage-sub text-slate-500">
-                      {STAGES[2].subtitle}
+                      {STAGE_TEXTS[3]?.subtitle[isKids ? "kids" : "standard"] ?? STAGES[2].subtitle}
                     </span>
                   </div>
                   <p className="title-stage-desc text-slate-500">
-                    {STAGES[2].description}
+                    {STAGE_TEXTS[3]?.description[isKids ? "kids" : "standard"] ?? STAGES[2].description}
                   </p>
                 </div>
                 <div className="title-locked-badge">
                   <Lock size={12} />
-                  <span>LOCKED</span>
+                  <span>{t("locked")}</span>
                 </div>
               </div>
 
@@ -434,14 +443,14 @@ export const TitleScreen = ({
                 <div className="title-stage-info">
                   <div className="title-stage-name-row">
                     <span className="title-stage-name-endless">
-                      {t("endlessMode")}
+                      {STAGE_TEXTS[99]?.name[isKids ? "kids" : "standard"] ?? t("endlessMode")}
                     </span>
                     <span className="title-stage-sub-endless">
-                      {ENDLESS_STAGE.subtitle}
+                      {STAGE_TEXTS[99]?.subtitle[isKids ? "kids" : "standard"] ?? ENDLESS_STAGE.subtitle}
                     </span>
                   </div>
                   <p className="title-stage-desc-endless">
-                    {ENDLESS_STAGE.description}
+                    {STAGE_TEXTS[99]?.description[isKids ? "kids" : "standard"] ?? ENDLESS_STAGE.description}
                   </p>
                 </div>
                 <button
@@ -498,7 +507,7 @@ export const TitleScreen = ({
                         : "ranking-tab-btn-inactive"
                     }`}
                   >
-                    BEST RECORDS (自己ベスト)
+                    {isKids ? "さいこう きろく" : "BEST RECORDS (自己ベスト)"}
                   </button>
                   <button
                     type="button"
@@ -509,7 +518,7 @@ export const TitleScreen = ({
                         : "ranking-tab-btn-inactive"
                     }`}
                   >
-                    SCORE LOGS (プレイ履歴)
+                    {isKids ? "あそんだ りれき" : "SCORE LOGS (プレイ履歴)"}
                   </button>
                 </div>
 
@@ -517,9 +526,21 @@ export const TitleScreen = ({
                 {rankingTab === "bests" && (
                   <div className="space-y-2 text-xs">
                     {[
-                      { id: 1, name: "STAGE 1: 入門・回路接続", isEndless: false },
-                      { id: 2, name: "STAGE 2: サイバー迂回ルート", isEndless: false },
-                      { id: 99, name: "★ ENDLESS MODE: 無限クライミング", isEndless: true },
+                      {
+                        id: 1,
+                        name: isKids ? "ステージ 1: はじめての みちづくり" : "STAGE 1: 入門・回路接続",
+                        isEndless: false,
+                      },
+                      {
+                        id: 2,
+                        name: isKids ? "ステージ 2: トゲをよけて すすもう" : "STAGE 2: サイバー迂回ルート",
+                        isEndless: false,
+                      },
+                      {
+                        id: 99,
+                        name: isKids ? "★ エンドレス: どこまでも のぼろう" : "★ ENDLESS MODE: 無限クライミング",
+                        isEndless: true,
+                      },
                     ].map((stg) => {
                       const best = stageBests[stg.id];
                       const hasRecord = Boolean(
@@ -529,12 +550,12 @@ export const TitleScreen = ({
 
                       // 統一バッジ判定
                       let badgeClass = "ranking-badge-none";
-                      let badgeText = "NO RECORD";
+                      let badgeText = isKids ? "きろくなし" : "NO RECORD";
 
                       if (stg.isEndless) {
                         if (hasRecord) {
                           badgeClass = "ranking-badge-purple";
-                          badgeText = "SURVIVOR";
+                          badgeText = isKids ? "サバイバー" : "SURVIVOR";
                         }
                       } else if (hasRecord && best?.bestRank) {
                         badgeText = `RANK ${best.bestRank}`;
@@ -557,7 +578,9 @@ export const TitleScreen = ({
                           </div>
                           <div className="ranking-card-metrics">
                             <div className="ranking-metric-item">
-                              <span className="ranking-metric-label">BEST SCORE:</span>
+                              <span className="ranking-metric-label">
+                                {isKids ? "さいこう てんすう:" : "BEST SCORE:"}
+                              </span>
                               <span
                                 className={`ranking-metric-value ${
                                   hasRecord && best?.highScore
@@ -572,7 +595,9 @@ export const TitleScreen = ({
                             </div>
                             <div className="ranking-metric-item">
                               <span className="ranking-metric-label">
-                                {stg.isEndless ? "MAX ALTITUDE:" : "CLEAR TIME:"}
+                                {stg.isEndless
+                                  ? (isKids ? "さいこう たかさ:" : "MAX ALTITUDE:")
+                                  : (isKids ? "クリア じかん:" : "CLEAR TIME:")}
                               </span>
                               <span
                                 className={`ranking-metric-value ${
@@ -610,9 +635,15 @@ export const TitleScreen = ({
                   <div className="space-y-2 text-xs max-h-[280px] overflow-y-auto pr-1">
                     {scoreLogs.length === 0 ? (
                       <div className="p-6 text-center text-slate-400 bg-slate-900/40 rounded-lg border border-slate-800">
-                        <p>プレイ履歴がまだありません。</p>
+                        <p>
+                          {isKids
+                            ? "あそんだ りれきが まだありません。"
+                            : "プレイ履歴がまだありません。"}
+                        </p>
                         <p className="text-[10px] text-slate-500 mt-1">
-                          ゲームをプレイすると直近30件のログがここに記録されます。
+                          {isKids
+                            ? "ゲームをあそぶと、さいごの30かいの きろくが ここにのこるよ。"
+                            : "ゲームをプレイすると直近30件のログがここに記録されます。"}
                         </p>
                       </div>
                     ) : (
@@ -671,9 +702,14 @@ export const TitleScreen = ({
                                     .padStart(2, "0")}
                                 </span>
                                 {log.climbedHeight ? (
-                                  <span>高度: {log.climbedHeight}m</span>
+                                  <span>
+                                    {isKids ? "たかさ" : "高度"}: {log.climbedHeight}m
+                                  </span>
                                 ) : (
-                                  <span>ミノ: {log.minoCount}手</span>
+                                  <span>
+                                    {isKids ? "ブロック" : "ミノ"}: {log.minoCount}
+                                    {isKids ? "かい" : "手"}
+                                  </span>
                                 )}
                                 <span>★ {log.bonusStars}</span>
                               </div>
@@ -696,7 +732,9 @@ export const TitleScreen = ({
                 <div className="title-modal-title">
                   <div className="flex items-center gap-2">
                     <Settings size={16} className="text-rose-400" />
-                    <span>SYSTEM SETTINGS (オプション)</span>
+                    <span>
+                      {isKids ? "せってい" : "SYSTEM SETTINGS (オプション)"}
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -725,10 +763,10 @@ export const TitleScreen = ({
                   <div className="flex items-center justify-between p-3 bg-slate-900/80 rounded border border-rose-500/30">
                     <div>
                       <div className="font-bold text-slate-200">
-                        オーディオ設定
+                        {isKids ? "おとの せってい" : "オーディオ設定"}
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        シンセ効果音 / SE
+                        {isKids ? "こうかおん" : "シンセ効果音 / SE"}
                       </div>
                     </div>
                     <button
@@ -741,7 +779,11 @@ export const TitleScreen = ({
                       ) : (
                         <Volume2 size={13} className="text-rose-400" />
                       )}
-                      <span>{isMuted ? "SOUND: OFF" : "SOUND: ON"}</span>
+                      <span>
+                        {isMuted
+                          ? (isKids ? "おと: なし" : "SOUND: OFF")
+                          : (isKids ? "おと: あり" : "SOUND: ON")}
+                      </span>
                     </button>
                   </div>
 
@@ -749,10 +791,14 @@ export const TitleScreen = ({
                   <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="font-bold text-slate-200">
-                        キーボード操作ガイド (CONTROLS)
+                        {isKids
+                          ? "キーボードの つかいかた"
+                          : "キーボード操作ガイド (CONTROLS)"}
                       </div>
                       <div className="text-[11px] text-rose-400">
-                        QWERTY & 十字キー対応
+                        {isKids
+                          ? "やじるしキーでも うごかせるよ"
+                          : "QWERTY & 十字キー対応"}
                       </div>
                     </div>
                     <div className="title-controls-modal-body">
@@ -769,7 +815,9 @@ export const TitleScreen = ({
                 <div className="title-modal-title">
                   <div className="flex items-center gap-2">
                     <Info size={16} className="text-sky-400" />
-                    <span>PRODUCTION CREDITS (クレジット)</span>
+                    <span>
+                      {isKids ? "クレジット" : "PRODUCTION CREDITS (クレジット)"}
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -807,14 +855,20 @@ export const TitleScreen = ({
                   type="button"
                   className="ranking-reset-btn"
                   onClick={() => {
-                    if (window.confirm("これまでの記録を初期化しますか？")) {
+                    if (
+                      window.confirm(
+                        isKids
+                          ? "これまでの きろくを ぜんぶ けしても いいですか？"
+                          : "これまでの記録を初期化しますか？",
+                      )
+                    ) {
                       resetAllRecords();
                       setStageBests(getStageBestRecords());
                       setScoreLogs(getScoreLogs());
                     }
                   }}
                 >
-                  RESET RECORDS (記録初期化)
+                  {isKids ? "きろくを けす" : "RESET RECORDS (記録初期化)"}
                 </button>
               ) : (
                 <div />
@@ -824,7 +878,7 @@ export const TitleScreen = ({
                 className="ranking-close-btn"
                 onClick={() => setActiveModal(null)}
               >
-                CLOSE (閉じる)
+                {isKids ? "とじる" : "CLOSE (閉じる)"}
               </button>
             </div>
           </div>
