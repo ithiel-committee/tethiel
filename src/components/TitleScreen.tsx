@@ -40,6 +40,7 @@ interface TitleScreenProps {
   onSelectStage: (stage: StageData) => void;
   isMuted: boolean;
   onToggleMute: () => void;
+  initialMenuView?: MenuView;
 }
 
 type MenuView = "main" | "select_level";
@@ -49,8 +50,13 @@ export const TitleScreen = ({
   onSelectStage,
   isMuted,
   onToggleMute,
+  initialMenuView = "main",
 }: TitleScreenProps) => {
-  const [menuView, setMenuView] = useState<MenuView>("main");
+  const [menuView, setMenuView] = useState<MenuView>(initialMenuView);
+
+  useEffect(() => {
+    setMenuView(initialMenuView);
+  }, [initialMenuView]);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
   const [rankingTab, setRankingTab] = useState<"bests" | "logs">("bests");

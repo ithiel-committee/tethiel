@@ -25,6 +25,9 @@ export function App() {
   const [screen, setScreen] = useState<Screen>(
     directStage ? "game" : "title",
   );
+  const [titleMenuView, setTitleMenuView] = useState<"main" | "select_level">(
+    "main",
+  );
   const [selectedStage, setSelectedStage] = useState<StageData>(
     directStage ?? STAGES[0],
   );
@@ -150,9 +153,17 @@ export function App() {
     engine.start();
   }, [engine]);
 
-  // タイトルへ戻る
-  const handleBackToTitle = useCallback(() => {
+  // ホーム画面へ戻る
+  const handleBackToHome = useCallback(() => {
     cleanStageUrl();
+    setTitleMenuView("main");
+    setScreen("title");
+  }, []);
+
+  // ステージ選択画面へ直行する
+  const handleGoToStageSelect = useCallback(() => {
+    cleanStageUrl();
+    setTitleMenuView("select_level");
     setScreen("title");
   }, []);
 
@@ -259,6 +270,7 @@ export function App() {
             onSelectStage={handleSelectStage}
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
+            initialMenuView={titleMenuView}
           />
         </div>
       )}
@@ -282,7 +294,7 @@ export function App() {
               }
             }
             onComplete={handleStartGame}
-            onBackToTitle={handleBackToTitle}
+            onBackToTitle={handleBackToHome}
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
           />
@@ -324,7 +336,7 @@ export function App() {
             stats={stats}
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
-            onExitGame={handleBackToTitle}
+            onExitGame={handleBackToHome}
           >
             <GameCanvas engine={engine} />
           </GameUI>
@@ -342,7 +354,8 @@ export function App() {
             hearts={hearts}
             nextStage={getNextStage(selectedStage)}
             onRetry={handleRetry}
-            onSelectStage={handleBackToTitle}
+            onSelectStage={handleGoToStageSelect}
+            onGoHome={handleBackToHome}
             onNextStage={handleNextStage}
           />
         </div>
