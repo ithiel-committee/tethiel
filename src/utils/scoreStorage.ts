@@ -30,12 +30,32 @@ export interface StageBestRecord {
   lastPlayedAt: number;
 }
 
-const STORAGE_KEY_BESTS = "tethiel_stage_bests_v1";
-const STORAGE_KEY_LOGS = "tethiel_score_logs_v1";
+const STORAGE_KEY_BESTS_V1 = "tethiel_stage_bests_v1";
+const STORAGE_KEY_LOGS_V1 = "tethiel_score_logs_v1";
+const STORAGE_KEY_BESTS = "tethiel_stage_bests_v2";
+const STORAGE_KEY_LOGS = "tethiel_score_logs_v2";
 const MAX_LOG_COUNT = 30;
+
+// 旧バージョンのコードで埋め込まれていた架空ハイスコア値のリスト
+const LEGACY_DUMMY_SCORES = new Set([987654, 854320, 128000]);
 
 // 初期デフォルトの記録 (初期状態は未プレイ)
 const DEFAULT_BESTS: Record<number, StageBestRecord> = {};
+
+/**
+ * ベスト記録が過去の架空モックデータかどうか判定・サニタイズする
+ */
+function sanitizeBestRecord(record: StageBestRecord): StageBestRecord | null {
+  if (!record || typeof record !== "object") return null;
+  // 架空モックスコアに合致、またはプレイ数0かつスコア正値の場合はダミーと判定して破棄
+  if (
+    LEGACY_DUMMY_SCORES.has(record.highScore) ||
+    ((record.playCount ?? 0) === 0 && (record.highScore ?? 0) > 0)
+  ) {
+    return null;
+  }
+  return record;
+}
 
 /**
  * ステージ別の自己ベスト記録を取得する
@@ -43,10 +63,56 @@ const DEFAULT_BESTS: Record<number, StageBestRecord> = {};
 export function getStageBestRecords(): Record<number, StageBestRecord> {
   if (typeof window === "undefined") return DEFAULT_BESTS;
   try {
+    // 1. v2 ストレージから読み込み
     const raw = localStorage.getItem(STORAGE_KEY_BESTS);
-    if (!raw) return DEFAULT_BESTS;
+
+    // 2. v2 がなく v1 がある場合はマイグレーション(古いダミー値を自動除外)
+    if (!raw) {
+      const v1Raw = localStorage.getItem(STORAGE_KEY_BESTS_V1);
+      if (v1Raw) {
+        try {
+          const v1Parsed = JSON.parse(v1Raw);
+          const migrated: Record<number, StageBestRecord> = {};
+          for (const [key, val] of Object.entries(v1Parsed)) {
+            const clean = sanitizeBestRecord(val as StageBestRecord);
+            if (clean) {
+              migrated[Number(key)] = clean;
+            }
+          }
+          localStorage.setItem(STORAGE_KEY_BESTS, JSON.stringify(migrated));
+          localStorage.removeItem(STORAGE_KEY_BESTS_V1);
+          return migrated;
+        } catch {
+          localStorage.removeItem(STORAGE_KEY_BESTS_V1);
+        }
+      }
+      return DEFAULT_BESTS;
+    }
+
+    // 3. 読み込んだデータのサニタイズ
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_BESTS, ...parsed };
+    const sanitized: Record<number, StageBestRecord> = {};
+    let needsResave = false;
+
+    for (const [key, val] of Object.entries(parsed)) {
+      const clean = sanitizeBestRecord(val as StageBestRecord);
+      if (clean) {
+        sanitized[Number(key)] = clean;
+      } else {
+        needsResave = true;
+      }
+    }
+
+    if (needsResave) {
+      localStorage.setItem(STORAGE_KEY_BESTS, JSON.stringify(sanitized));
+    }
+
+    // 念のため古い v1 キーがあれば削除
+    if (localStorage.getItem(STORAGE_KEY_BESTS_V1)) {
+      localStorage.removeItem(STORAGE_KEY_BESTS_V1);
+    }
+
+    return sanitized;
   } catch (e) {
     console.warn("Failed to load stage best records from localStorage", e);
     return DEFAULT_BESTS;
@@ -60,11 +126,39 @@ export function getScoreLogs(): ScoreLogEntry[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY_LOGS);
-    if (!raw) return [];
+    if (!raw) {
+      const v1Logs = localStorage.getItem(STORAGE_KEY_LOGS_V1);
+      if (v1Logs) {
+        try {
+          const parsed = JSON.parse(v1Logs);
+          localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(parsed));
+          localStorage.removeItem(STORAGE_KEY_LOGS_V1);
+          return parsed;
+        } catch {
+          localStorage.removeItem(STORAGE_KEY_LOGS_V1);
+        }
+      }
+      return [];
+    }
     return JSON.parse(raw);
   } catch (e) {
     console.warn("Failed to load score logs from localStorage", e);
     return [];
+  }
+}
+
+/**
+ * すべてのローカル記録(自己ベスト・プレイログ)を完全消去・初期化する
+ */
+export function resetAllRecords(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_KEY_BESTS);
+    localStorage.removeItem(STORAGE_KEY_LOGS);
+    localStorage.removeItem(STORAGE_KEY_BESTS_V1);
+    localStorage.removeItem(STORAGE_KEY_LOGS_V1);
+  } catch (e) {
+    console.warn("Failed to reset records from localStorage", e);
   }
 }
 

@@ -22,6 +22,7 @@ import { preloadGameAssets } from "../utils/preloadAssets";
 import {
   getScoreLogs,
   getStageBestRecords,
+  resetAllRecords,
   type ScoreLogEntry,
   type StageBestRecord,
 } from "../utils/scoreStorage";
@@ -714,7 +715,24 @@ export const TitleScreen = ({
               </>
             )}
 
-            <div className="pt-2 border-t border-rose-950/60 flex justify-end">
+            <div className="pt-2 border-t border-rose-950/60 flex justify-between items-center">
+              {activeModal === "ranking" ? (
+                <button
+                  type="button"
+                  className="px-2.5 py-1 text-[11px] text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded border border-slate-800 transition-colors cursor-pointer"
+                  onClick={() => {
+                    if (window.confirm("これまでの記録を初期化しますか？")) {
+                      resetAllRecords();
+                      setStageBests(getStageBestRecords());
+                      setScoreLogs(getScoreLogs());
+                    }
+                  }}
+                >
+                  RESET RECORDS (記録初期化)
+                </button>
+              ) : (
+                <div />
+              )}
               <button
                 type="button"
                 className="title-back-btn"
