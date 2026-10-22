@@ -152,9 +152,9 @@ export const GameUI = ({
         }`}
       >
         {/* ================= 左パネル ================= */}
-        <div className="w-full lg:w-[230px] flex flex-col gap-2.5">
+        <div className="w-full lg:w-[260px] flex flex-col gap-3">
           {/* システムバー (STAGE名 & PAUSE / MUTE / EXIT コントロール) */}
-          <div className="game-hud-card w-full flex items-center justify-between px-3 py-1.5">
+          <div className="game-hud-card w-full flex items-center justify-between px-3.5 py-2">
             <div className="font-pixel-en text-rose-400 text-xs font-bold tracking-wider">
               {stats.gameMode === "endless"
                 ? (isKids ? "エンドレス" : "ENDLESS")
@@ -197,7 +197,7 @@ export const GameUI = ({
           </div>
 
           {/* 1. 残りライフ (ハート5つ) */}
-          <div className="game-hud-card relative flex items-center justify-between px-3 py-2">
+          <div className="game-hud-card relative flex items-center justify-between px-3.5 py-2.5">
             {[0, 1, 2, 3, 4].map((i) => {
               const isBroken = brokenHeartIndices.includes(i);
               const isAlive = i < hearts;
@@ -239,7 +239,7 @@ export const GameUI = ({
           </div>
 
           {/* 2. ステータス情報カード */}
-          <div className="game-hud-card p-3 flex flex-col text-left">
+          <div className="game-hud-card p-3.5 flex flex-col text-left">
             {/* SCORE */}
             <div className="game-stat-row relative">
               <span className="game-stat-label">{t("score")}</span>
@@ -345,7 +345,7 @@ export const GameUI = ({
         <div className="flex justify-center shrink-0">{children}</div>
 
         {/* ================= 右パネル ================= */}
-        <div className="w-full lg:w-[260px] flex flex-col gap-2.5">
+        <div className="w-full lg:w-[260px] flex flex-col gap-3">
           {/* NEXT & HOLD スロット */}
           <div className="grid grid-cols-2 gap-2">
             {/* NEXT */}
@@ -399,7 +399,7 @@ export const GameUI = ({
           </div>
 
           {/* 操作説明枠 (キーボード操作ガイド - キーUIはそのまま維持) */}
-          <div className="game-hud-card p-3 text-left space-y-1.5 shadow-[0_0_12px_rgba(255,26,75,0.12)]">
+          <div className="game-hud-card p-3.5 text-left space-y-1.5 shadow-[0_0_12px_rgba(255,26,75,0.12)]">
             <div className="border-b border-slate-800/80 pb-1.5 mb-1 flex justify-between items-center text-[10px]">
               <span className="text-rose-400 font-bold font-['DotGothic16',sans-serif] text-xs tracking-wider">
                 {t("controlsGuide")}
@@ -443,6 +443,9 @@ export const GameUI = ({
                   <span className="game-guide-label">ボム:</span>
                   <span className="keycap keycap-accent">B</span>
                   <span className="keycap">1</span>
+                  <span className="text-amber-300 font-pixel-en text-[11px] font-bold ml-0.5">
+                    ×{engine.skills.length}
+                  </span>
                   <span className="text-slate-500 text-[10px] ml-1">
                     {isKids ? "(ウイルスばくは)" : "(ウイルス爆破)"}
                   </span>

@@ -3095,11 +3095,12 @@ button:disabled {
 }
 
 .game-guide-label {
-  width: 52px;
+  min-width: 58px;
   flex-shrink: 0;
   font-size: 11px;
   color: #94a3b8;
   user-select: none;
+  white-space: nowrap;
 }
 
 
