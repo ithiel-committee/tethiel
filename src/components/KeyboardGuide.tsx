@@ -50,6 +50,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
         xmlns="http://www.w3.org/2000/svg"
         style={{ fontFamily: "var(--font-pixel)" }}
       >
+        <title>{isKids ? "キーボードそうさガイド" : "キーボード操作ガイド"}</title>
         <defs>
           {/* ネオングローフィルター */}
           <filter id="neon-glow" x="-30%" y="-30%" width="160%" height="160%">

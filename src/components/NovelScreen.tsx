@@ -257,16 +257,9 @@ export const NovelScreen = ({
       </div>
 
       {/* 4. ノベルメッセージウィンドウ (画面下部) */}
-      <div
-        role="button"
-        tabIndex={0}
+      <button
+        type="button"
         onClick={handleNext}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleNext();
-          }
-        }}
         className="novel-msg-container"
       >
         {/* ネームプレート (左上に飛び出たサイバーバッジ) */}
@@ -304,7 +297,7 @@ export const NovelScreen = ({
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
       {/* 5. バックログモーダル (ノベルゲーム定番機能) */}
       {showLog && (

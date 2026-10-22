@@ -483,12 +483,17 @@ export const TitleScreen = ({
         <div
           className="title-modal-overlay"
           onClick={() => setActiveModal(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setActiveModal(null);
+          }}
+          role="presentation"
         >
           <div
             className={`title-modal-box ${
               activeModal === "option" ? "title-modal-box-wide" : ""
             }`}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
           >
             {/* RANKING モーダル */}
             {activeModal === "ranking" && (

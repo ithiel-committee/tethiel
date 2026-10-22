@@ -41,6 +41,13 @@ export const UIModeToggle = ({
     <div
       className={`cyber-mode-toggle ${isSmall ? "cyber-mode-toggle-sm" : ""} ${className}`}
       onClick={handleToggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleToggle();
+        }
+      }}
+      tabIndex={0}
       role="switch"
       aria-checked={isKids}
       aria-label="表示モード切り替え (通常 / ひらがな)"
