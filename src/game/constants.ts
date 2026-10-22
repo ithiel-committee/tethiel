@@ -247,7 +247,7 @@ export const getNextStage = (currentStage: StageData): StageData | null => {
   const currentIndex = STAGES.findIndex((s) => s.id === currentStage.id);
   if (currentIndex !== -1) {
     const nextNormalStage = STAGES[currentIndex + 1];
-    if (nextNormalStage && nextNormalStage.isUnlocked) {
+    if (nextNormalStage?.isUnlocked) {
       return nextNormalStage;
     }
     // 次の通常ステージがない、またはロックされている場合はエンドレスモードへ
