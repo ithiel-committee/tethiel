@@ -8,9 +8,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useEffect } from "react";
-import ithielStandingDefault from "../assets/character/ithiel_standing_default.png";
-import ithielStandingSmile from "../assets/character/ithiel_standing_smile.png";
-import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
+import tethielCursor from "../assets/character/tethiel_cursor.png";
 import type { GameStats, StageData } from "../types/game";
 import { calculateRank } from "../utils/scoreStorage";
 import { CyberCard } from "./ui";
@@ -61,46 +59,20 @@ export const ResultScreen = ({
     stats.totalStars,
   );
 
-  // 表情アイコンの選択
-  const avatarSrc = !isCleared
-    ? ithielStandingDefault
-    : isBonusClear
-      ? ithielStandingSmug
-      : ithielStandingSmile;
-
   return (
     <CyberCard
       variant="default"
       className="w-full max-w-lg p-6 md:p-8 space-y-6 text-center animate-fadeIn shadow-[0_0_35px_rgba(255,26,75,0.2)]"
     >
       <div className="space-y-3">
-        {/* イティエルの丸型フェイスアバター (上部顔クローズアップ) */}
+        {/* イティエル カーソルアイコン (フチ・背景なし) */}
         <div className="inline-flex items-center justify-center">
-          <div
-            className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full p-[3px] transition-transform hover:scale-105 ${
-              !isCleared
-                ? "bg-gradient-to-b from-rose-700 via-rose-900 to-slate-900 border-2 border-rose-500/80 shadow-[0_0_24px_rgba(244,63,94,0.55)]"
-                : isBonusClear
-                  ? "bg-gradient-to-b from-amber-400 via-rose-500 to-amber-300 border-2 border-amber-300 shadow-[0_0_28px_rgba(251,191,36,0.75)]"
-                  : "bg-gradient-to-b from-rose-500 via-rose-600 to-amber-500 border-2 border-rose-400/90 shadow-[0_0_26px_rgba(255,26,75,0.7)]"
-            }`}
-          >
-            <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center">
-              <img
-                src={avatarSrc}
-                alt="イティエル"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "52% 28%",
-                  transform: "scale(2.8)",
-                  transformOrigin: "52% 28%",
-                }}
-                className="select-none pointer-events-none"
-              />
-            </div>
-          </div>
+          <img
+            src={tethielCursor}
+            alt="イティエル"
+            className="w-20 h-20 sm:w-24 sm:h-24 object-contain select-none pointer-events-none drop-shadow-[0_4px_16px_rgba(255,26,75,0.35)] transition-transform hover:scale-105"
+            style={{ imageRendering: "pixelated" }}
+          />
         </div>
 
         {stats.gameMode === "endless" ? (
