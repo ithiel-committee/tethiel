@@ -147,6 +147,7 @@ export const STAGES: StageData[] = [
       [9, 5],
       [4, 6],
     ],
+    initialSkills: [],
   },
   {
     id: 2,
@@ -159,6 +160,7 @@ export const STAGES: StageData[] = [
     infectionIntervalMs: 1400,
     goalRow: GOAL_ROW,
     startCols: START_COLS,
+    initialSkills: ["bomb", "bomb"],
     initialObstacles: [
       // 1〜4ブロック程度の小型障害物クラスター配置（PDF 5p準拠）
       // 左上小型ブロック (1ブロック)
@@ -207,6 +209,7 @@ export const STAGES: StageData[] = [
     infectionIntervalMs: 1600, // 1.6秒ごと (手応えと操作余裕を両立した適正スピード)
     goalRow: GOAL_ROW,
     startCols: START_COLS,
+    initialSkills: ["bomb", "bomb"],
     initialObstacles: [
       // 1. 低層セクション (スタート直上の左右分岐と外側アクセント)
       [19, 1],
@@ -262,6 +265,7 @@ export const ENDLESS_STAGE: StageData = {
   goalRow: -999, // ゴールなし (無限進行)
   startCols: START_COLS,
   mode: "endless",
+  initialSkills: ["bomb", "bomb"],
   initialObstacles: [
     [16, 2],
     [16, 9],

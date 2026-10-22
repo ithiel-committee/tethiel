@@ -63,6 +63,8 @@ export interface StageData {
   startCols: number[]; // 最下部START地点の列番号
   goalRow: number; // 最上部GOALラインの行番号
   mode?: GameMode;
+  // ステージ開始時の初期スキル所持（ボムなど）
+  initialSkills?: SkillType[];
 }
 
 export interface GameStats {

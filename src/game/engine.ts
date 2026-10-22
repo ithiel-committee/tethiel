@@ -210,6 +210,11 @@ export class GameEngine {
     this.isGoalPending = false;
     this.isBonusGoal = false;
     this.isGoalCelebration = false;
+    this.skills = this.stage.initialSkills
+      ? [...this.stage.initialSkills]
+      : this.stage.id >= 2
+        ? ["bomb", "bomb"]
+        : [];
     this.goalReachedTimerMs = 0;
     this.infectionTimerMs = 0;
     this.infectedDamageTimerMs = 0;
