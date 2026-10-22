@@ -230,25 +230,63 @@ export class GameEngine {
     return x - Math.floor(x);
   }
 
-  // 行内の最大連続空き幅を検査し、幅4マス以上の通路を100%保証するフェイルセーフ
+  // 行内の最大連続空き幅を検査し、幅4マス以上の通路を自然に保証するフェイルセーフ
   private ensurePassableCorridor(row: Cell[]): void {
     let maxEmptySpan = 0;
+    let bestStart = -1;
     let currentSpan = 0;
+    let currentStart = -1;
 
     for (let c = 0; c < GRID_WIDTH; c++) {
       if (row[c].type !== "obstacle") {
+        if (currentSpan === 0) {
+          currentStart = c;
+        }
         currentSpan++;
         if (currentSpan > maxEmptySpan) {
           maxEmptySpan = currentSpan;
+          bestStart = currentStart;
         }
       } else {
         currentSpan = 0;
       }
     }
 
-    // 幅4以上の連続空きスペースがない場合のみ、中央付近(列 4〜7)の空きを強制確保して詰みを防止
-    if (maxEmptySpan < 4) {
-      for (let c = 4; c <= 7; c++) {
+    if (maxEmptySpan >= 4) {
+      return;
+    }
+
+    // 空き区間が存在しない場合は中央付近を起点にする
+    let corridorStart = bestStart;
+    let corridorEnd = bestStart + maxEmptySpan - 1;
+    if (bestStart === -1 || maxEmptySpan === 0) {
+      corridorStart = 3;
+      corridorEnd = 2;
+    }
+
+    // 幅4になるまで余白の多い側へ自然に拡張
+    while (corridorEnd - corridorStart + 1 < 4) {
+      const canExpandLeft = corridorStart > 0;
+      const canExpandRight = corridorEnd < GRID_WIDTH - 1;
+
+      if (canExpandLeft && canExpandRight) {
+        if (corridorStart <= GRID_WIDTH - 1 - corridorEnd) {
+          corridorEnd++;
+        } else {
+          corridorStart--;
+        }
+      } else if (canExpandLeft) {
+        corridorStart--;
+      } else if (canExpandRight) {
+        corridorEnd++;
+      } else {
+        break;
+      }
+    }
+
+    // 決定した通路区間内の obstacle のみ empty に変換し既存アイテムを保護
+    for (let c = corridorStart; c <= corridorEnd; c++) {
+      if (row[c].type === "obstacle") {
         row[c] = { type: "empty" };
       }
     }
