@@ -6,9 +6,6 @@ import {
   Layers,
   Play,
   RotateCcw,
-  ShieldAlert,
-  Sparkles,
-  Trophy,
 } from "lucide-react";
 import { useEffect } from "react";
 import ithielStandingDefault from "../assets/character/ithiel_standing_default.png";
@@ -16,7 +13,7 @@ import ithielStandingSmile from "../assets/character/ithiel_standing_smile.png";
 import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
 import type { GameStats, StageData } from "../types/game";
 import { calculateRank } from "../utils/scoreStorage";
-import { CyberButton, CyberCard } from "./ui";
+import { CyberCard } from "./ui";
 
 interface ResultScreenProps {
   isCleared: boolean;
@@ -77,44 +74,32 @@ export const ResultScreen = ({
       className="w-full max-w-lg p-6 md:p-8 space-y-6 text-center animate-fadeIn shadow-[0_0_35px_rgba(255,26,75,0.2)]"
     >
       <div className="space-y-3">
-        {/* イティエルの丸型フェイスアバター */}
-        <div className="relative inline-flex items-center justify-center">
+        {/* イティエルの丸型フェイスアバター (上部顔クローズアップ) */}
+        <div className="inline-flex items-center justify-center">
           <div
-            className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px] transition-transform hover:scale-105 ${
+            className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full p-[3px] transition-transform hover:scale-105 ${
               !isCleared
-                ? "bg-gradient-to-b from-rose-700 via-rose-900 to-slate-900 border border-rose-500/80 shadow-[0_0_20px_rgba(244,63,94,0.5)]"
+                ? "bg-gradient-to-b from-rose-700 via-rose-900 to-slate-900 border-2 border-rose-500/80 shadow-[0_0_24px_rgba(244,63,94,0.55)]"
                 : isBonusClear
-                  ? "bg-gradient-to-b from-amber-400 via-rose-500 to-amber-300 border border-amber-300 shadow-[0_0_25px_rgba(251,191,36,0.7)]"
-                  : "bg-gradient-to-b from-rose-500 via-rose-600 to-amber-500 border border-rose-400/90 shadow-[0_0_22px_rgba(255,26,75,0.65)]"
+                  ? "bg-gradient-to-b from-amber-400 via-rose-500 to-amber-300 border-2 border-amber-300 shadow-[0_0_28px_rgba(251,191,36,0.75)]"
+                  : "bg-gradient-to-b from-rose-500 via-rose-600 to-amber-500 border-2 border-rose-400/90 shadow-[0_0_26px_rgba(255,26,75,0.7)]"
             }`}
           >
             <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center">
               <img
                 src={avatarSrc}
                 alt="イティエル"
-                className="w-full h-full object-cover object-[50%_18%] scale-[1.7] transform select-none pointer-events-none"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "52% 28%",
+                  transform: "scale(2.8)",
+                  transformOrigin: "52% 28%",
+                }}
+                className="select-none pointer-events-none"
               />
             </div>
-          </div>
-          {/* 右下ステータスバッジ */}
-          <div
-            className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center border shadow-md ${
-              !isCleared
-                ? "bg-rose-950 border-rose-500 text-rose-300"
-                : isBonusClear
-                  ? "bg-amber-950 border-amber-400 text-yellow-300 shadow-[0_0_8px_rgba(251,191,36,0.6)]"
-                  : "bg-red-950 border-rose-400 text-rose-300 shadow-[0_0_8px_rgba(255,26,75,0.6)]"
-            }`}
-          >
-            {stats.gameMode === "endless" ? (
-              <Trophy size={14} className="text-yellow-400" />
-            ) : isBonusClear ? (
-              <Sparkles size={14} className="text-yellow-400" />
-            ) : isCleared ? (
-              <span className="text-xs leading-none">♥</span>
-            ) : (
-              <ShieldAlert size={14} className="text-rose-400" />
-            )}
           </div>
         </div>
 
@@ -238,61 +223,54 @@ export const ResultScreen = ({
         )}
       </CyberCard>
 
-      {/* 操作アクションボタン群 (縦並び / Vertical Layout) */}
-      <div className="flex flex-col gap-2.5 w-full pt-2">
+      {/* 操作アクションボタン群 (統一デザイン・縦並び・マージン確保) */}
+      <div className="result-actions-container">
         {/* 1. 次のレベルへ進むボタン (ステージクリア時かつ次ステージ存在時に最上部で強力ハイライト) */}
         {isCleared && nextStage && onNextStage && (
           <button
             type="button"
             onClick={onNextStage}
-            className="w-full relative group overflow-hidden py-3 px-5 rounded-xl font-['DotGothic16',sans-serif] text-sm sm:text-base font-bold tracking-wider text-white transition-all duration-150 active:scale-[0.98] cursor-pointer border border-rose-400/90 bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 shadow-[0_0_22px_rgba(255,26,75,0.7),inset_0_0_12px_rgba(255,255,255,0.25)] hover:shadow-[0_0_32px_rgba(255,26,75,0.95),inset_0_0_16px_rgba(255,255,255,0.4)] hover:brightness-110 animate-pulse"
+            className="result-action-btn result-action-btn-primary animate-pulse"
           >
-            {/* サイバースキャンライン光沢演出 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
-
-            <div className="relative flex items-center justify-center gap-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              <Play size={16} fill="currentColor" className="text-amber-300 shrink-0" />
-              <span>NEXT LEVEL : {nextStage.name}</span>
-              <ChevronRight
-                size={18}
-                className="text-amber-200 group-hover:translate-x-1 transition-transform shrink-0"
-              />
-            </div>
+            <Play size={16} fill="currentColor" className="text-amber-300 shrink-0" />
+            <span>NEXT LEVEL : {nextStage.name}</span>
+            <ChevronRight size={18} className="text-amber-200 shrink-0" />
           </button>
         )}
 
         {/* 2. リトライボタン */}
-        <CyberButton
-          variant={isCleared && nextStage ? "secondary" : "primary"}
-          size="md"
-          className="w-full justify-center"
-          icon={<RotateCcw size={15} />}
+        <button
+          type="button"
           onClick={onRetry}
+          className={`result-action-btn ${
+            isCleared && nextStage
+              ? "result-action-btn-secondary"
+              : "result-action-btn-primary"
+          }`}
         >
-          RETRY
-        </CyberButton>
+          <RotateCcw size={16} className="shrink-0" />
+          <span>RETRY</span>
+        </button>
 
         {/* 3. ステージ選択画面へ直行 */}
-        <CyberButton
-          variant="secondary"
-          size="md"
-          className="w-full justify-center"
-          icon={<Layers size={15} />}
+        <button
+          type="button"
           onClick={onSelectStage}
+          className="result-action-btn result-action-btn-secondary"
         >
-          STAGE SELECT
-        </CyberButton>
+          <Layers size={16} className="shrink-0" />
+          <span>STAGE SELECT</span>
+        </button>
 
         {/* 4. ホーム画面へ戻る */}
-        <CyberButton
-          variant="secondary"
-          size="md"
-          className="w-full justify-center"
-          icon={<Home size={15} />}
+        <button
+          type="button"
           onClick={onGoHome}
+          className="result-action-btn result-action-btn-secondary"
         >
-          HOME
-        </CyberButton>
+          <Home size={16} className="shrink-0" />
+          <span>HOME</span>
+        </button>
       </div>
     </CyberCard>
   );
