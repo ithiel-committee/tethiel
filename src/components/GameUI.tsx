@@ -16,7 +16,6 @@ import { TETROMINO_SHAPES } from "../game/constants";
 import { useUIText } from "../context/UIModeContext";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
-import { CyberButton, CyberCard } from "./ui";
 import { useOverflowCheck } from "../utils/overflowChecker";
 
 // 現在HPに応じたイティエルの腕上げ立ち絵を取得
@@ -153,12 +152,9 @@ export const GameUI = ({
         }`}
       >
         {/* ================= 左パネル ================= */}
-        <div className="w-full lg:w-[220px] flex flex-col gap-2.5">
+        <div className="w-full lg:w-[230px] flex flex-col gap-2.5">
           {/* システムバー (STAGE名 & PAUSE / MUTE / EXIT コントロール) */}
-          <CyberCard
-            variant="subtle"
-            className="w-full flex items-center justify-between px-2.5 py-1.5 border-rose-500/40 shadow-[0_0_10px_rgba(255,26,75,0.1)]"
-          >
+          <div className="game-hud-card w-full flex items-center justify-between px-3 py-1.5">
             <div className="font-pixel-en text-rose-400 text-xs font-bold tracking-wider">
               {stats.gameMode === "endless"
                 ? (isKids ? "エンドレス" : "ENDLESS")
@@ -168,46 +164,40 @@ export const GameUI = ({
             </div>
 
             <div className="flex items-center gap-1.5">
-              <CyberButton
-                variant="secondary"
-                size="xs"
+              <button
+                type="button"
                 onClick={() => {
                   engine.togglePause();
                   setIsPaused(engine.status === "paused");
                 }}
                 title={isKids ? (isPaused ? "つづける" : "ひとやすみ") : (isPaused ? "再開" : "一時停止")}
-                className="px-1.5 py-0.5 text-[10px]"
+                className="game-hud-btn"
               >
-                {isPaused ? <Play size={11} fill="currentColor" /> : <Pause size={11} />}
-              </CyberButton>
+                {isPaused ? <Play size={13} fill="currentColor" /> : <Pause size={13} />}
+              </button>
 
-              <CyberButton
-                variant="secondary"
-                size="xs"
+              <button
+                type="button"
                 onClick={onToggleMute}
                 title={isKids ? (isMuted ? "おとをだす" : "おとをけす") : (isMuted ? "ミュート解除" : "ミュート")}
-                className="px-1.5 py-0.5 text-[10px]"
+                className="game-hud-btn"
               >
-                {isMuted ? <VolumeX size={12} className="text-rose-400" /> : <Volume2 size={12} className="text-rose-400" />}
-              </CyberButton>
+                {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              </button>
 
-              <CyberButton
-                variant="danger"
-                size="xs"
+              <button
+                type="button"
                 onClick={onExitGame}
                 title={isKids ? "おわる" : "タイトルへ戻る"}
-                className="px-2 py-0.5 text-[10px] font-bold"
+                className="game-hud-btn-danger"
               >
                 {t("exit")}
-              </CyberButton>
+              </button>
             </div>
-          </CyberCard>
+          </div>
 
           {/* 1. 残りライフ (ハート5つ) */}
-          <CyberCard
-            variant="subtle"
-            className="relative flex items-center justify-center lg:justify-start gap-2 px-3 py-2 border-rose-500/40 shadow-[0_0_10px_rgba(255,26,75,0.15)]"
-          >
+          <div className="game-hud-card relative flex items-center justify-between px-3 py-2">
             {[0, 1, 2, 3, 4].map((i) => {
               const isBroken = brokenHeartIndices.includes(i);
               const isAlive = i < hearts;
@@ -215,7 +205,7 @@ export const GameUI = ({
               return (
                 <div key={`heart-${i}`} className="relative">
                   <Heart
-                    size={22}
+                    size={20}
                     className={`transition-colors duration-300 ${
                       isAlive
                         ? "text-rose-400 fill-rose-500 filter drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]"
@@ -226,7 +216,7 @@ export const GameUI = ({
                   {isBroken && (
                     <div className="absolute inset-0 animate-heart-break pointer-events-none">
                       <Heart
-                        size={22}
+                        size={20}
                         className="text-rose-300 fill-rose-500 filter drop-shadow-[0_0_14px_rgba(255,0,85,1)]"
                       />
                     </div>
@@ -246,26 +236,23 @@ export const GameUI = ({
                 </span>
               ))}
             </div>
-          </CyberCard>
+          </div>
 
-          <CyberCard
-            variant="default"
-            className="p-3 space-y-2 text-left"
-          >
-
+          {/* 2. ステータス情報カード */}
+          <div className="game-hud-card p-3 flex flex-col text-left">
             {/* SCORE */}
-            <div className="relative">
-              <div className="text-slate-400 text-[11px]">{t("score")}</div>
+            <div className="game-stat-row relative">
+              <span className="game-stat-label">{t("score")}</span>
               <div className="relative flex items-center gap-2">
-                <div
-                  className={`font-pixel-en text-yellow-400 text-sm tracking-wider transition-transform ${
+                <span
+                  className={`game-stat-val text-yellow-400 font-pixel-en text-sm transition-transform ${
                     isScoreBumping
                       ? "animate-score-bump text-yellow-300"
                       : ""
                   }`}
                 >
                   {stats.score.toLocaleString()}
-                </div>
+                </span>
                 {/* 星獲得時の浮き上がる+スコアアニメーション */}
                 <div className="absolute left-full ml-1.5 flex flex-col gap-1 pointer-events-none">
                   {floatingScores.map((item) => (
@@ -281,127 +268,120 @@ export const GameUI = ({
             </div>
 
             {/* TIME */}
-            <div>
-              <div className="text-slate-400 text-[11px]">{t("time")}</div>
-              <div className="font-['Press_Start_2P'] text-rose-200 text-xs tracking-wider">
+            <div className="game-stat-row">
+              <span className="game-stat-label">{t("time")}</span>
+              <span className="game-stat-val text-rose-200">
                 {formatTime(stats.clearTimeMs)}
-              </div>
+              </span>
             </div>
 
             {/* MINO COUNT */}
-            <div>
-              <div className="text-slate-400 text-[11px]">{t("minoCount")}</div>
-              <div className="font-['Press_Start_2P'] text-pink-400 text-xs tracking-wider">
+            <div className="game-stat-row">
+              <span className="game-stat-label">{t("minoCount")}</span>
+              <span className="game-stat-val text-pink-400">
                 {stats.minoCount.toString().padStart(3, "0")}
-              </div>
+              </span>
             </div>
 
             {/* STAGE or MODE */}
-            <div>
-              <div className="text-slate-400 text-[11px]">
+            <div className="game-stat-row">
+              <span className="game-stat-label">
                 {engine.gameMode === "endless" ? t("mode") : t("stage")}
-              </div>
-              <div className="font-['Press_Start_2P'] text-rose-400 text-xs tracking-wider">
+              </span>
+              <span className="game-stat-val text-rose-400">
                 {engine.gameMode === "endless"
                   ? (isKids ? "エンドレス" : "ENDLESS")
                   : stats.stageNumber.toString().padStart(2, "0")}
-              </div>
+              </span>
             </div>
 
             {/* HEIGHT (エンドレス時) または BONUS (ステージ時) */}
             {engine.gameMode === "endless" ? (
-              <div>
-                <div className="text-slate-400 text-[11px]">{t("height")}</div>
-                <div className="font-['Press_Start_2P'] text-amber-300 text-xs font-bold tracking-wider">
+              <div className="game-stat-row">
+                <span className="game-stat-label">{t("height")}</span>
+                <span className="game-stat-val text-amber-300 font-bold">
                   {engine.climbedHeight} m
-                </div>
+                </span>
               </div>
             ) : (
-              <div>
-                <div className="text-slate-400 text-[11px]">{t("bonus")}</div>
-                <div className="font-['Press_Start_2P'] text-amber-300 text-xs flex items-center gap-1">
+              <div className="game-stat-row">
+                <span className="game-stat-label">{t("bonus")}</span>
+                <span className="game-stat-val text-amber-300 flex items-center gap-1">
                   <span>★</span>
                   <span>{`${stats.bonusStars}/${stats.totalStars}`}</span>
-                </div>
+                </span>
               </div>
             )}
 
             {/* VIRUS STATUS */}
-            <div>
-              <div className="text-slate-400 text-[11px]">{t("virus")}</div>
+            <div className="game-stat-row">
+              <span className="game-stat-label">{t("virus")}</span>
               {engine.minosUntilInfection > 0 ? (
-                <div className="text-amber-300 text-xs font-bold animate-pulse">
+                <span className="text-amber-300 text-xs font-bold animate-pulse font-['DotGothic16',sans-serif]">
                   {isKids
                     ? `まってます (あと${engine.minosUntilInfection}かい)`
                     : `待機中 (あと${engine.minosUntilInfection}手)`}
-                </div>
+                </span>
               ) : (
-                <div className="text-rose-400 text-xs font-bold">
+                <span className="text-rose-400 text-xs font-bold font-['DotGothic16',sans-serif]">
                   {t("virusAdvancing")}
-                </div>
+                </span>
               )}
             </div>
 
-            {/* BEST SCORE */}
-            <div className="pt-1 border-t border-slate-800">
-              <div className="text-slate-500 text-[10px]">{t("bestScore")}</div>
-              <div className="font-['Press_Start_2P'] text-purple-400 text-xs tracking-wider">
-                {stats.bestScore.toLocaleString()}
+            {/* BEST SCORE (区切りボーダー) */}
+            <div className="border-t border-slate-800/80 mt-1.5 pt-1.5">
+              <div className="game-stat-row">
+                <span className="game-stat-label text-slate-500">{t("bestScore")}</span>
+                <span className="game-stat-val text-purple-400">
+                  {stats.bestScore.toLocaleString()}
+                </span>
               </div>
             </div>
-          </CyberCard>
+          </div>
         </div>
 
         {/* ================= 中央パネル (Canvas) ================= */}
         <div className="flex justify-center shrink-0">{children}</div>
 
         {/* ================= 右パネル ================= */}
-        <div className="w-full lg:w-[260px] flex flex-col gap-3">
+        <div className="w-full lg:w-[260px] flex flex-col gap-2.5">
           {/* NEXT & HOLD スロット */}
           <div className="grid grid-cols-2 gap-2">
             {/* NEXT */}
-            <CyberCard
-              variant="default"
-              className="p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]"
-            >
-              <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 font-bold">
+            <div className="game-hud-card p-2.5 text-center">
+              <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 font-bold tracking-wider">
                 {t("next")}
               </div>
-              <div className="w-full h-14 bg-slate-950 rounded flex items-center justify-center border border-slate-800">
+              <div className="w-full h-14 bg-slate-950/90 rounded border border-slate-800/80 flex items-center justify-center">
                 {nextPieces[0] ? (
                   <MiniPieceView type={nextPieces[0]} />
                 ) : (
                   <span className="text-slate-600 text-xs">--</span>
                 )}
               </div>
-            </CyberCard>
+            </div>
 
             {/* HOLD */}
-            <CyberCard
-              variant="default"
-              className="p-2 text-center shadow-[0_0_10px_rgba(255,26,75,0.1)]"
-            >
-              <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex items-center justify-between px-1 font-bold">
+            <div className="game-hud-card p-2.5 text-center">
+              <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex items-center justify-between px-0.5 font-bold tracking-wider">
                 <span>{t("hold")}</span>
                 <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none px-1">
                   C / SHIFT
                 </span>
               </div>
-              <div className="w-full h-14 bg-slate-950 rounded flex items-center justify-center border border-slate-800">
+              <div className="w-full h-14 bg-slate-950/90 rounded border border-slate-800/80 flex items-center justify-center">
                 {holdPiece ? (
                   <MiniPieceView type={holdPiece} />
                 ) : (
                   <span className="text-slate-600 text-xs">--</span>
                 )}
               </div>
-            </CyberCard>
+            </div>
           </div>
 
           {/* イティエル立ち絵表示枠 (HP連動表情・腕上げポーズ) */}
-          <CyberCard
-            variant="default"
-            className="relative w-full h-44 overflow-hidden flex flex-col items-center justify-end p-2 border-rose-500/30"
-          >
+          <div className="game-hud-card relative w-full h-44 overflow-hidden flex flex-col items-center justify-end p-2.5 border-rose-500/35">
             {/* サイバー背景エフェクト */}
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ff1a4b_1px,transparent_1px)] [background-size:12px_12px]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,26,75,0.2)_0%,transparent_70%)] pointer-events-none" />
@@ -416,63 +396,60 @@ export const GameUI = ({
                 isShaking ? "scale-95 brightness-125 filter drop-shadow-[0_0_20px_#ff1a4b]" : "scale-100"
               }`}
             />
-          </CyberCard>
+          </div>
 
-          {/* 操作説明枠 (キーボード操作ガイド) */}
-          <CyberCard
-            variant="default"
-            className="p-2.5 text-left space-y-2 shadow-[0_0_15px_rgba(255,26,75,0.1)]"
-          >
-            <div className="title-controls-header border-b border-slate-800 pb-1 flex justify-between items-center text-[10px]">
-              <span className="text-rose-400 font-bold font-['DotGothic16'] text-xs">
+          {/* 操作説明枠 (キーボード操作ガイド - キーUIはそのまま維持) */}
+          <div className="game-hud-card p-3 text-left space-y-1.5 shadow-[0_0_12px_rgba(255,26,75,0.12)]">
+            <div className="border-b border-slate-800/80 pb-1.5 mb-1 flex justify-between items-center text-[10px]">
+              <span className="text-rose-400 font-bold font-['DotGothic16',sans-serif] text-xs tracking-wider">
                 {t("controlsGuide")}
               </span>
-              <span className="title-controls-sub text-[9px]">{t("keyboard")}</span>
+              <span className="text-[9px] text-slate-500 tracking-wider font-pixel-en">{t("keyboard")}</span>
             </div>
 
             <div className="flex flex-col gap-1 text-[11px] pt-0.5">
-              <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">{t("hardDrop")}</span>
+              <div className="game-guide-row">
+                <span className="game-guide-label">{t("hardDrop")}</span>
                 <span className="keycap">↑</span>
                 <span className="keycap keycap-wide">SPACE</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">{t("rotate")}</span>
+              <div className="game-guide-row">
+                <span className="game-guide-label">{t("rotate")}</span>
                 <span className="keycap">Q</span>
                 <span className="keycap">W</span>
                 <span className="keycap">Z</span>
                 <span className="keycap">X</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">{t("move")}</span>
+              <div className="game-guide-row">
+                <span className="game-guide-label">{t("move")}</span>
                 <span className="keycap">←</span>
                 <span className="keycap">→</span>
                 <span className="keycap">A</span>
                 <span className="keycap">D</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">{t("softDrop")}</span>
+              <div className="game-guide-row">
+                <span className="game-guide-label">{t("softDrop")}</span>
                 <span className="keycap">↓</span>
                 <span className="keycap">S</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="ctrl-label">{t("holdLabel")}</span>
+              <div className="game-guide-row">
+                <span className="game-guide-label">{t("holdLabel")}</span>
                 <span className="keycap keycap-accent">C</span>
                 <span className="keycap keycap-accent keycap-wide">SHIFT</span>
-                <span className="ctrl-note text-[10px]">{t("minoExchange")}</span>
+                <span className="text-slate-500 text-[10px] ml-1">{t("minoExchange")}</span>
               </div>
               {engine.skills.length > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <span className="ctrl-label">ボム:</span>
+                <div className="game-guide-row">
+                  <span className="game-guide-label">ボム:</span>
                   <span className="keycap keycap-accent">B</span>
                   <span className="keycap">1</span>
-                  <span className="ctrl-note text-[10px]">
+                  <span className="text-slate-500 text-[10px] ml-1">
                     {isKids ? "(ウイルスばくは)" : "(ウイルス爆破)"}
                   </span>
                 </div>
               )}
             </div>
-          </CyberCard>
+          </div>
         </div>
       </div>
     </div>
