@@ -201,13 +201,57 @@ export const STAGES: StageData[] = [
     name: "STAGE 3",
     codeName: "STAGE 3",
     subtitle: "最終防衛戦",
-    description: "高速ウイルスとの最終決戦。(Coming Soon)",
-    isUnlocked: false,
-    infectionIntervalMs: 2200, // 2.2秒ごと
+    description:
+      "サーバーコア中枢での最終防衛戦！複雑に入り組むトゲを回避し、迫る高速マルウェアからサーバーを守り抜け！",
+    isUnlocked: true,
+    infectionIntervalMs: 1100, // 1.1秒ごと (最終ステージの高速感染)
     goalRow: GOAL_ROW,
     startCols: START_COLS,
-    initialObstacles: [],
-    initialStars: [],
+    initialObstacles: [
+      // 1. 低層セクション (スタート直後の分岐)
+      [19, 1],
+      [19, 2],
+      [19, 9],
+      [19, 10],
+      [17, 3],
+      [17, 4],
+      [17, 7],
+      [17, 8],
+
+      // 2. 中層セクション (中央小島と左右の隘路)
+      [14, 1],
+      [14, 2],
+      [14, 9],
+      [14, 10],
+      [13, 5],
+      [13, 6],
+      [11, 0],
+      [11, 11],
+      [10, 3],
+      [10, 4],
+      [10, 7],
+      [10, 8],
+
+      // 3. 上層セクション (中央コアとゲート)
+      [7, 5],
+      [7, 6],
+      [6, 2],
+      [6, 3],
+      [6, 8],
+      [6, 9],
+
+      // 4. ゴール直前バリア & ボーナスルートの難所
+      [4, 5],
+      [4, 6],
+      [3, 9],
+    ],
+    initialStars: [
+      [18, 1], // 左下
+      [15, 11], // 右下
+      [12, 5], // 中央島
+      [8, 2], // 左上
+      [3, 11], // BONUS GOAL最奥
+    ],
   },
 ];
 

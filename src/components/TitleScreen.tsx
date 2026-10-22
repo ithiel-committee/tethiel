@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   Info,
-  Lock,
   Play,
   Settings,
   Trophy,
@@ -413,25 +412,35 @@ export const TitleScreen = ({
                 </button>
               </div>
 
-              {/* STAGE 3 (LOCKED) */}
-              <div className="title-stage-card title-stage-card-locked">
+              {/* STAGE 3 */}
+              <div
+                className={`title-stage-card ${
+                  selectedStageId === STAGES[2].id
+                    ? "title-stage-card-selected"
+                    : ""
+                }`}
+              >
                 <div className="title-stage-info">
                   <div className="title-stage-name-row">
-                    <span className="title-stage-name text-slate-500">
+                    <span className="title-stage-name">
                       {STAGE_TEXTS[3]?.name[isKids ? "kids" : "standard"] ?? STAGES[2].name}
                     </span>
-                    <span className="title-stage-sub text-slate-500">
+                    <span className="title-stage-sub">
                       {STAGE_TEXTS[3]?.subtitle[isKids ? "kids" : "standard"] ?? STAGES[2].subtitle}
                     </span>
                   </div>
-                  <p className="title-stage-desc text-slate-500">
+                  <p className="title-stage-desc">
                     {STAGE_TEXTS[3]?.description[isKids ? "kids" : "standard"] ?? STAGES[2].description}
                   </p>
                 </div>
-                <div className="title-locked-badge">
-                  <Lock size={12} />
-                  <span>{t("locked")}</span>
-                </div>
+                <button
+                  type="button"
+                  className="title-start-btn"
+                  onClick={() => handleStageSelectWithAnim(STAGES[2])}
+                >
+                  <Play size={12} fill="currentColor" />
+                  <span>{t("start")}</span>
+                </button>
               </div>
 
               {/* ENDLESS MODE */}
@@ -536,6 +545,11 @@ export const TitleScreen = ({
                       {
                         id: 2,
                         name: isKids ? "ステージ 2: トゲをよけて すすもう" : "STAGE 2: サイバー迂回ルート",
+                        isEndless: false,
+                      },
+                      {
+                        id: 3,
+                        name: isKids ? "ステージ 3: さいごの たたかい" : "STAGE 3: 最終防衛戦",
                         isEndless: false,
                       },
                       {

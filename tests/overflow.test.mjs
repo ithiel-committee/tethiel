@@ -145,3 +145,26 @@ test("4. Overflow Checker Utility Integration", () => {
     );
   }
 });
+
+test("5. STAGE 3 Implementation and Unlock Verification", () => {
+  const constantsPath = path.join(rootDir, "src", "game", "constants.ts");
+  const constantsContent = fs.readFileSync(constantsPath, "utf-8");
+
+  // STAGE 3 must be unlocked
+  assert.ok(
+    constantsContent.includes('name: "STAGE 3"') && constantsContent.includes("isUnlocked: true"),
+    "STAGE 3 must be defined and unlocked",
+  );
+
+  // STAGE 3 must have obstacles and stars defined
+  assert.match(
+    constantsContent,
+    /id:\s*3,.*initialObstacles:\s*\[\s*\[/s,
+    "STAGE 3 must have configured initialObstacles",
+  );
+  assert.match(
+    constantsContent,
+    /id:\s*3,.*initialStars:\s*\[\s*\[/s,
+    "STAGE 3 must have configured initialStars",
+  );
+});
