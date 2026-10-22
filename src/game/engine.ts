@@ -15,8 +15,10 @@ import {
   GOAL_ROW,
   GRID_HEIGHT,
   GRID_WIDTH,
+  SCORE_CONFIG,
   START_COLS,
   START_ROW,
+  TIMING_CONFIG,
 } from "./constants";
 import {
   TetrominoBag,
@@ -335,7 +337,7 @@ export class GameEngine {
   public scrollDown(count = 1) {
     for (let step = 0; step < count; step++) {
       this.climbedHeight++;
-      this.score += 50;
+      this.score += SCORE_CONFIG.ENDLESS_SCROLL_PER_ROW;
 
       // ウイルスの段階的加速 (10m登るごとに120ms短縮、最小1400ms)
       this.currentInfectionIntervalMs = Math.max(
@@ -519,7 +521,7 @@ export class GameEngine {
       this.infectionTimerMs = 0;
     }
 
-    // 2. ウイルス領域滞在中の継続ダメージ（1秒おきにハート-1）
+    // 2. ウイルス領域滞在中の継続ダメージ(1秒おきにハート-1)
     const footR = Math.round(this.characterPos.y);
     const footC = Math.floor(this.characterPos.x);
     const isFootInfected =
@@ -532,7 +534,9 @@ export class GameEngine {
 
     if (isFootInfected) {
       this.infectedDamageTimerMs += deltaMs;
-      if (this.infectedDamageTimerMs >= 1000) {
+      if (
+        this.infectedDamageTimerMs >= TIMING_CONFIG.INFECTED_DAMAGE_INTERVAL_MS
+      ) {
         this.infectedDamageTimerMs = 0;
         this.takeDamage("ウイルスの感染領域内に留まり続けています！");
         if (this.status !== "playing") return;
@@ -541,19 +545,21 @@ export class GameEngine {
       this.infectedDamageTimerMs = 0;
     }
 
-    // 2. イティエルの移動（ミノをたどる動き）
+    // 2. イティエルの移動(ミノをたどる動き)
     if (this.waypoints.length > 0) {
       const target = this.waypoints[0];
       const dx = target.x - this.characterPos.x;
       const dy = target.y - this.characterPos.y;
       const dist = Math.hypot(dx, dy);
 
-      // 右に移動するときだけ右向き、それ以外（左移動・上下移動・停止）はデフォルト左向き
+      // 右に移動するときだけ右向き、それ以外(左移動・上下移動・停止)はデフォルト左向き
       this.characterPos.facing = dx > 0.02 ? "right" : "left";
       this.characterPos.isMoving = true;
 
-      // 移動速度（ブロック/秒）
-      const speed = this.isGoalPending ? 12.0 : 9.0;
+      // 移動速度(ブロック/秒)
+      const speed = this.isGoalPending
+        ? TIMING_CONFIG.CHAR_MOVE_SPEED_GOAL
+        : TIMING_CONFIG.CHAR_MOVE_SPEED_NORMAL;
       const step = (speed * deltaMs) / 1000;
 
       if (dist <= step) {
@@ -588,10 +594,10 @@ export class GameEngine {
       this.characterPos.isMoving = false;
       this.characterPos.facing = "left";
 
-      // ゴールマスに到着後のセレブレーション待機（1秒後にリザルト画面へ遷移・ステージモードのみ）
+      // ゴールマスに到着後のセレブレーション待機(1秒後にリザルト画面へ遷移・ステージモードのみ)
       if (this.gameMode === "stage" && this.isGoalCelebration) {
         this.goalReachedTimerMs += deltaMs;
-        if (this.goalReachedTimerMs >= 1000) {
+        if (this.goalReachedTimerMs >= TIMING_CONFIG.GOAL_CELEBRATION_WAIT_MS) {
           this.triggerStageClear(this.isBonusGoal);
           return;
         }
@@ -599,9 +605,10 @@ export class GameEngine {
     }
 
     // 2.5 エンドレスモード時の自動縦スクロール処理
-    // イティエルが画面上部（行11未満）に登ったら、フィールドを下にスクロールして中央へ戻す
-    if (this.gameMode === "endless" && this.characterPos.y < 11) {
-      const scrollRows = Math.floor(11 - this.characterPos.y);
+    // イティエルが画面上部に登ったら、フィールドを下にスクロールして中央へ戻す
+    const midGridRow = Math.floor(GRID_HEIGHT / 2);
+    if (this.gameMode === "endless" && this.characterPos.y < midGridRow) {
+      const scrollRows = Math.floor(midGridRow - this.characterPos.y);
       if (scrollRows > 0) {
         this.scrollDown(scrollRows);
         this.recalculateCircuit();
@@ -635,7 +642,7 @@ export class GameEngine {
 
       if (this.isLocking) {
         this.lockDelayTimerMs += deltaMs;
-        if (this.lockDelayTimerMs >= 500) {
+        if (this.lockDelayTimerMs >= TIMING_CONFIG.LOCK_DELAY_MS) {
           this.lockPiece();
         }
       }
@@ -739,11 +746,11 @@ export class GameEngine {
           ) {
             placedCoords.push([targetY, targetX]);
 
-            // 星（★）を回収（スピーディなプレイを促すためスコアを控えめに調整）
+            // 星(★)を回収(スピーディなプレイを促すためスコアを控えめに調整)
             if (this.grid[targetY][targetX].type === "star") {
               sounds.playItemGet();
               this.bonusStars++;
-              this.score += 100;
+              this.score += SCORE_CONFIG.STAR_COLLECT;
             }
 
             this.grid[targetY][targetX] = {
@@ -759,7 +766,7 @@ export class GameEngine {
     }
 
     this.currentPiece = null;
-    this.score += 10;
+    this.score += SCORE_CONFIG.PLACED_MINO;
 
     // 回路接続の再計算（STARTからBFS探索）
     this.recalculateCircuit();
@@ -1120,7 +1127,7 @@ export class GameEngine {
     if (this.status !== "playing" || !this.currentPiece) return;
     if (!checkCollision(this.currentPiece, this.grid, 0, 1)) {
       this.currentPiece.y++;
-      this.score += 1;
+      this.score += SCORE_CONFIG.SOFT_DROP_PER_ROW;
       sounds.playMove();
       // 下に移動した直後の接地判定
       if (!checkCollision(this.currentPiece, this.grid, 0, 1)) {
@@ -1137,7 +1144,8 @@ export class GameEngine {
   public hardDrop() {
     if (this.status !== "playing" || !this.currentPiece) return;
     const ghostY = calculateGhostY(this.currentPiece, this.grid);
-    this.score += (ghostY - this.currentPiece.y) * 2;
+    this.score +=
+      (ghostY - this.currentPiece.y) * SCORE_CONFIG.HARD_DROP_PER_ROW;
     this.currentPiece.y = ghostY;
     sounds.playHardDrop();
     this.lockPiece();
@@ -1199,7 +1207,7 @@ export class GameEngine {
               color: oldColor,
               glitchSeed: Math.random() * 100,
             };
-            this.score += 50;
+            this.score += SCORE_CONFIG.BOMB_BREAK_PER_BLOCK;
           }
         }
       }
@@ -1242,23 +1250,29 @@ export class GameEngine {
     sounds.playClear();
 
     // 1. クリア基本ボーナス
-    const clearBonus = isBonusClear ? 10000 : 5000;
+    const clearBonus = isBonusClear
+      ? SCORE_CONFIG.CLEAR_BONUS
+      : SCORE_CONFIG.CLEAR_NORMAL;
     this.score += clearBonus;
 
-    // 2. 時間によるマイナス補正（1秒ごとに -30点のタイムペナルティ）
+    // 2. 時間によるマイナス補正(1秒ごとに -30点のタイムペナルティ)
     const clearSec = Math.floor(this.elapsedTimeMs / 1000);
-    this.timePenalty = clearSec * 30;
+    this.timePenalty = clearSec * SCORE_CONFIG.TIME_PENALTY_PER_SEC;
     this.score = Math.max(0, this.score - this.timePenalty);
 
-    // 3. ミノ数評価（少ない方がプラス評価：基準20ミノに対し少ないほどボーナス加算）
-    this.minoBonus = Math.max(0, (20 - this.minoCount) * 200);
+    // 3. ミノ数評価(少ない方がプラス評価：基準20ミノに対し少ないほどボーナス加算)
+    this.minoBonus = Math.max(
+      0,
+      (SCORE_CONFIG.MINO_PAR_COUNT - this.minoCount) *
+        SCORE_CONFIG.MINO_BONUS_PER_MINO,
+    );
     this.score += this.minoBonus;
 
-    // 4. 星ボーナス（スピーディなプレイを促すため星への固執度を下げる控えめ設定: 1個200点）
-    this.score += this.bonusStars * 200;
+    // 4. 星ボーナス(スピーディなプレイを促すため星への固執度を下げる控えめ設定: 1個200点)
+    this.score += this.bonusStars * SCORE_CONFIG.STAR_CLEAR_BONUS;
 
     // 5. 残りハートボーナス
-    this.score += this.hearts * 300;
+    this.score += this.hearts * SCORE_CONFIG.HEART_BONUS;
 
     const stats: GameStats = {
       score: this.score,

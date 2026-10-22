@@ -4,8 +4,34 @@ export const GRID_WIDTH = 12; // PDF 5pに合わせたマス幅
 export const GRID_HEIGHT = 22; // PDF 5pに合わせたマス高
 export const GOAL_ROW = 2; // 行0〜2がGOALエリア
 export const START_ROW = 21; // 最下部START行
-export const START_COLS = [5, 6]; // START地点（中央下部）
+export const START_COLS = [5, 6]; // START地点(中央下部)
 export const BONUS_GOAL_COLS = [10, 11]; // 右上のBONUSゴール列
+
+// スコア計算・ボーナス定数設定
+export const SCORE_CONFIG = {
+  PLACED_MINO: 10,
+  SOFT_DROP_PER_ROW: 1,
+  HARD_DROP_PER_ROW: 2,
+  STAR_COLLECT: 100,
+  ENDLESS_SCROLL_PER_ROW: 50,
+  BOMB_BREAK_PER_BLOCK: 50,
+  CLEAR_NORMAL: 5000,
+  CLEAR_BONUS: 10000,
+  TIME_PENALTY_PER_SEC: 30,
+  MINO_PAR_COUNT: 20,
+  MINO_BONUS_PER_MINO: 200,
+  STAR_CLEAR_BONUS: 200,
+  HEART_BONUS: 300,
+} as const;
+
+// ゲーム進行・アニメーションタイミング定数設定
+export const TIMING_CONFIG = {
+  LOCK_DELAY_MS: 500,
+  INFECTED_DAMAGE_INTERVAL_MS: 1000,
+  GOAL_CELEBRATION_WAIT_MS: 1000,
+  CHAR_MOVE_SPEED_NORMAL: 9.0,
+  CHAR_MOVE_SPEED_GOAL: 12.0,
+} as const;
 
 // サイバーネオン調カラーパレット
 export const TETROMINO_SHAPES: Record<
