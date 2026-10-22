@@ -90,7 +90,7 @@ export class GameEngine {
   public totalStars = 0;
   public startTimeMs = 0;
   public elapsedTimeMs = 0;
-  public bestScore = 987654;
+  public bestScore = 0;
 
   // 接続された回路パス（STARTから昇順）
   public connectedPath: [number, number][] = [];

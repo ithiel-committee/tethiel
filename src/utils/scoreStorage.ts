@@ -34,40 +34,8 @@ const STORAGE_KEY_BESTS = "tethiel_stage_bests_v1";
 const STORAGE_KEY_LOGS = "tethiel_score_logs_v1";
 const MAX_LOG_COUNT = 30;
 
-// 初期デフォルトの記録 (初期体験用の目標スコア)
-const DEFAULT_BESTS: Record<number, StageBestRecord> = {
-  1: {
-    stageId: 1,
-    stageName: "STAGE 1",
-    highScore: 987654,
-    bestTimeSeconds: 42,
-    bestRank: "S",
-    playCount: 0,
-    clearCount: 0,
-    lastPlayedAt: Date.now(),
-  },
-  2: {
-    stageId: 2,
-    stageName: "STAGE 2",
-    highScore: 854320,
-    bestTimeSeconds: 68,
-    bestRank: "A",
-    playCount: 0,
-    clearCount: 0,
-    lastPlayedAt: Date.now(),
-  },
-  99: {
-    stageId: 99,
-    stageName: "ENDLESS",
-    highScore: 128000,
-    maxAltitude: 1280,
-    bestTimeSeconds: 314,
-    bestRank: "A",
-    playCount: 0,
-    clearCount: 0,
-    lastPlayedAt: Date.now(),
-  },
-};
+// 初期デフォルトの記録 (初期状態は未プレイ)
+const DEFAULT_BESTS: Record<number, StageBestRecord> = {};
 
 /**
  * ステージ別の自己ベスト記録を取得する
@@ -105,13 +73,16 @@ export function getScoreLogs(): ScoreLogEntry[] {
  */
 export function calculateRank(
   isCleared: boolean,
-  isBonusClear: boolean,
-  hearts: number,
-  bonusStars: number,
+  isBonusClear = false,
+  hearts = 5,
+  bonusStars = 0,
+  totalStars = 5,
 ): string {
   if (!isCleared) return "F";
   if (isBonusClear && hearts >= 4) return "S+";
-  if (hearts >= 4 && bonusStars >= 3) return "S";
+  const hasHighStars =
+    totalStars > 0 ? bonusStars / totalStars >= 0.6 : bonusStars >= 3;
+  if (hearts >= 4 && hasHighStars) return "S";
   if (hearts >= 2) return "A";
   return "B";
 }
@@ -136,7 +107,13 @@ export function saveGameResult(params: {
     gameOverReason,
   } = params;
 
-  const rank = calculateRank(isCleared, isBonusClear, hearts, stats.bonusStars);
+  const rank = calculateRank(
+    isCleared,
+    isBonusClear,
+    hearts,
+    stats.bonusStars,
+    stats.totalStars,
+  );
   const now = Date.now();
   const stageId = stage.id;
   const gameMode = stage.mode ?? "stage";

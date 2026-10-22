@@ -44,7 +44,7 @@ export function App() {
     bonusStars: 0,
     totalStars: 5,
     stageNumber: directStage?.id ?? 1,
-    bestScore: 987654,
+    bestScore: getStageBestRecords()[directStage?.id ?? 1]?.highScore ?? 0,
   });
   const [gameOverReason, setGameOverReason] = useState<string>("");
 

@@ -12,6 +12,7 @@ import {
 import { useEffect } from "react";
 import type { GameStats, StageData } from "../types/game";
 import { CyberButton, CyberCard } from "./ui";
+import { calculateRank } from "../utils/scoreStorage";
 
 interface ResultScreenProps {
   isCleared: boolean;
@@ -49,16 +50,13 @@ export const ResultScreen = ({
     }
   }, [isCleared, isBonusClear]);
 
-  // ランク計算
-  const calculateRank = () => {
-    if (!isCleared) return "F";
-    if (isBonusClear && hearts >= 4) return "S+";
-    if (hearts >= 4 && stats.bonusStars >= 3) return "S";
-    if (hearts >= 2) return "A";
-    return "B";
-  };
-
-  const rank = calculateRank();
+  const rank = calculateRank(
+    isCleared,
+    isBonusClear,
+    hearts,
+    stats.bonusStars,
+    stats.totalStars,
+  );
 
   return (
     <CyberCard

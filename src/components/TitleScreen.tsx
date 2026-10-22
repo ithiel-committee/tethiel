@@ -503,16 +503,20 @@ export const TitleScreen = ({
                     <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
                       <div className="flex justify-between items-center">
                         <span className="text-amber-300 font-bold">STAGE 1: 入門・回路接続</span>
-                        {stageBests[1]?.bestRank && (
+                        {stageBests[1]?.bestRank ? (
                           <span className="px-1.5 py-0.5 bg-amber-500/20 border border-amber-400 text-amber-300 rounded text-[10px] font-bold">
                             RANK {stageBests[1].bestRank}
                           </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-500">未記録</span>
                         )}
                       </div>
                       <div className="flex justify-between text-slate-300 text-[11px]">
-                        <span>BEST SCORE: {(stageBests[1]?.highScore ?? 987654).toLocaleString()} pts</span>
                         <span>
-                          CLEAR TIME: {stageBests[1]?.bestTimeSeconds ? `${Math.floor(stageBests[1].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[1].bestTimeSeconds % 60).toString().padStart(2, "0")}.00` : "00:42.50"}
+                          BEST SCORE: {stageBests[1]?.highScore ? `${stageBests[1].highScore.toLocaleString()} pts` : "--"}
+                        </span>
+                        <span>
+                          CLEAR TIME: {stageBests[1]?.bestTimeSeconds ? `${Math.floor(stageBests[1].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[1].bestTimeSeconds % 60).toString().padStart(2, "0")}` : "--:--"}
                         </span>
                       </div>
                     </div>
@@ -521,16 +525,20 @@ export const TitleScreen = ({
                     <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
                       <div className="flex justify-between items-center">
                         <span className="text-rose-300 font-bold">STAGE 2: サイバー迂回ルート</span>
-                        {stageBests[2]?.bestRank && (
+                        {stageBests[2]?.bestRank ? (
                           <span className="px-1.5 py-0.5 bg-rose-500/20 border border-rose-400 text-rose-300 rounded text-[10px] font-bold">
                             RANK {stageBests[2].bestRank}
                           </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-500">未記録</span>
                         )}
                       </div>
                       <div className="flex justify-between text-slate-300 text-[11px]">
-                        <span>BEST SCORE: {(stageBests[2]?.highScore ?? 854320).toLocaleString()} pts</span>
                         <span>
-                          CLEAR TIME: {stageBests[2]?.bestTimeSeconds ? `${Math.floor(stageBests[2].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[2].bestTimeSeconds % 60).toString().padStart(2, "0")}.00` : "01:08.20"}
+                          BEST SCORE: {stageBests[2]?.highScore ? `${stageBests[2].highScore.toLocaleString()} pts` : "--"}
+                        </span>
+                        <span>
+                          CLEAR TIME: {stageBests[2]?.bestTimeSeconds ? `${Math.floor(stageBests[2].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[2].bestTimeSeconds % 60).toString().padStart(2, "0")}` : "--:--"}
                         </span>
                       </div>
                     </div>
@@ -542,8 +550,12 @@ export const TitleScreen = ({
                         <span className="text-[10px] text-amber-300">サバイバル</span>
                       </div>
                       <div className="flex justify-between text-slate-300 text-[11px]">
-                        <span>MAX ALTITUDE: {(stageBests[99]?.maxAltitude ?? 1280).toLocaleString()} m</span>
-                        <span>BEST SCORE: {(stageBests[99]?.highScore ?? 128000).toLocaleString()} pts</span>
+                        <span>
+                          MAX ALTITUDE: {stageBests[99]?.maxAltitude ? `${stageBests[99].maxAltitude.toLocaleString()} m` : "--"}
+                        </span>
+                        <span>
+                          BEST SCORE: {stageBests[99]?.highScore ? `${stageBests[99].highScore.toLocaleString()} pts` : "--"}
+                        </span>
                       </div>
                     </div>
                   </div>
