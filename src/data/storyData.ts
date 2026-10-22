@@ -30,24 +30,24 @@ export const STORY_SCENES: Record<string, StoryScene> = {
     title: "STAGE 01 : プロローグ",
     dialogues: [
       {
+        speaker: "防衛本部",
+        expression: "default",
+        text: "中央大学 iTL サイバーセキュリティ防衛本部より入電――",
+      },
+      {
+        speaker: "イティエル",
+        expression: "surprised",
+        text: "マルウェアがサーバーに侵入しようとしてる……？！",
+      },
+      {
+        speaker: "イティエル",
+        expression: "default",
+        text: "手遅れになる前に防衛地点……ファイアーウォールまで急がないと行けませんね",
+      },
+      {
         speaker: "イティエル",
         expression: "determined",
-        text: "ここに「プレイヤーへの呼びかけ・緊急事態発生の状況説明」が入る",
-      },
-      {
-        speaker: "イティエル",
-        expression: "troubled",
-        text: "ここに「キャンパス外郭へのウイルス侵入と危険性」が入る",
-      },
-      {
-        speaker: "イティエル",
-        expression: "thinking",
-        text: "ここに「上から回路ブロックを投下して足場を作るというルール説明」が入る",
-      },
-      {
-        speaker: "イティエル",
-        expression: "smug",
-        text: "ここに「最上部サーバーコア到達への意気込み・激励」が入る",
+        text: "学生の皆さんのためにも、私がここを守らないといけません！",
       },
     ],
   },
@@ -83,19 +83,29 @@ export const STORY_SCENES: Record<string, StoryScene> = {
     title: "STAGE 02 : プロローグ",
     dialogues: [
       {
+        speaker: "防衛本部",
+        expression: "default",
+        text: "中央大学 iTL サイバーセキュリティ防衛本部より入電――",
+      },
+      {
         speaker: "イティエル",
-        expression: "frustrated",
-        text: "ここに「敵の侵入ルート増加への焦り・悔しさ」が入る",
+        expression: "smile",
+        text: "良かった、防衛作戦は順調みたいですね",
+      },
+      {
+        speaker: "マルウェア",
+        expression: "surprised",
+        text: "――！ ――！！",
+      },
+      {
+        speaker: "イティエル",
+        expression: "surprised",
+        text: "って、抜けられてる？！",
       },
       {
         speaker: "イティエル",
         expression: "troubled",
-        text: "ここに「黒色感染ウイルスの新登場・注意喚起」が入る",
-      },
-      {
-        speaker: "イティエル",
-        expression: "determined",
-        text: "ここに「落ち着いて回路を繋げば突破できるという励まし」が入る",
+        text: "マルウェアたちより先にサーバーまで行って保護しないと……！",
       },
     ],
   },
@@ -131,24 +141,44 @@ export const STORY_SCENES: Record<string, StoryScene> = {
     title: "STAGE 03 : プロローグ",
     dialogues: [
       {
-        speaker: "イティエル",
-        expression: "determined",
-        text: "ここに「最終防衛ライン・メインフレーム前に到着した緊張感」が入る",
+        speaker: "防衛本部",
+        expression: "default",
+        text: "中央大学 iTL サイバーセキュリティ防衛本部より入電――",
       },
       {
         speaker: "イティエル",
         expression: "troubled",
-        text: "ここに「高速で迫るウイルスと星回収の難しさについての説明」が入る",
+        text: "何とかサーバーまで辿り着けました……",
       },
       {
         speaker: "イティエル",
         expression: "thinking",
-        text: "ここに「二人ならきっと完全防衛できるという信頼」が入る",
+        text: "ですが、このままではいずれマルウェアもここまで来てしまいますね",
       },
       {
         speaker: "イティエル",
-        expression: "smug",
-        text: "ここに「iTLの平和を守るため全力で挑む決意」が入る",
+        expression: "thinking",
+        text: "どうしたものでしょうか……",
+      },
+      {
+        speaker: "マルウェア",
+        expression: "troubled",
+        text: "――！ ――！！",
+      },
+      {
+        speaker: "イティエル",
+        expression: "default",
+        text: "悩んでいる暇はありませんね",
+      },
+      {
+        speaker: "イティエル",
+        expression: "default",
+        text: "サーバーを守りながら離脱しましょう！",
+      },
+      {
+        speaker: "イティエル",
+        expression: "determined",
+        text: "この大学は、私が守ります！",
       },
     ],
   },
@@ -186,17 +216,22 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       {
         speaker: "イティエル",
         expression: "surprised",
-        text: "ここに「未曾有の大規模サイバー侵攻アラート・警報音への驚き」が入る",
+        text: "先のマルウェア侵入を受けた訓練、ですか？",
       },
       {
         speaker: "イティエル",
-        expression: "thinking",
-        text: "ここに「高度制限解除・無限クライミング迎撃のルール説明」が入る",
+        expression: "smile",
+        text: "そうですね。そういうのは大事です",
       },
       {
         speaker: "イティエル",
-        expression: "determined",
-        text: "ここに「限界まで登り続ける挑戦への気合い」が入る",
+        expression: "smug",
+        text: "先の防衛戦を経た私たちなら良いスコアが出せるはずです",
+      },
+      {
+        speaker: "イティエル",
+        expression: "smile",
+        text: "どこまで記録を伸ばせるか、頑張って挑戦してみましょう！",
       },
     ],
   },
