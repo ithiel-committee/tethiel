@@ -9,7 +9,7 @@ interface KeyboardGuideProps {
  * QWERTYキーボードUIと外側へ伸びる引き出し線(矢印)による直感的操作ガイド
  */
 export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
-  const { isKids } = useUIText();
+  const { isKids, t } = useUIText();
   // 押下中のキーをリアルタイム検知してキートップをアクティブ発光
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
 
@@ -679,7 +679,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1"
           />
           <text x="54" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
-            {isKids ? "↻ みぎにまわす (W / X)" : "↻ 右回転 (W / X)"}
+            {t("guideRotateRight")}
           </text>
         </g>
 
@@ -708,7 +708,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1"
           />
           <text x="58" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
-            {isKids ? "💣 ばくだん (B / 1)" : "💣 ボム (B / 1)"}
+            {t("guideBomb")}
           </text>
         </g>
 
@@ -730,7 +730,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1"
           />
           <text x="50" y="14" textAnchor="middle" fill="#7dd3fc" fontSize="10" fontWeight="bold">
-            {isKids ? "◀ よこにいどう (A / D) ▶" : "◀ 左右移動 (A / D) ▶"}
+            {t("guideMove")}
           </text>
         </g>
 
@@ -759,7 +759,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1"
           />
           <text x="54" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
-            {isKids ? "↺ ひだりにまわす (Q / Z)" : "↺ 左回転 (Q / Z)"}
+            {t("guideRotateLeft")}
           </text>
         </g>
 
@@ -781,7 +781,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1"
           />
           <text x="50" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
-            {isKids ? "▼ おとす (S / ↓)" : "▼ 落下 (S / ↓)"}
+            {t("guideDrop")}
           </text>
         </g>
 
@@ -803,7 +803,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1.2"
           />
           <text x="58" y="14" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">
-            {isKids ? "⚡ すぐにおく (SPACE / ↑)" : "⚡ 即置き (SPACE / ↑)"}
+            {t("guideHardDrop")}
           </text>
         </g>
 
@@ -825,7 +825,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1.2"
           />
           <text x="62" y="14" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">
-            {isKids ? "★ キープ (C / SHIFT)" : "★ ホールド (C / SHIFT)"}
+            {t("guideHold")}
           </text>
         </g>
 
@@ -847,7 +847,7 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1"
           />
           <text x="56" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
-            {isKids ? "⏸ ひとやすみ (P / ESC)" : "⏸ 一時停止 (P / ESC)"}
+            {t("guidePause")}
           </text>
         </g>
 
@@ -869,12 +869,10 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             strokeWidth="1.2"
           />
           <text x="12" y="18" fill="#38bdf8" fontSize="11" fontWeight="bold">
-            {isKids ? "やじるしキーでも あそべるよ" : "十字キーでも完全操作可能"}
+            {t("guideArrowKeys")}
           </text>
           <text x="12" y="34" fill="#94a3b8" fontSize="9">
-            {isKids
-              ? "↑:すぐにおく / ←→:いどう / ↓:おとす"
-              : "↑:即置き / ←→:左右移動 / ↓:落下"}
+            {t("guideArrowKeysDetail")}
           </text>
         </g>
       </svg>

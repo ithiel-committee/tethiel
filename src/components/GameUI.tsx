@@ -17,6 +17,7 @@ import { useUIText } from "../context/UIModeContext";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
 import { useOverflowCheck } from "../utils/overflowChecker";
+import { Keycap } from "./Keycap";
 
 // 現在HPに応じたイティエルの腕上げ立ち絵を取得
 const getIthielStandingImage = (currentHearts: number) => {
@@ -366,9 +367,12 @@ export const GameUI = ({
             <div className="game-hud-card p-2.5 text-center">
               <div className="font-pixel-en text-[10px] text-rose-400 mb-1.5 flex items-center justify-between px-0.5 font-bold tracking-wider">
                 <span>{t("hold")}</span>
-                <span className="keycap keycap-accent text-[9px] min-w-[18px] h-[18px] leading-none px-1">
+                <Keycap
+                  variant="accent"
+                  className="text-[9px] min-w-[18px] h-[18px] leading-none px-1"
+                >
                   C / SHIFT
-                </span>
+                </Keycap>
               </div>
               <div className="w-full h-14 bg-slate-950/90 rounded border border-slate-800/80 flex items-center justify-center">
                 {holdPiece ? (
@@ -410,44 +414,44 @@ export const GameUI = ({
             <div className="flex flex-col gap-1 text-[11px] pt-0.5">
               <div className="game-guide-row">
                 <span className="game-guide-label">{t("hardDrop")}</span>
-                <span className="keycap">↑</span>
-                <span className="keycap keycap-wide">SPACE</span>
+                <Keycap>↑</Keycap>
+                <Keycap wide>SPACE</Keycap>
               </div>
               <div className="game-guide-row">
                 <span className="game-guide-label">{t("rotate")}</span>
-                <span className="keycap">Q</span>
-                <span className="keycap">W</span>
-                <span className="keycap">Z</span>
-                <span className="keycap">X</span>
+                <Keycap>Q</Keycap>
+                <Keycap>W</Keycap>
+                <Keycap>Z</Keycap>
+                <Keycap>X</Keycap>
               </div>
               <div className="game-guide-row">
                 <span className="game-guide-label">{t("move")}</span>
-                <span className="keycap">←</span>
-                <span className="keycap">→</span>
-                <span className="keycap">A</span>
-                <span className="keycap">D</span>
+                <Keycap>←</Keycap>
+                <Keycap>→</Keycap>
+                <Keycap>A</Keycap>
+                <Keycap>D</Keycap>
               </div>
               <div className="game-guide-row">
                 <span className="game-guide-label">{t("softDrop")}</span>
-                <span className="keycap">↓</span>
-                <span className="keycap">S</span>
+                <Keycap>↓</Keycap>
+                <Keycap>S</Keycap>
               </div>
               <div className="game-guide-row">
                 <span className="game-guide-label">{t("holdLabel")}</span>
-                <span className="keycap keycap-accent">C</span>
-                <span className="keycap keycap-accent keycap-wide">SHIFT</span>
+                <Keycap variant="accent">C</Keycap>
+                <Keycap variant="accent" wide>SHIFT</Keycap>
                 <span className="text-slate-500 text-[10px] ml-1">{t("minoExchange")}</span>
               </div>
               {engine.skills.length > 0 && (
                 <div className="game-guide-row">
-                  <span className="game-guide-label">ボム:</span>
-                  <span className="keycap keycap-accent">B</span>
-                  <span className="keycap">1</span>
+                  <span className="game-guide-label">{t("bombGuideLabel")}</span>
+                  <Keycap variant="accent">B</Keycap>
+                  <Keycap>1</Keycap>
                   <span className="text-amber-300 font-pixel-en text-[11px] font-bold ml-0.5">
                     ×{engine.skills.length}
                   </span>
                   <span className="text-slate-500 text-[10px] ml-1">
-                    {isKids ? "(ウイルスばくは)" : "(ウイルス爆破)"}
+                    {t("bombDesc")}
                   </span>
                 </div>
               )}

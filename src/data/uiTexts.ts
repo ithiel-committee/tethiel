@@ -209,6 +209,142 @@ export const UI_TEXTS = {
     kids: "(ブロックこうたい)",
   },
 
+  // ボム・スキル操作ガイド
+  bombGuideLabel: {
+    standard: "ボム:",
+    kids: "ばくだん:",
+  },
+  bombDesc: {
+    standard: "(ウイルス爆破)",
+    kids: "(ウイルスばくは)",
+  },
+
+  // タイトル画面モーダル・ランキング
+  bestRecords: {
+    standard: "BEST RECORDS (自己ベスト)",
+    kids: "さいこう きろく",
+  },
+  scoreLogs: {
+    standard: "SCORE LOGS (プレイ履歴)",
+    kids: "あそんだ りれき",
+  },
+  noRecord: {
+    standard: "NO RECORD",
+    kids: "きろくなし",
+  },
+  survivor: {
+    standard: "SURVIVOR",
+    kids: "サバイバー",
+  },
+  bestScoreLabel: {
+    standard: "BEST SCORE:",
+    kids: "さいこう てんすう:",
+  },
+  maxAltitudeLabel: {
+    standard: "MAX ALTITUDE:",
+    kids: "さいこう たかさ:",
+  },
+  clearTimeLabel: {
+    standard: "CLEAR TIME:",
+    kids: "クリア じかん:",
+  },
+  altitudeUnit: {
+    standard: "高度",
+    kids: "たかさ",
+  },
+  minoUnit: {
+    standard: "ミノ",
+    kids: "ブロック",
+  },
+  movesUnit: {
+    standard: "手",
+    kids: "かい",
+  },
+
+  // オプション・クレジット
+  settingsTitle: {
+    standard: "SYSTEM SETTINGS (オプション)",
+    kids: "せってい",
+  },
+  audioSetting: {
+    standard: "オーディオ設定",
+    kids: "おとの せってい",
+  },
+  soundEffectLabel: {
+    standard: "シンセ効果音 / SE",
+    kids: "こうかおん",
+  },
+  soundOff: {
+    standard: "SOUND: OFF",
+    kids: "おと: なし",
+  },
+  soundOn: {
+    standard: "SOUND: ON",
+    kids: "おと: あり",
+  },
+  controlsTitle: {
+    standard: "キーボード操作ガイド (CONTROLS)",
+    kids: "キーボードの つかいかた",
+  },
+  controlsSubtitle: {
+    standard: "QWERTY & 十字キー対応",
+    kids: "やじるしキーでも うごかせるよ",
+  },
+  creditsTitle: {
+    standard: "PRODUCTION CREDITS (クレジット)",
+    kids: "クレジット",
+  },
+  resetRecords: {
+    standard: "RESET RECORDS (記録初期化)",
+    kids: "きろくを けす",
+  },
+  closeButton: {
+    standard: "CLOSE (閉じる)",
+    kids: "とじる",
+  },
+
+  // キーボード操作ガイド (KeyboardGuide)
+  guideRotateRight: {
+    standard: "↻ 右回転 (W / X)",
+    kids: "↻ みぎにまわす (W / X)",
+  },
+  guideRotateLeft: {
+    standard: "↺ 左回転 (Q / Z)",
+    kids: "↺ ひだりにまわす (Q / Z)",
+  },
+  guideBomb: {
+    standard: "💣 ボム (B / 1)",
+    kids: "💣 ばくだん (B / 1)",
+  },
+  guideMove: {
+    standard: "◀ 左右移動 (A / D) ▶",
+    kids: "◀ よこにいどう (A / D) ▶",
+  },
+  guideDrop: {
+    standard: "▼ 落下 (S / ↓)",
+    kids: "▼ おとす (S / ↓)",
+  },
+  guideHardDrop: {
+    standard: "⚡ 即置き (SPACE / ↑)",
+    kids: "⚡ すぐにおく (SPACE / ↑)",
+  },
+  guideHold: {
+    standard: "★ ホールド (C / SHIFT)",
+    kids: "★ キープ (C / SHIFT)",
+  },
+  guidePause: {
+    standard: "⏸ 一時停止 (P / ESC)",
+    kids: "⏸ ひとやすみ (P / ESC)",
+  },
+  guideArrowKeys: {
+    standard: "十字キーでも完全操作可能",
+    kids: "やじるしキーでも あそべるよ",
+  },
+  guideArrowKeysDetail: {
+    standard: "↑:即置き / ←→:左右移動 / ↓:落下",
+    kids: "↑:すぐにおく / ←→:いどう / ↓:おとす",
+  },
+
   // モード切替ラベル
   modeStandardLabel: {
     standard: "つうじょう",
