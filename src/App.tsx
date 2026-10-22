@@ -97,23 +97,20 @@ export function App() {
   // ステージ切り替え後の自動開始管理
   const pendingStartStageIdRef = useRef<number | null>(null);
 
-  // URL直接指定で直接ゲーム画面に入った場合の自動開始、またはプロローグなしステージ遷移時の自動開始
+  // URL直接指定やプロローグなしステージ遷移時の自動開始管理
   useEffect(() => {
-    if (directStage && engine.status === "ready") {
-      engine.start();
-    }
-  }, [directStage, engine]);
+    if (engine.status !== "ready") return;
 
-  useEffect(() => {
-    if (
+    if (directStage) {
+      engine.start();
+    } else if (
       pendingStartStageIdRef.current !== null &&
-      selectedStage.id === pendingStartStageIdRef.current &&
-      engine.status === "ready"
+      selectedStage.id === pendingStartStageIdRef.current
     ) {
       pendingStartStageIdRef.current = null;
       engine.start();
     }
-  }, [selectedStage, engine]);
+  }, [directStage, selectedStage, engine]);
 
   // サウンド切り替え
   const handleToggleMute = useCallback(() => {
