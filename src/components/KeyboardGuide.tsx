@@ -150,10 +150,11 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
             width="18"
             height="18"
             rx="3"
-            fill={isPressed("escape") ? "url(#key-pressed)" : "url(#key-idle)"}
-            stroke={isPressed("escape") ? "#ff2a6d" : "rgba(100, 116, 139, 0.3)"}
+            fill={isPressed("escape") ? "url(#key-pressed)" : "url(#key-active)"}
+            stroke="#ff2a6d"
+            strokeWidth={isPressed("escape") ? "2" : "1.2"}
           />
-          <text x="147" y="49" textAnchor="middle" fill="#64748b" fontSize="7">
+          <text x="147" y="49" textAnchor="middle" fill="#ff708f" fontSize="7" fontWeight="bold">
             ESC
           </text>
 
@@ -659,37 +660,66 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
 
         {/* 3. 各キーから外側へ引っ張る矢印線 & 説明ラベル */}
 
-        {/* [1] 上側: W / X -> 右回転 */}
+        {/* [1] 上側左: W / X -> 右回転 */}
         <path
-          d="M 195 58 L 195 18 L 165 18"
+          d="M 195 58 L 195 18 L 156 18"
           fill="none"
           stroke="#ff2a6d"
           strokeWidth="1.4"
           markerEnd="url(#arrow-rose)"
         />
-        <g transform="translate(48, 8)">
+        <g transform="translate(44, 8)">
           <rect
-            width="112"
+            width="108"
             height="20"
             rx="4"
             fill="rgba(24, 7, 16, 0.92)"
             stroke="rgba(255, 42, 109, 0.7)"
             strokeWidth="1"
           />
-          <text x="56" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
+          <text x="54" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
             {isKids ? "↻ みぎにまわす (W / X)" : "↻ 右回転 (W / X)"}
+          </text>
+        </g>
+
+        {/* [新設] 上側中央: B / 1 -> ボム */}
+        <path
+          d="M 168 37 L 168 18 L 210 18"
+          fill="none"
+          stroke="#ff2a6d"
+          strokeWidth="1.4"
+          markerEnd="url(#arrow-rose)"
+        />
+        <path
+          d="M 268 100 L 268 32"
+          fill="none"
+          stroke="#ff2a6d"
+          strokeWidth="1.4"
+          markerEnd="url(#arrow-rose)"
+        />
+        <g transform="translate(216, 8)">
+          <rect
+            width="116"
+            height="20"
+            rx="4"
+            fill="rgba(24, 7, 16, 0.92)"
+            stroke="rgba(255, 42, 109, 0.7)"
+            strokeWidth="1"
+          />
+          <text x="58" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
+            {isKids ? "💣 ばくだん (B / 1)" : "💣 ボム (B / 1)"}
           </text>
         </g>
 
         {/* [2] 左側: A / D -> 左右移動 */}
         <path
-          d="M 169 88 L 122 88 L 122 68 L 110 68"
+          d="M 169 88 L 122 88 L 122 66 L 110 66"
           fill="none"
           stroke="#38bdf8"
           strokeWidth="1.4"
           markerEnd="url(#arrow-cyan)"
         />
-        <g transform="translate(6, 58)">
+        <g transform="translate(6, 56)">
           <rect
             width="100"
             height="20"
@@ -703,37 +733,44 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
           </text>
         </g>
 
-        {/* [3] 左下: Z -> 左回転 */}
+        {/* [3] 左下: Q / Z -> 左回転 (SHIFTキーを迂回して視認性を確保) */}
         <path
-          d="M 175 109 L 115 109"
+          d="M 165 67 L 115 67 L 115 95"
           fill="none"
           stroke="#ff2a6d"
           strokeWidth="1.4"
           markerEnd="url(#arrow-rose)"
         />
-        <g transform="translate(10, 99)">
+        <path
+          d="M 184 118 L 184 125 L 116 125 L 116 123"
+          fill="none"
+          stroke="#ff2a6d"
+          strokeWidth="1.4"
+          markerEnd="url(#arrow-rose)"
+        />
+        <g transform="translate(4, 99)">
           <rect
-            width="100"
+            width="108"
             height="20"
             rx="4"
             fill="rgba(24, 7, 16, 0.92)"
             stroke="rgba(255, 42, 109, 0.7)"
             strokeWidth="1"
           />
-          <text x="50" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
-            {isKids ? "↺ ひだりにまわす (Z)" : "↺ 左回転 (Z)"}
+          <text x="54" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
+            {isKids ? "↺ ひだりにまわす (Q / Z)" : "↺ 左回転 (Q / Z)"}
           </text>
         </g>
 
         {/* [4] 下側左: S -> 高速落下 */}
         <path
-          d="M 199 97 L 199 158 L 175 158"
+          d="M 199 97 L 199 158 L 168 158"
           fill="none"
           stroke="#ff2a6d"
           strokeWidth="1.4"
           markerEnd="url(#arrow-rose)"
         />
-        <g transform="translate(70, 148)">
+        <g transform="translate(64, 148)">
           <rect
             width="100"
             height="20"
@@ -749,45 +786,45 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
 
         {/* [5] 下側中央: SPACE -> 即置き */}
         <path
-          d="M 238 139 L 238 165"
+          d="M 238 139 L 238 164"
           fill="none"
           stroke="#f59e0b"
           strokeWidth="1.4"
           markerEnd="url(#arrow-amber)"
         />
-        <g transform="translate(182, 168)">
+        <g transform="translate(176, 168)">
           <rect
-            width="114"
+            width="116"
             height="20"
             rx="4"
             fill="rgba(35, 15, 5, 0.95)"
             stroke="rgba(245, 158, 11, 0.85)"
             strokeWidth="1.2"
           />
-          <text x="57" y="14" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">
+          <text x="58" y="14" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">
             {isKids ? "⚡ すぐにおく (SPACE / ↑)" : "⚡ 即置き (SPACE / ↑)"}
           </text>
         </g>
 
-        {/* [6] 下側右: C -> ホールド */}
+        {/* [6] 下側右: C / SHIFT -> ホールド */}
         <path
-          d="M 226 118 L 226 158 L 305 158"
+          d="M 226 118 L 226 158 L 300 158"
           fill="none"
           stroke="#f59e0b"
           strokeWidth="1.4"
           markerEnd="url(#arrow-amber)"
         />
-        <g transform="translate(310, 148)">
+        <g transform="translate(304, 148)">
           <rect
-            width="108"
+            width="124"
             height="20"
             rx="4"
             fill="rgba(35, 15, 5, 0.95)"
             stroke="rgba(245, 158, 11, 0.85)"
             strokeWidth="1.2"
           />
-          <text x="54" y="14" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">
-            {isKids ? "★ キープ (C)" : "★ ホールド (C)"}
+          <text x="62" y="14" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">
+            {isKids ? "★ キープ (C / SHIFT)" : "★ ホールド (C / SHIFT)"}
           </text>
         </g>
 
@@ -801,14 +838,14 @@ export const KeyboardGuide = ({ className = "" }: KeyboardGuideProps) => {
         />
         <g transform="translate(445, 8)">
           <rect
-            width="110"
+            width="112"
             height="20"
             rx="4"
             fill="rgba(24, 7, 16, 0.92)"
             stroke="rgba(255, 42, 109, 0.7)"
             strokeWidth="1"
           />
-          <text x="55" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
+          <text x="56" y="14" textAnchor="middle" fill="#ffaec0" fontSize="10" fontWeight="bold">
             {isKids ? "⏸ ひとやすみ (P / ESC)" : "⏸ 一時停止 (P / ESC)"}
           </text>
         </g>
