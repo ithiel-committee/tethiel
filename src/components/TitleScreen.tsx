@@ -210,9 +210,9 @@ export const TitleScreen = ({
   }, []);
 
   return (
-    <div className="title-screen-container relative">
+    <div className="title-screen-container">
       {/* 画面右上: 表示モード切り替えトグル (未就学児〜大人) */}
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-40">
+      <div className="title-mode-toggle-wrap">
         <UIModeToggle size="sm" />
       </div>
 

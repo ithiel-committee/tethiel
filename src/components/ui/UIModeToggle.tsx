@@ -1,3 +1,4 @@
+import type React from "react";
 import { sounds } from "../../audio/soundSystem";
 import { useUIText } from "../../context/UIModeContext";
 
@@ -10,9 +11,12 @@ export const UIModeToggle = ({
   className = "",
   size = "md",
 }: UIModeToggleProps) => {
-  const { mode, setMode } = useUIText();
+  const { mode, isKids, setMode, toggleMode } = useUIText();
 
-  const handleSelect = (newMode: "standard" | "kids") => {
+  const handleSelect = (newMode: "standard" | "kids", e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     if (mode === newMode) return;
     try {
       sounds.playRotate();
@@ -22,40 +26,51 @@ export const UIModeToggle = ({
     setMode(newMode);
   };
 
+  const handleToggle = () => {
+    try {
+      sounds.playRotate();
+    } catch {
+      // 無視
+    }
+    toggleMode();
+  };
+
   const isSmall = size === "sm";
 
   return (
     <div
-      className={`ui-mode-toggle-group inline-flex items-center rounded-full p-1 bg-slate-950/80 border border-rose-500/40 backdrop-blur-sm select-none ${
-        isSmall ? "text-xs" : "text-xs sm:text-sm"
-      } ${className}`}
-      role="group"
-      aria-label="表示モード切り替え"
+      className={`cyber-mode-toggle ${isSmall ? "cyber-mode-toggle-sm" : ""} ${className}`}
+      onClick={handleToggle}
+      role="switch"
+      aria-checked={isKids}
+      aria-label="表示モード切り替え (通常 / ひらがな)"
+      title="表示モード切り替え (通常 / ひらがな)"
     >
+      {/* 左右にスライドするアクティブプレート (ノブ) */}
+      <div
+        className={`cyber-mode-toggle-thumb ${
+          isKids ? "is-kids" : "is-standard"
+        }`}
+      />
+
+      {/* 通常モードボタン */}
       <button
         type="button"
-        onClick={() => handleSelect("standard")}
-        className={`ui-mode-toggle-btn flex items-center gap-1.5 rounded-full font-bold transition-all duration-150 cursor-pointer ${
-          isSmall ? "px-2.5 py-1" : "px-3 py-1.5"
-        } ${
-          mode === "standard"
-            ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-[0_0_12px_rgba(255,26,75,0.7)]"
-            : "text-slate-400 hover:text-slate-200"
+        onClick={(e) => handleSelect("standard", e)}
+        className={`cyber-mode-toggle-option ${
+          !isKids ? "is-active" : ""
         }`}
       >
         <span>🎮</span>
         <span>つうじょう</span>
       </button>
 
+      {/* ひらがな (キッズ) モードボタン */}
       <button
         type="button"
-        onClick={() => handleSelect("kids")}
-        className={`ui-mode-toggle-btn flex items-center gap-1.5 rounded-full font-bold transition-all duration-150 cursor-pointer ${
-          isSmall ? "px-2.5 py-1" : "px-3 py-1.5"
-        } ${
-          mode === "kids"
-            ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 shadow-[0_0_14px_rgba(251,191,36,0.8)]"
-            : "text-slate-400 hover:text-slate-200"
+        onClick={(e) => handleSelect("kids", e)}
+        className={`cyber-mode-toggle-option ${
+          isKids ? "is-active" : ""
         }`}
       >
         <span>🐣</span>

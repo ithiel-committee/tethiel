@@ -65,10 +65,10 @@ export const ResultScreen = ({
   return (
     <CyberCard
       variant="default"
-      className="w-full max-w-lg p-6 md:p-8 space-y-6 text-center animate-fadeIn shadow-[0_0_35px_rgba(255,26,75,0.2)] relative"
+      className="w-full max-w-lg p-6 md:p-8 space-y-6 text-center animate-fadeIn shadow-[0_0_35px_rgba(255,26,75,0.2)]"
     >
       {/* 右上 モード切り替えトグル (未就学児/通常) */}
-      <div className="flex justify-end -mt-2 -mr-2">
+      <div className="result-mode-toggle-wrap">
         <UIModeToggle size="sm" />
       </div>
 
