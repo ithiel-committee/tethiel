@@ -5,7 +5,16 @@ export const GRID_HEIGHT = 22; // PDF 5pに合わせたマス高
 export const GOAL_ROW = 2; // 行0〜2がGOALエリア
 export const START_ROW = 21; // 最下部START行
 export const START_COLS = [5, 6]; // START地点(中央下部)
+export const START_CENTER_X = (START_COLS[0] + START_COLS[1] + 1) / 2; // 5.5 (中央初期位置)
 export const BONUS_GOAL_COLS = [10, 11]; // 右上のBONUSゴール列
+
+// ゲーム基本ルール定数
+export const GAME_RULES = {
+  INITIAL_HEARTS: 5,
+  MAX_HEARTS: 5,
+  INFECTION_DELAY_MINO_COUNT: 2, // ウイルス感染開始までに必要な配置ミノ数
+  ENDLESS_SAFE_ROWS: 4, // エンドレス開始時の足元安全行数
+} as const;
 
 // スコア計算・ボーナス定数設定
 export const SCORE_CONFIG = {
@@ -26,6 +35,8 @@ export const SCORE_CONFIG = {
 
 // ゲーム進行・アニメーションタイミング定数設定
 export const TIMING_CONFIG = {
+  DEFAULT_DROP_INTERVAL_MS: 900,
+  DEFAULT_INFECTION_INTERVAL_MS: 3800,
   LOCK_DELAY_MS: 500,
   INFECTED_DAMAGE_INTERVAL_MS: 1000,
   GOAL_CELEBRATION_WAIT_MS: 1000,

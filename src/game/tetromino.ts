@@ -1,5 +1,5 @@
 import type { Cell, Tetromino, TetrominoType } from "../types/game";
-import { GRID_HEIGHT, GRID_WIDTH, TETROMINO_SHAPES } from "./constants";
+import { GRID_HEIGHT, GRID_WIDTH, TETROMINO_SHAPES } from "./constants.ts";
 
 // 7-bag方式のテトリミノ生成器
 export class TetrominoBag {

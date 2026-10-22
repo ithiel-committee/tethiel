@@ -1,19 +1,7 @@
 // 全ミノの地上到達可能性（Passability / Solvability）検証関数
 import { STAGES, GRID_WIDTH, GRID_HEIGHT } from "../src/game/constants.ts";
 import { TETROMINO_SHAPES } from "../src/game/constants.ts";
-
-function rotateMatrix(matrix, clockwise = true) {
-  const rows = matrix.length;
-  const cols = matrix[0].length;
-  const newMatrix = Array.from({ length: cols }, () => Array(rows).fill(0));
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (clockwise) newMatrix[c][rows - 1 - r] = matrix[r][c];
-      else newMatrix[cols - 1 - c][r] = matrix[r][c];
-    }
-  }
-  return newMatrix;
-}
+import { rotateMatrix } from "../src/game/tetromino.ts";
 
 function checkCollision(matrix, px, py, grid) {
   for (let r = 0; r < matrix.length; r++) {

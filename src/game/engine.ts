@@ -12,10 +12,12 @@ import type {
 } from "../types/game";
 import {
   BONUS_GOAL_COLS,
+  GAME_RULES,
   GOAL_ROW,
   GRID_HEIGHT,
   GRID_WIDTH,
   SCORE_CONFIG,
+  START_CENTER_X,
   START_COLS,
   START_ROW,
   TIMING_CONFIG,
@@ -47,13 +49,13 @@ export class GameEngine {
   public nextPieces: TetrominoType[] = [];
   public skills: SkillType[] = [];
 
-  public hearts = 5; // ハート5つ
-  public maxHearts = 5;
+  public hearts: number = GAME_RULES.INITIAL_HEARTS;
+  public maxHearts: number = GAME_RULES.MAX_HEARTS;
 
   public characterPos: CharacterPosition = {
-    x: 5.5,
+    x: START_CENTER_X,
     y: START_ROW,
-    targetX: 5.5,
+    targetX: START_CENTER_X,
     targetY: START_ROW,
     isClimbing: false,
     facing: "left",
@@ -76,7 +78,7 @@ export class GameEngine {
   private bag: TetrominoBag;
   private lastFrameTime = 0;
   private dropTimerMs = 0;
-  private dropIntervalMs = 900;
+  private dropIntervalMs: number = TIMING_CONFIG.DEFAULT_DROP_INTERVAL_MS;
   private lockDelayTimerMs = 0;
   private isLocking = false;
 
@@ -118,11 +120,12 @@ export class GameEngine {
   // エンドレスモードで登った総高度（メートル）
   public climbedHeight = 0;
   // 現在のウイルス感染間隔（エンドレスモードで加速）
-  public currentInfectionIntervalMs = 3800;
+  public currentInfectionIntervalMs: number =
+    TIMING_CONFIG.DEFAULT_INFECTION_INTERVAL_MS;
 
   // 感染開始までの残り配置ミノ数（0なら既にウイルス活動中）
   public get minosUntilInfection(): number {
-    return Math.max(0, 2 - this.minoCount);
+    return Math.max(0, GAME_RULES.INFECTION_DELAY_MINO_COUNT - this.minoCount);
   }
 
   constructor(
@@ -165,9 +168,10 @@ export class GameEngine {
 
     // 障害物と星の初期配置
     if (this.gameMode === "endless") {
-      // エンドレスモード: 足元(行18〜21)は安全を確保し、行0〜17に上空へ向かってプロシージャル地形を初期展開
-      for (let r = 17; r >= 0; r--) {
-        const height = START_ROW - r; // 行17はh=4、行0はh=21
+      // エンドレスモード: 足元は安全を確保し、上空へ向かってプロシージャル地形を初期展開
+      const terrainStartRow = START_ROW - GAME_RULES.ENDLESS_SAFE_ROWS;
+      for (let r = terrainStartRow; r >= 0; r--) {
+        const height = START_ROW - r;
         this.grid[r] = this.generateNewEndlessRow(height);
       }
     } else {
@@ -185,16 +189,16 @@ export class GameEngine {
     }
 
     this.characterPos = {
-      x: 5.5,
+      x: START_CENTER_X,
       y: START_ROW,
-      targetX: 5.5,
+      targetX: START_CENTER_X,
       targetY: START_ROW,
       isClimbing: false,
       facing: "left",
       isMoving: false,
     };
 
-    this.hearts = 5;
+    this.hearts = GAME_RULES.INITIAL_HEARTS;
     this.score = 0;
     this.minoCount = 0;
     this.bonusStars = 0;
@@ -506,14 +510,12 @@ export class GameEngine {
     this.lastFrameTime = now;
     this.elapsedTimeMs = now - this.startTimeMs;
 
-    // 1. ウイルス感染進行（マグマせりあがり または 従来の回路感染）
+    // 1. ウイルス感染進行（マグマせりあがり）
     // 要件：「2ミノを配置完了し終わるまで動き出さないように」
-    const isReadyToInfect = this.minoCount >= 2;
+    const isReadyToInfect =
+      this.minoCount >= GAME_RULES.INFECTION_DELAY_MINO_COUNT;
     const shouldInfect =
-      isReadyToInfect &&
-      (this.infectionMode === "rising_magma"
-        ? this.connectedPath.length > 0 || this.minoCount > 0
-        : this.connectedPath.length > 0);
+      isReadyToInfect && (this.connectedPath.length > 0 || this.minoCount > 0);
 
     if (shouldInfect) {
       this.infectionTimerMs += deltaMs;
@@ -535,7 +537,7 @@ export class GameEngine {
         footC >= 0 &&
         footC < GRID_WIDTH &&
         this.grid[footR][footC]?.isInfected) ||
-      (this.infectionMode === "rising_magma" && footR >= this.magmaRow);
+      footR >= this.magmaRow;
 
     if (isFootInfected) {
       this.infectedDamageTimerMs += deltaMs;
@@ -656,16 +658,12 @@ export class GameEngine {
     this.updateStats();
   }
 
-  // ウイルス感染を一歩進める
+  // ウイルス感染を一歩進める（せりあがり型マグマ感染）
   private advanceInfection() {
-    if (this.infectionMode === "rising_magma") {
-      this.advanceMagmaInfection();
-    } else {
-      this.advanceCircuitPathInfection();
-    }
+    this.advanceMagmaInfection();
   }
 
-  // 新仕様：マグマがせりあがってくるように横一列で下から感染を進める
+  // マグマがせりあがってくるように横一列で下から感染を進める
   private advanceMagmaInfection() {
     if (this.magmaRow > 0) {
       this.magmaRow--;
@@ -683,33 +681,6 @@ export class GameEngine {
       if (charRow >= targetRow) {
         this.takeDamage("ウイルスに飲み込まれました！");
         this.infectedDamageTimerMs = 0;
-      }
-    }
-  }
-
-  /* =========================================================================
-   * ※【既存形式の保持】
-   * 以前の「STARTから繋がった回路パスを最下部から1マスずつ黒く感染させる」形式のロジックです。
-   * 要件「現在の形式も一応残しておく / 残しておくことをコメントつける」に基づき残しています。
-   * engine.infectionMode = "circuit_path" を指定することで切り替えて使用可能です。
-   * ========================================================================= */
-  private advanceCircuitPathInfection() {
-    // connectedPath は START から最上部に向かって並んでいる
-    for (const [r, c] of this.connectedPath) {
-      const cell = this.grid[r][c];
-      if (!cell.isInfected) {
-        cell.isInfected = true;
-
-        // もし感染したマスが、イティエルがいる最上部ミノ（またはイティエルの現在地）だった場合
-        if (
-          cell.isTopCircuit ||
-          (Math.round(this.characterPos.y) === r &&
-            Math.floor(this.characterPos.x) === c)
-        ) {
-          this.takeDamage("最上部のミノがウイルスに追いつかれました！");
-          this.infectedDamageTimerMs = 0;
-        }
-        break;
       }
     }
   }
