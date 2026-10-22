@@ -472,14 +472,14 @@ export const TitleScreen = ({
                 </div>
 
                 {/* タブ切り替え */}
-                <div className="flex gap-2 border-b border-rose-950/60 pb-2">
+                <div className="ranking-tabs-bar">
                   <button
                     type="button"
                     onClick={() => setRankingTab("bests")}
-                    className={`px-3 py-1 text-xs rounded font-bold transition-colors cursor-pointer ${
+                    className={`ranking-tab-btn ${
                       rankingTab === "bests"
-                        ? "bg-rose-600 text-white shadow-[0_0_10px_rgba(255,26,75,0.5)]"
-                        : "bg-slate-900/90 text-slate-400 hover:text-white"
+                        ? "ranking-tab-btn-active"
+                        : "ranking-tab-btn-inactive"
                     }`}
                   >
                     BEST RECORDS (自己ベスト)
@@ -487,10 +487,10 @@ export const TitleScreen = ({
                   <button
                     type="button"
                     onClick={() => setRankingTab("logs")}
-                    className={`px-3 py-1 text-xs rounded font-bold transition-colors cursor-pointer ${
+                    className={`ranking-tab-btn ${
                       rankingTab === "logs"
-                        ? "bg-rose-600 text-white shadow-[0_0_10px_rgba(255,26,75,0.5)]"
-                        : "bg-slate-900/90 text-slate-400 hover:text-white"
+                        ? "ranking-tab-btn-active"
+                        : "ranking-tab-btn-inactive"
                     }`}
                   >
                     SCORE LOGS (プレイ履歴)
@@ -499,66 +499,93 @@ export const TitleScreen = ({
 
                 {/* BEST RECORDS タブ */}
                 {rankingTab === "bests" && (
-                  <div className="space-y-2.5 text-xs">
-                    {/* STAGE 1 */}
-                    <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-amber-300 font-bold">STAGE 1: 入門・回路接続</span>
-                        {stageBests[1]?.bestRank ? (
-                          <span className="px-1.5 py-0.5 bg-amber-500/20 border border-amber-400 text-amber-300 rounded text-[10px] font-bold">
-                            RANK {stageBests[1].bestRank}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-slate-500">未記録</span>
-                        )}
-                      </div>
-                      <div className="flex justify-between text-slate-300 text-[11px]">
-                        <span>
-                          BEST SCORE: {stageBests[1]?.highScore ? `${stageBests[1].highScore.toLocaleString()} pts` : "--"}
-                        </span>
-                        <span>
-                          CLEAR TIME: {stageBests[1]?.bestTimeSeconds ? `${Math.floor(stageBests[1].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[1].bestTimeSeconds % 60).toString().padStart(2, "0")}` : "--:--"}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="space-y-2 text-xs">
+                    {[
+                      { id: 1, name: "STAGE 1: 入門・回路接続", isEndless: false },
+                      { id: 2, name: "STAGE 2: サイバー迂回ルート", isEndless: false },
+                      { id: 99, name: "★ ENDLESS MODE: 無限クライミング", isEndless: true },
+                    ].map((stg) => {
+                      const best = stageBests[stg.id];
+                      const hasRecord = Boolean(
+                        best &&
+                          ((best.highScore ?? 0) > 0 || (best.maxAltitude ?? 0) > 0),
+                      );
 
-                    {/* STAGE 2 */}
-                    <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-rose-300 font-bold">STAGE 2: サイバー迂回ルート</span>
-                        {stageBests[2]?.bestRank ? (
-                          <span className="px-1.5 py-0.5 bg-rose-500/20 border border-rose-400 text-rose-300 rounded text-[10px] font-bold">
-                            RANK {stageBests[2].bestRank}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-slate-500">未記録</span>
-                        )}
-                      </div>
-                      <div className="flex justify-between text-slate-300 text-[11px]">
-                        <span>
-                          BEST SCORE: {stageBests[2]?.highScore ? `${stageBests[2].highScore.toLocaleString()} pts` : "--"}
-                        </span>
-                        <span>
-                          CLEAR TIME: {stageBests[2]?.bestTimeSeconds ? `${Math.floor(stageBests[2].bestTimeSeconds / 60).toString().padStart(2, "0")}:${(stageBests[2].bestTimeSeconds % 60).toString().padStart(2, "0")}` : "--:--"}
-                        </span>
-                      </div>
-                    </div>
+                      // 統一バッジ判定
+                      let badgeClass = "ranking-badge-none";
+                      let badgeText = "NO RECORD";
 
-                    {/* ENDLESS */}
-                    <div className="p-2.5 bg-slate-900/80 rounded border border-amber-500/40 space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-amber-400 font-bold">★ ENDLESS MODE: 無限クライミング</span>
-                        <span className="text-[10px] text-amber-300">サバイバル</span>
-                      </div>
-                      <div className="flex justify-between text-slate-300 text-[11px]">
-                        <span>
-                          MAX ALTITUDE: {stageBests[99]?.maxAltitude ? `${stageBests[99].maxAltitude.toLocaleString()} m` : "--"}
-                        </span>
-                        <span>
-                          BEST SCORE: {stageBests[99]?.highScore ? `${stageBests[99].highScore.toLocaleString()} pts` : "--"}
-                        </span>
-                      </div>
-                    </div>
+                      if (stg.isEndless) {
+                        if (hasRecord) {
+                          badgeClass = "ranking-badge-purple";
+                          badgeText = "SURVIVOR";
+                        }
+                      } else if (hasRecord && best?.bestRank) {
+                        badgeText = `RANK ${best.bestRank}`;
+                        if (best.bestRank === "S+" || best.bestRank === "S") {
+                          badgeClass = "ranking-badge-gold";
+                        } else if (best.bestRank === "A") {
+                          badgeClass = "ranking-badge-rose";
+                        } else {
+                          badgeClass = "ranking-badge-cyan";
+                        }
+                      }
+
+                      return (
+                        <div key={stg.id} className="ranking-card">
+                          <div className="ranking-card-header">
+                            <span className="ranking-card-title">{stg.name}</span>
+                            <span className={`ranking-badge ${badgeClass}`}>
+                              {badgeText}
+                            </span>
+                          </div>
+                          <div className="ranking-card-metrics">
+                            <div className="ranking-metric-item">
+                              <span className="ranking-metric-label">BEST SCORE:</span>
+                              <span
+                                className={`ranking-metric-value ${
+                                  hasRecord && best?.highScore
+                                    ? "text-amber-400"
+                                    : "text-slate-600"
+                                }`}
+                              >
+                                {hasRecord && best?.highScore
+                                  ? `${best.highScore.toLocaleString()} pts`
+                                  : "--"}
+                              </span>
+                            </div>
+                            <div className="ranking-metric-item">
+                              <span className="ranking-metric-label">
+                                {stg.isEndless ? "MAX ALTITUDE:" : "CLEAR TIME:"}
+                              </span>
+                              <span
+                                className={`ranking-metric-value ${
+                                  hasRecord
+                                    ? stg.isEndless
+                                      ? "text-emerald-400"
+                                      : "text-sky-300"
+                                    : "text-slate-600"
+                                }`}
+                              >
+                                {stg.isEndless
+                                  ? hasRecord && best?.maxAltitude
+                                    ? `${best.maxAltitude.toLocaleString()} m`
+                                    : "--"
+                                  : hasRecord && best?.bestTimeSeconds
+                                    ? `${Math.floor(best.bestTimeSeconds / 60)
+                                        .toString()
+                                        .padStart(2, "0")}:${(
+                                        best.bestTimeSeconds % 60
+                                      )
+                                        .toString()
+                                        .padStart(2, "0")}`
+                                    : "--:--"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -566,33 +593,67 @@ export const TitleScreen = ({
                 {rankingTab === "logs" && (
                   <div className="space-y-2 text-xs max-h-[280px] overflow-y-auto pr-1">
                     {scoreLogs.length === 0 ? (
-                      <div className="p-6 text-center text-slate-400 bg-slate-900/40 rounded border border-slate-800">
+                      <div className="p-6 text-center text-slate-400 bg-slate-900/40 rounded-lg border border-slate-800">
                         <p>プレイ履歴がまだありません。</p>
-                        <p className="text-[10px] text-slate-500 mt-1">ゲームをプレイすると直近30件のログがここに記録されます。</p>
+                        <p className="text-[10px] text-slate-500 mt-1">
+                          ゲームをプレイすると直近30件のログがここに記録されます。
+                        </p>
                       </div>
                     ) : (
                       scoreLogs.map((log) => {
                         const date = new Date(log.timestamp);
-                        const timeStr = `${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+                        const timeStr = `${(date.getMonth() + 1)
+                          .toString()
+                          .padStart(2, "0")}/${date
+                          .getDate()
+                          .toString()
+                          .padStart(2, "0")} ${date
+                          .getHours()
+                          .toString()
+                          .padStart(2, "0")}:${date
+                          .getMinutes()
+                          .toString()
+                          .padStart(2, "0")}`;
+
+                        const statusBadgeClass = log.isCleared
+                          ? log.isBonusClear
+                            ? "ranking-badge-gold"
+                            : "ranking-badge-rose"
+                          : "ranking-badge-none";
+
+                        const statusText = log.isCleared
+                          ? log.isBonusClear
+                            ? "BONUS"
+                            : "CLEAR"
+                          : "FAIL";
+
                         return (
-                          <div
-                            key={log.id}
-                            className="p-2 bg-slate-900/80 rounded border border-slate-800 hover:border-rose-500/40 transition-colors flex justify-between items-center"
-                          >
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
-                                  log.isCleared
-                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                                    : "bg-rose-500/20 text-rose-300 border border-rose-500/40"
-                                }`}>
-                                  {log.isCleared ? (log.isBonusClear ? "BONUS" : "CLEAR") : "FAIL"}
+                          <div key={log.id} className="ranking-card">
+                            <div className="ranking-card-header">
+                              <div className="flex items-center gap-2">
+                                <span className={`ranking-badge ${statusBadgeClass}`}>
+                                  {statusText}
                                 </span>
-                                <span className="font-bold text-slate-200">{log.stageName}</span>
-                                <span className="text-[10px] text-slate-500">{timeStr}</span>
+                                <span className="ranking-card-title text-[11px]">
+                                  {log.stageName}
+                                </span>
+                                <span className="text-[10px] text-slate-500">
+                                  {timeStr}
+                                </span>
                               </div>
-                              <div className="text-[10px] text-slate-400 flex gap-2">
-                                <span>TIME: {Math.floor(log.clearTimeSeconds / 60)}:{(log.clearTimeSeconds % 60).toString().padStart(2, "0")}</span>
+                              <span className="text-amber-400 font-bold font-mono text-[11px]">
+                                {log.score.toLocaleString()} pts
+                              </span>
+                            </div>
+                            <div className="ranking-card-metrics text-[10px] text-slate-400">
+                              <div className="flex items-center gap-3">
+                                <span>
+                                  TIME:{" "}
+                                  {Math.floor(log.clearTimeSeconds / 60)}:
+                                  {(log.clearTimeSeconds % 60)
+                                    .toString()
+                                    .padStart(2, "0")}
+                                </span>
                                 {log.climbedHeight ? (
                                   <span>高度: {log.climbedHeight}m</span>
                                 ) : (
@@ -600,15 +661,9 @@ export const TitleScreen = ({
                                 )}
                                 <span>★ {log.bonusStars}</span>
                               </div>
-                            </div>
-
-                            <div className="text-right">
-                              <div className="text-yellow-400 font-bold font-mono">
-                                {log.score.toLocaleString()} pts
-                              </div>
-                              <div className="text-[10px] text-rose-300 font-bold">
+                              <span className="text-rose-300 font-bold text-[10px]">
                                 RANK {log.rank}
-                              </div>
+                              </span>
                             </div>
                           </div>
                         );
@@ -715,11 +770,11 @@ export const TitleScreen = ({
               </>
             )}
 
-            <div className="pt-2 border-t border-rose-950/60 flex justify-between items-center">
+            <div className="ranking-footer">
               {activeModal === "ranking" ? (
                 <button
                   type="button"
-                  className="px-2.5 py-1 text-[11px] text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded border border-slate-800 transition-colors cursor-pointer"
+                  className="ranking-reset-btn"
                   onClick={() => {
                     if (window.confirm("これまでの記録を初期化しますか？")) {
                       resetAllRecords();
@@ -735,7 +790,7 @@ export const TitleScreen = ({
               )}
               <button
                 type="button"
-                className="title-back-btn"
+                className="ranking-close-btn"
                 onClick={() => setActiveModal(null)}
               >
                 CLOSE (閉じる)
