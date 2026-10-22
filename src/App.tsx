@@ -5,6 +5,7 @@ import { GameUI } from "./components/GameUI";
 import { NovelScreen } from "./components/NovelScreen";
 import { ResultScreen } from "./components/ResultScreen";
 import { TitleScreen } from "./components/TitleScreen";
+import { UIModeProvider } from "./context/UIModeContext";
 import { getStoryScene } from "./data/storyData";
 import { getNextStage, STAGES } from "./game/constants";
 import { GameEngine } from "./game/engine";
@@ -257,13 +258,14 @@ export function App() {
   }, [screen, engine]);
 
   return (
-    <div
-      className={`w-full text-slate-100 flex flex-col items-center justify-center select-none overflow-x-hidden ${
-        screen === "title" || screen === "game"
-          ? "h-screen max-h-screen overflow-hidden p-1 sm:p-2"
-          : "min-h-screen p-2 sm:p-4"
-      }`}
-    >
+    <UIModeProvider>
+      <div
+        className={`w-full text-slate-100 flex flex-col items-center justify-center select-none overflow-x-hidden ${
+          screen === "title" || screen === "game"
+            ? "h-screen max-h-screen overflow-hidden p-1 sm:p-2"
+            : "min-h-screen p-2 sm:p-4"
+        }`}
+      >
       {screen === "title" && (
         <div key="title" className="screen-transition-enter w-full h-full">
           <TitleScreen
@@ -360,7 +362,8 @@ export function App() {
           />
         </div>
       )}
-    </div>
+      </div>
+    </UIModeProvider>
   );
 }
 export default App;

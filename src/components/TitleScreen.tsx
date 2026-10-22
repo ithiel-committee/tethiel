@@ -17,6 +17,7 @@ import ithielStandingSmile from "../assets/character/ithiel_standing_smile.png";
 import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
 import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
+import { useUIText } from "../context/UIModeContext";
 import type { StageData } from "../types/game";
 import { preloadGameAssets } from "../utils/preloadAssets";
 import {
@@ -27,6 +28,7 @@ import {
   type StageBestRecord,
 } from "../utils/scoreStorage";
 import { KeyboardGuide } from "./KeyboardGuide";
+import { UIModeToggle } from "./ui";
 
 // ホーム画面イティエル長押し隠し機能ポーズリスト
 const ITHIEL_SECRET_POSES = [
@@ -52,6 +54,7 @@ export const TitleScreen = ({
   onToggleMute,
   initialMenuView = "main",
 }: TitleScreenProps) => {
+  const { t, isKids } = useUIText();
   const [menuView, setMenuView] = useState<MenuView>(initialMenuView);
 
   useEffect(() => {
@@ -207,7 +210,12 @@ export const TitleScreen = ({
   }, []);
 
   return (
-    <div className="title-screen-container">
+    <div className="title-screen-container relative">
+      {/* 画面右上: 表示モード切り替えトグル (未就学児〜大人) */}
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-40">
+        <UIModeToggle size="sm" />
+      </div>
+
       {/* 背景のサイバーグロー演出 */}
       <div className="title-bg-glow-left" />
       <div className="title-bg-glow-right" />
@@ -238,7 +246,7 @@ export const TitleScreen = ({
                 >
                   <div className="title-menu-btn-content">
                     <Play size={16} fill="currentColor" />
-                    <span>START</span>
+                    <span>{t("start")}</span>
                   </div>
                 </button>
 
@@ -250,7 +258,7 @@ export const TitleScreen = ({
                 >
                   <div className="title-menu-btn-content">
                     <Trophy size={15} className="text-amber-400" />
-                    <span>RANKING</span>
+                    <span>{t("ranking")}</span>
                   </div>
                 </button>
 
@@ -262,7 +270,7 @@ export const TitleScreen = ({
                 >
                   <div className="title-menu-btn-content">
                     <Settings size={15} className="text-rose-400" />
-                    <span>OPTION</span>
+                    <span>{t("option")}</span>
                   </div>
                 </button>
 
@@ -274,7 +282,7 @@ export const TitleScreen = ({
                 >
                   <div className="title-menu-btn-content">
                     <Info size={15} className="text-sky-400" />
-                    <span>CREDIT</span>
+                    <span>{t("credit")}</span>
                   </div>
                 </button>
               </div>
@@ -330,9 +338,11 @@ export const TitleScreen = ({
                 onClick={() => setMenuView("main")}
               >
                 <ArrowLeft size={12} />
-                <span>BACK</span>
+                <span>{t("back")}</span>
               </button>
-              <div className="title-level-title">{"// SELECT LEVEL"}</div>
+              <div className="title-level-title">
+                {isKids ? t("selectStageTitle") : "// SELECT LEVEL"}
+              </div>
               <div className="title-header-spacer" />
             </div>
 
@@ -361,7 +371,7 @@ export const TitleScreen = ({
                   onClick={() => handleStageSelectWithAnim(STAGES[0])}
                 >
                   <Play size={12} fill="currentColor" />
-                  <span>START</span>
+                  <span>{t("start")}</span>
                 </button>
               </div>
 
@@ -388,7 +398,7 @@ export const TitleScreen = ({
                   onClick={() => handleStageSelectWithAnim(STAGES[1])}
                 >
                   <Play size={12} fill="currentColor" />
-                  <span>START</span>
+                  <span>{t("start")}</span>
                 </button>
               </div>
 
@@ -424,7 +434,7 @@ export const TitleScreen = ({
                 <div className="title-stage-info">
                   <div className="title-stage-name-row">
                     <span className="title-stage-name-endless">
-                      ENDLESS
+                      {t("endlessMode")}
                     </span>
                     <span className="title-stage-sub-endless">
                       {ENDLESS_STAGE.subtitle}
@@ -440,7 +450,7 @@ export const TitleScreen = ({
                   onClick={() => handleStageSelectWithAnim(ENDLESS_STAGE)}
                 >
                   <Play size={12} fill="currentColor" />
-                  <span>START</span>
+                  <span>{t("start")}</span>
                 </button>
               </div>
             </div>
@@ -697,6 +707,21 @@ export const TitleScreen = ({
                   </button>
                 </div>
                 <div className="space-y-3 text-xs">
+                  {/* 表示モード設定 (未就学児〜大人) */}
+                  <div className="flex items-center justify-between p-3 bg-slate-900/80 rounded border border-rose-500/30">
+                    <div>
+                      <div className="font-bold text-slate-200">
+                        {t("uiModeSetting")}
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        {isKids
+                          ? "ひらがなで よみやすい ひょうじ"
+                          : "通常 (英語・漢字) / ひらがな (キッズ)"}
+                      </div>
+                    </div>
+                    <UIModeToggle size="sm" />
+                  </div>
+
                   <div className="flex items-center justify-between p-3 bg-slate-900/80 rounded border border-rose-500/30">
                     <div>
                       <div className="font-bold text-slate-200">

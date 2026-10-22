@@ -2750,4 +2750,32 @@ button:disabled {
   transform: translateY(-1px);
 }
 
+/* 表示モード切り替えトグル (UIModeToggle) */
+.ui-mode-toggle-group {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.ui-mode-toggle-btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.ui-mode-toggle-btn:active {
+  transform: scale(0.96);
+}
+
+/* キッズモード (ひらがな表示) 時の読みやすさ向上調整 */
+[data-ui-mode="kids"] .result-action-btn {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+[data-ui-mode="kids"] .title-menu-btn span {
+  letter-spacing: 0.06em;
+}
+
+
 

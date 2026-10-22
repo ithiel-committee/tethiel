@@ -9,9 +9,10 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import tethielCursor from "../assets/character/tethiel_cursor.png";
+import { useUIText } from "../context/UIModeContext";
 import type { GameStats, StageData } from "../types/game";
 import { calculateRank } from "../utils/scoreStorage";
-import { CyberCard } from "./ui";
+import { CyberCard, UIModeToggle } from "./ui";
 
 interface ResultScreenProps {
   isCleared: boolean;
@@ -51,6 +52,8 @@ export const ResultScreen = ({
     }
   }, [isCleared, isBonusClear]);
 
+  const { t, isKids } = useUIText();
+
   const rank = calculateRank(
     isCleared,
     isBonusClear,
@@ -62,8 +65,13 @@ export const ResultScreen = ({
   return (
     <CyberCard
       variant="default"
-      className="w-full max-w-lg p-6 md:p-8 space-y-6 text-center animate-fadeIn shadow-[0_0_35px_rgba(255,26,75,0.2)]"
+      className="w-full max-w-lg p-6 md:p-8 space-y-6 text-center animate-fadeIn shadow-[0_0_35px_rgba(255,26,75,0.2)] relative"
     >
+      {/* 右上 モード切り替えトグル (未就学児/通常) */}
+      <div className="flex justify-end -mt-2 -mr-2">
+        <UIModeToggle size="sm" />
+      </div>
+
       <div className="space-y-3">
         {/* イティエル カーソルアイコン (フチ・背景なし) */}
         <div className="inline-flex items-center justify-center">
@@ -78,33 +86,37 @@ export const ResultScreen = ({
         {stats.gameMode === "endless" ? (
           <>
             <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-rose-400 tracking-wider">
-              ENDLESS RECORD
+              {t("endlessRecord")}
             </h2>
             <p className="text-sm text-amber-300 font-bold">
-              到達高度: {stats.climbedHeight ?? 0} m
+              {t("climbedHeight")}: {stats.climbedHeight ?? 0} m
             </p>
             <p className="text-xs text-rose-300">
-              {gameOverReason || "ウイルスに追いつかれました"}
+              {gameOverReason || t("virusCaught")}
             </p>
           </>
         ) : isCleared ? (
           <>
             <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-amber-300 tracking-wider">
-              {isBonusClear ? "BONUS CLEAR!" : "STAGE CLEAR!"}
+              {isBonusClear ? "BONUS CLEAR!" : t("stageClear")}
             </h2>
             <p className="text-sm text-rose-200">
-              {isBonusClear
-                ? "最高難度のBONUSゴールへイティエルを到達させました！"
-                : "イティエルが無事にGOALサーバーへ到達しました！"}
+              {isKids
+                ? isBonusClear
+                  ? "すごい！ とくべつなゴールへ いけたよ！"
+                  : "イティエルが ぶじにゴールへ ついたよ！"
+                : isBonusClear
+                  ? "最高難度のBONUSゴールへイティエルを到達させました！"
+                  : "イティエルが無事にGOALサーバーへ到達しました！"}
             </p>
           </>
         ) : (
           <>
             <h2 className="font-['Press_Start_2P'] text-xl md:text-2xl text-rose-500 tracking-wider">
-              GAME OVER
+              {t("gameOver")}
             </h2>
             <p className="text-xs md:text-sm text-rose-300">
-              {gameOverReason || "ウイルスに追いつかれました"}
+              {gameOverReason || (isKids ? "ウイルスにおいつかれちゃった… もういちどあそぼう！" : "ウイルスに追いつかれました")}
             </p>
           </>
         )}
@@ -121,7 +133,7 @@ export const ResultScreen = ({
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs text-slate-400 flex items-center gap-1.5">
               <Award size={14} className="text-yellow-400" />
-              CLIMBED ALTITUDE
+              {t("evaluationRank")}
             </span>
             <span className="font-['Press_Start_2P'] text-2xl text-amber-300">
               {stats.climbedHeight ?? 0} m
@@ -132,7 +144,7 @@ export const ResultScreen = ({
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <span className="text-xs text-slate-400 flex items-center gap-1.5">
                 <Award size={14} className="text-yellow-400" />
-                EVALUATION RANK
+                {t("evaluationRank")}
               </span>
               <span className="font-['Press_Start_2P'] text-2xl text-yellow-400">
                 RANK {rank}
@@ -144,14 +156,14 @@ export const ResultScreen = ({
         <div className="grid grid-cols-2 gap-3 text-xs md:text-sm">
           <div>
             <span className="text-slate-500 block text-[11px]">
-              FINAL SCORE
+              {t("finalScore")}
             </span>
             <span className="font-['Press_Start_2P'] text-rose-300">
               {stats.score.toLocaleString()}
             </span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[11px]">TIME</span>
+            <span className="text-slate-500 block text-[11px]">{t("time")}</span>
             <span className="font-['Press_Start_2P'] text-slate-300">
               {Math.floor(stats.clearTimeSeconds / 60)}:
               {(stats.clearTimeSeconds % 60).toString().padStart(2, "0")}
@@ -159,7 +171,7 @@ export const ResultScreen = ({
           </div>
           <div>
             <span className="text-slate-500 block text-[11px]">
-              MINO COUNT
+              {t("minoCount")}
             </span>
             <span className="font-['Press_Start_2P'] text-pink-400">
               {stats.minoCount}
@@ -167,7 +179,7 @@ export const ResultScreen = ({
           </div>
           <div>
             <span className="text-slate-500 block text-[11px]">
-              BONUS STARS
+              {t("bonusStars")}
             </span>
             <span className="font-['Press_Start_2P'] text-amber-300">
               {stats.gameMode === "endless"
@@ -180,13 +192,13 @@ export const ResultScreen = ({
         {isCleared && (
           <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 space-y-1">
             <div className="flex justify-between items-center">
-              <span>・タイム減点補正:</span>
+              <span>・{t("timePenalty")}:</span>
               <span className="text-rose-400 font-['Press_Start_2P'] text-[10px]">
                 -{stats.timePenalty?.toLocaleString() ?? 0} pts
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span>・ミノ節約ボーナス:</span>
+              <span>・{t("minoBonus")}:</span>
               <span className="text-amber-300 font-['Press_Start_2P'] text-[10px]">
                 +{(stats.minoBonus ?? 0).toLocaleString()} pts
               </span>
@@ -205,7 +217,11 @@ export const ResultScreen = ({
             className="result-action-btn result-action-btn-primary animate-pulse"
           >
             <Play size={16} fill="currentColor" className="text-amber-300 shrink-0" />
-            <span>NEXT LEVEL : {nextStage.name}</span>
+            <span>
+              {isKids
+                ? `${t("nextLevel")} (${nextStage.name})`
+                : `${t("nextLevel")} : ${nextStage.name}`}
+            </span>
             <ChevronRight size={18} className="text-amber-200 shrink-0" />
           </button>
         )}
@@ -221,7 +237,7 @@ export const ResultScreen = ({
           }`}
         >
           <RotateCcw size={16} className="shrink-0" />
-          <span>RETRY</span>
+          <span>{t("retry")}</span>
         </button>
 
         {/* 3. ステージ選択画面へ直行 */}
@@ -231,7 +247,7 @@ export const ResultScreen = ({
           className="result-action-btn result-action-btn-secondary"
         >
           <Layers size={16} className="shrink-0" />
-          <span>STAGE SELECT</span>
+          <span>{t("stageSelect")}</span>
         </button>
 
         {/* 4. ホーム画面へ戻る */}
@@ -241,7 +257,7 @@ export const ResultScreen = ({
           className="result-action-btn result-action-btn-secondary"
         >
           <Home size={16} className="shrink-0" />
-          <span>HOME</span>
+          <span>{t("home")}</span>
         </button>
       </div>
     </CyberCard>
