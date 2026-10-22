@@ -24,6 +24,11 @@
 
 html,
 body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
   cursor: url("./assets/cursor/tethiel_cursor_32.png") 16 16, auto;
 }
 
@@ -50,18 +55,20 @@ body {
   color: #f1f5f9;
   font-family: var(--font-pixel);
   letter-spacing: 0.05em;
-  min-height: 100vh;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow-x: hidden;
+  overflow: hidden;
   user-select: none;
 }
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2693,29 +2700,135 @@ button:disabled {
   box-shadow: 0 0 10px rgba(255, 26, 75, 0.35);
 }
 
-/* リザルト画面 縦並びアクションボタン群 (統一UI) */
+/* リザルト画面カード (画面中央・スクロール無しで美しく収まるコンパクト設計) */
+.result-modal-card {
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - 20px);
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-cyber);
+  box-shadow: 0 0 35px rgba(255, 26, 75, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.result-header-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.result-ithiel-avatar {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 8px rgba(255, 26, 75, 0.35));
+}
+
+.result-title-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.result-sub-text {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.result-stage-label {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+/* スコアサマリー部 */
+.result-summary-card {
+  padding: 8px 12px;
+  background: rgba(14, 4, 9, 0.88);
+  border: 1px solid rgba(255, 26, 75, 0.22);
+  border-radius: 8px;
+  text-align: left;
+  margin: 4px 0;
+}
+
+.result-summary-rank-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 26, 75, 0.15);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.result-summary-rank-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 15px;
+  color: #facc15;
+}
+
+.result-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+  font-size: 11px;
+}
+
+.result-summary-item-label {
+  color: #64748b;
+  font-size: 9px;
+  display: block;
+}
+
+.result-summary-item-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+}
+
+.result-adjustments-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 4px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 26, 75, 0.12);
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+/* 縦並びアクションボタン群 (スリム化・スクロール不要) */
 .result-actions-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 26, 75, 0.2);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 26, 75, 0.15);
 }
 
 .result-action-btn {
   width: 100%;
-  height: 44px;
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border-radius: 8px;
+  gap: 6px;
+  border-radius: 6px;
   font-family: var(--font-pixel);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.15s ease;
   user-select: none;
@@ -2726,12 +2839,12 @@ button:disabled {
   background: linear-gradient(90deg, #dc2626 0%, #e11d48 50%, #f43f5e 100%);
   color: #ffffff;
   border-color: rgba(255, 140, 170, 0.85);
-  box-shadow: 0 0 18px rgba(255, 26, 75, 0.55);
+  box-shadow: 0 0 14px rgba(255, 26, 75, 0.45);
 }
 
 .result-action-btn-primary:hover {
   filter: brightness(1.12);
-  box-shadow: 0 0 26px rgba(255, 26, 75, 0.8);
+  box-shadow: 0 0 20px rgba(255, 26, 75, 0.7);
   transform: translateY(-1px);
 }
 
@@ -2746,7 +2859,7 @@ button:disabled {
   background: rgba(45, 12, 28, 0.95);
   color: #ffffff;
   border-color: rgba(255, 70, 110, 0.75);
-  box-shadow: 0 0 14px rgba(255, 26, 75, 0.3);
+  box-shadow: 0 0 12px rgba(255, 26, 75, 0.3);
   transform: translateY(-1px);
 }
 

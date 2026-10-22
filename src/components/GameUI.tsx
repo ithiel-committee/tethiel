@@ -17,6 +17,7 @@ import { useUIText } from "../context/UIModeContext";
 import type { GameEngine } from "../game/engine";
 import type { GameStats, TetrominoType } from "../types/game";
 import { CyberButton, CyberCard } from "./ui";
+import { useOverflowCheck } from "../utils/overflowChecker";
 
 // 現在HPに応じたイティエルの腕上げ立ち絵を取得
 const getIthielStandingImage = (currentHearts: number) => {
@@ -52,6 +53,7 @@ export const GameUI = ({
   children,
 }: GameUIProps) => {
   const { t, isKids } = useUIText();
+  useOverflowCheck("GameUI");
   const [isPaused, setIsPaused] = useState(engine.status === "paused");
   const [floatingScores, setFloatingScores] = useState<
     { id: number; text: string }[]

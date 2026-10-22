@@ -260,11 +260,7 @@ export function App() {
   return (
     <UIModeProvider>
       <div
-        className={`w-full text-slate-100 flex flex-col items-center justify-center select-none overflow-x-hidden ${
-          screen === "title" || screen === "game"
-            ? "h-screen max-h-screen overflow-hidden p-1 sm:p-2"
-            : "min-h-screen p-2 sm:p-4"
-        }`}
+        className="w-full h-full max-h-screen text-slate-100 flex flex-col items-center justify-center select-none overflow-hidden p-1 sm:p-2"
       >
       {screen === "title" && (
         <div key="title" className="screen-transition-enter w-full h-full">
@@ -278,7 +274,7 @@ export function App() {
       )}
 
       {screen === "prologue" && (
-        <div key="prologue" className="screen-transition-enter w-full">
+        <div key="prologue" className="screen-transition-enter w-full h-full flex items-center justify-center overflow-hidden">
           <NovelScreen
             scene={
               getStoryScene(selectedStage.id, "prologue") ?? {
@@ -304,7 +300,7 @@ export function App() {
       )}
 
       {screen === "epilogue" && (
-        <div key="epilogue" className="screen-transition-enter w-full">
+        <div key="epilogue" className="screen-transition-enter w-full h-full flex items-center justify-center overflow-hidden">
           <NovelScreen
             scene={
               getStoryScene(selectedStage.id, "epilogue") ?? {
@@ -346,7 +342,7 @@ export function App() {
       )}
 
       {screen === "result" && (
-        <div key="result" className="screen-transition-enter w-full flex justify-center">
+        <div key="result" className="screen-transition-enter w-full h-full flex justify-center items-center overflow-hidden">
           <ResultScreen
             isCleared={gameStatus === "cleared"}
             isBonusClear={isBonusClear}

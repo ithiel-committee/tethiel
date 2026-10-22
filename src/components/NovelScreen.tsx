@@ -14,6 +14,7 @@ import { useUIText } from "../context/UIModeContext";
 import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 import type { StoryDialogue, StoryScene } from "../types/story";
 import { CyberBadge, CyberButton } from "./ui";
+import { useOverflowCheck } from "../utils/overflowChecker";
 
 interface NovelScreenProps {
   scene: StoryScene;
@@ -31,6 +32,7 @@ export const NovelScreen = ({
   onToggleMute,
 }: NovelScreenProps) => {
   const { t, isKids } = useUIText();
+  useOverflowCheck("NovelScreen");
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);

@@ -30,6 +30,7 @@ import {
 } from "../utils/scoreStorage";
 import { KeyboardGuide } from "./KeyboardGuide";
 import { UIModeToggle } from "./ui";
+import { useOverflowCheck } from "../utils/overflowChecker";
 
 // ホーム画面イティエル長押し隠し機能ポーズリスト
 const ITHIEL_SECRET_POSES = [
@@ -56,6 +57,7 @@ export const TitleScreen = ({
   initialMenuView = "main",
 }: TitleScreenProps) => {
   const { t, isKids } = useUIText();
+  useOverflowCheck("TitleScreen");
   const [menuView, setMenuView] = useState<MenuView>(initialMenuView);
 
   useEffect(() => {
