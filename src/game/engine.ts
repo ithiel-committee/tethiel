@@ -10,8 +10,8 @@ import type {
   Tetromino,
   TetrominoType,
 } from "../types/game";
+import { recalculateCircuit } from "./circuitPathfinder.ts";
 import {
-  BONUS_GOAL_COLS,
   GAME_RULES,
   GOAL_ROW,
   GRID_HEIGHT,
@@ -21,14 +21,16 @@ import {
   START_COLS,
   START_ROW,
   TIMING_CONFIG,
-} from "./constants";
+} from "./constants.ts";
+import { calculateStageClearScore } from "./scoring.ts";
+import { generateEndlessRow } from "./terrainGenerator.ts";
 import {
   TetrominoBag,
   calculateGhostY,
   checkCollision,
   createTetromino,
   tryRotate,
-} from "./tetromino";
+} from "./tetromino.ts";
 
 export interface EngineCallbacks {
   onStatusChange: (status: GameStatus) => void;
@@ -172,7 +174,7 @@ export class GameEngine {
       const terrainStartRow = START_ROW - GAME_RULES.ENDLESS_SAFE_ROWS;
       for (let r = terrainStartRow; r >= 0; r--) {
         const height = START_ROW - r;
-        this.grid[r] = this.generateNewEndlessRow(height);
+        this.grid[r] = generateEndlessRow(height);
       }
     } else {
       // 通常ステージモード: ステージ定義に基づく配置
@@ -224,162 +226,6 @@ export class GameEngine {
     this.infectedDamageTimerMs = 0;
   }
 
-  // 決定論的擬似乱数ハッシュ (高度に基づくシード計算)
-  private pseudoRandom(seed: number): number {
-    const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453123;
-    return x - Math.floor(x);
-  }
-
-  // 行内の最大連続空き幅を検査し、幅4マス以上の通路を自然に保証するフェイルセーフ
-  private ensurePassableCorridor(row: Cell[]): void {
-    let maxEmptySpan = 0;
-    let bestStart = -1;
-    let currentSpan = 0;
-    let currentStart = -1;
-
-    for (let c = 0; c < GRID_WIDTH; c++) {
-      if (row[c].type !== "obstacle") {
-        if (currentSpan === 0) {
-          currentStart = c;
-        }
-        currentSpan++;
-        if (currentSpan > maxEmptySpan) {
-          maxEmptySpan = currentSpan;
-          bestStart = currentStart;
-        }
-      } else {
-        currentSpan = 0;
-      }
-    }
-
-    if (maxEmptySpan >= 4) {
-      return;
-    }
-
-    // 空き区間が存在しない場合は中央付近を起点にする
-    let corridorStart = bestStart;
-    let corridorEnd = bestStart + maxEmptySpan - 1;
-    if (bestStart === -1 || maxEmptySpan === 0) {
-      corridorStart = 3;
-      corridorEnd = 2;
-    }
-
-    // 幅4になるまで余白の多い側へ自然に拡張
-    while (corridorEnd - corridorStart + 1 < 4) {
-      const canExpandLeft = corridorStart > 0;
-      const canExpandRight = corridorEnd < GRID_WIDTH - 1;
-
-      if (canExpandLeft && canExpandRight) {
-        if (corridorStart <= GRID_WIDTH - 1 - corridorEnd) {
-          corridorEnd++;
-        } else {
-          corridorStart--;
-        }
-      } else if (canExpandLeft) {
-        corridorStart--;
-      } else if (canExpandRight) {
-        corridorEnd++;
-      } else {
-        break;
-      }
-    }
-
-    // 決定した通路区間内の obstacle のみ empty に変換し既存アイテムを保護
-    for (let c = corridorStart; c <= corridorEnd; c++) {
-      if (row[c].type === "obstacle") {
-        row[c] = { type: "empty" };
-      }
-    }
-  }
-
-  // エンドレスモード用：感覚的ランダムかつクリア可能な新しい1行の手続き的生成
-  private generateNewEndlessRow(height: number): Cell[] {
-    const row: Cell[] = [];
-    for (let c = 0; c < GRID_WIDTH; c++) {
-      row.push({ type: "empty" });
-    }
-
-    // 序盤の低高度 (h <= 4) はスタート直後の足場作りのため完全空き
-    if (height <= 4) {
-      return row;
-    }
-
-    // クールダウン行 (3行に1回、または全体の約30%をスキップして障害物数を従来の0.7倍に調整)
-    if (height % 3 === 0 || this.pseudoRandom(height * 5.1) > 0.7) {
-      if (this.pseudoRandom(height * 3.7) > 0.3) {
-        const starCol = 3 + Math.floor(this.pseudoRandom(height * 8.9) * 6);
-        row[starCol] = { type: "star" };
-      }
-      return row;
-    }
-
-    const rnd = (off: number) => this.pseudoRandom(height * 17.1 + off * 5.3);
-    // 5種類の障害物パターン (0: 左壁, 1: 右壁, 2: 中央島, 3: オフセットピン, 4: 左右ピンチ)
-    const pattern = Math.floor(rnd(1) * 5);
-
-    const obstacleCols: number[] = [];
-
-    switch (pattern) {
-      case 0: {
-        // パターン0: 左壁 (列 1 または 列 0〜1) - 右側幅10マス開通
-        obstacleCols.push(1);
-        if (height > 20 && rnd(2) > 0.7) obstacleCols.push(0);
-        break;
-      }
-      case 1: {
-        // パターン1: 右壁 (列 10 または 列 10〜11) - 左側幅10マス開通
-        obstacleCols.push(10);
-        if (height > 20 && rnd(2) > 0.7) obstacleCols.push(11);
-        break;
-      }
-      case 2: {
-        // パターン2: 中央アイランド (列 5, 6 または 列 4, 7) - 中央即配置を阻み左右迂回ルートを要求
-        if (rnd(2) > 0.4) {
-          obstacleCols.push(5, 6);
-        } else {
-          obstacleCols.push(rnd(3) > 0.5 ? 4 : 7);
-        }
-        break;
-      }
-      case 3: {
-        // パターン3: オフセットピン (列 3 または 列 8) - 単独トゲ、両側迂回可能
-        const c = rnd(3) > 0.5 ? 3 : 8;
-        obstacleCols.push(c);
-        break;
-      }
-      case 4: {
-        // パターン4: 左右ピンチ (列 1 と 列 10) - 中央幅8マス完全開通
-        obstacleCols.push(1);
-        if (rnd(4) > 0.55) obstacleCols.push(10);
-        break;
-      }
-    }
-
-    // 障害物を適用
-    for (const col of obstacleCols) {
-      if (col >= 0 && col < GRID_WIDTH) {
-        row[col] = { type: "obstacle" };
-      }
-    }
-
-    // 低確率で星(★)を空きスペースに配置
-    if (rnd(5) > 0.65 && !row.some((cell) => cell.type === "star")) {
-      const freeCols: number[] = [];
-      for (let c = 2; c <= 9; c++) {
-        if (row[c].type === "empty") freeCols.push(c);
-      }
-      if (freeCols.length > 0) {
-        const picked = freeCols[Math.floor(rnd(6) * freeCols.length)];
-        row[picked] = { type: "star" };
-      }
-    }
-
-    // クリア不可能ケースの絶対防止バリデーション (幅4以上の連続空きスペースを保証)
-    this.ensurePassableCorridor(row);
-
-    return row;
-  }
-
   // エンドレスモード用：フィールド全体を下にスクロール (イティエルが登った高度を進める)
   public scrollDown(count = 1) {
     for (let step = 0; step < count; step++) {
@@ -397,7 +243,7 @@ export class GameEngine {
       // 初期グリッド (高度0〜21) の上空へ連続するように START_ROW + climbedHeight を渡す
       this.grid.pop();
       this.grid.unshift(
-        this.generateNewEndlessRow(START_ROW + this.climbedHeight),
+        generateEndlessRow(START_ROW + this.climbedHeight),
       );
     }
 
@@ -843,267 +689,24 @@ export class GameEngine {
 
   // STARTから繋がる回路の再計算
   private recalculateCircuit() {
-    // 既存のフラグをリセット（感染済みフラグは維持）
-    for (let r = 0; r < GRID_HEIGHT; r++) {
-      for (let c = 0; c < GRID_WIDTH; c++) {
-        if (this.grid[r][c].type === "placed") {
-          this.grid[r][c].isConnected = false;
-          this.grid[r][c].isTopCircuit = false;
-        }
-      }
-    }
+    const result = recalculateCircuit(
+      this.grid,
+      this.characterPos,
+      this.gameMode,
+    );
 
-    // BFSでSTART地点から隣接しているplacedブロックを探索
-    const queue: [number, number][] = [];
-    const visited = new Set<string>();
+    this.connectedPath = result.connectedPath;
+    this.circuitRoute = result.circuitRoute;
+    this.waypoints = result.waypoints;
+    this.isGoalPending = result.isGoalPending;
+    this.isBonusGoal = result.isBonusGoal;
 
-    // 最下部START地点のブロックをシードにする
-    for (const startCol of START_COLS) {
-      // START行直上またはSTART行にミノがあるか
-      for (let r = START_ROW; r >= START_ROW - 1; r--) {
-        if (this.grid[r][startCol].type === "placed") {
-          const key = `${r},${startCol}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            queue.push([r, startCol]);
-          }
-        }
-      }
-    }
-
-    // エンドレスモード時：スクロール後も回路が途切れないよう、イティエルの足元ブロックと最下行ブロックをシードに含める
-    if (this.gameMode === "endless") {
-      const footR = Math.round(this.characterPos.y);
-      const footC = Math.floor(this.characterPos.x);
-      if (
-        footR >= 0 &&
-        footR < GRID_HEIGHT &&
-        footC >= 0 &&
-        footC < GRID_WIDTH
-      ) {
-        if (this.grid[footR][footC].type === "placed") {
-          const key = `${footR},${footC}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            queue.push([footR, footC]);
-          }
-        }
-      }
-      for (let c = 0; c < GRID_WIDTH; c++) {
-        if (this.grid[GRID_HEIGHT - 1][c].type === "placed") {
-          const key = `${GRID_HEIGHT - 1},${c}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            queue.push([GRID_HEIGHT - 1, c]);
-          }
-        }
-      }
-    }
-
-    const path: [number, number][] = [];
-    let topRow = GRID_HEIGHT;
-    let topCell: [number, number] | null = null;
-    const parent = new Map<string, [number, number]>();
-
-    const dirs = [
-      [-1, 0],
-      [1, 0],
-      [0, -1],
-      [0, 1],
-    ];
-
-    while (queue.length > 0) {
-      const curr = queue.shift();
-      if (!curr) break;
-      const [cr, cc] = curr;
-      path.push([cr, cc]);
-      this.grid[cr][cc].isConnected = true;
-
-      if (cr < topRow) {
-        topRow = cr;
-        topCell = [cr, cc];
-      }
-
-      for (const [dr, dc] of dirs) {
-        const nr = cr + dr;
-        const nc = cc + dc;
-        if (nr >= 0 && nr < GRID_HEIGHT && nc >= 0 && nc < GRID_WIDTH) {
-          if (this.grid[nr][nc].type === "placed") {
-            const key = `${nr},${nc}`;
-            if (!visited.has(key)) {
-              visited.add(key);
-              parent.set(key, [cr, cc]);
-              queue.push([nr, nc]);
-            }
-          }
-        }
-      }
-    }
-
-    // 最下部から上に向かう順序でソート
-    path.sort((a, b) => b[0] - a[0]);
-    this.connectedPath = path;
-
-    // 最上部ブロックの特定＆イティエルの目標位置
-    if (topCell) {
-      const [tr, tc] = topCell;
-      this.grid[tr][tc].isTopCircuit = true;
-      this.characterPos.targetX = tc + 0.5;
-      this.characterPos.targetY = tr;
-
-      // STARTから最上部ブロックまでの一本の接続ルートを復元
-      const route: [number, number][] = [];
-      let curr: [number, number] | undefined = topCell;
-      while (curr) {
-        route.unshift(curr);
-        const key = `${curr[0]},${curr[1]}`;
-        curr = parent.get(key);
-      }
-      this.circuitRoute = route;
-
-      // キャラクター現在位置から最上部ブロックまで、ミノをたどるルート（最短経路）をBFSで探索
-      this.calculateWaypointsTo(tr, tc);
-
-      // GOAL判定の準備（ステージモードのみ。エンドレスモードではゴール終了せず無限クライミング）
-      if (this.gameMode === "stage" && tr <= GOAL_ROW) {
-        this.isGoalPending = true;
-        this.isBonusGoal = BONUS_GOAL_COLS.includes(tc);
-        this.currentPiece = null; // ゴール達成時はミノの落下を止めて登頂を見届ける
-      } else {
-        this.isGoalPending = false;
-      }
+    if (result.targetPos) {
+      this.characterPos.targetX = result.targetPos.x;
+      this.characterPos.targetY = result.targetPos.y;
     } else {
-      this.waypoints = [];
-      this.circuitRoute = [];
-      this.isGoalPending = false;
       this.characterPos.isClimbing = false;
     }
-  }
-
-  // キャラクター現在位置から目標地点まで、接続されたミノをたどるウェイポイント列を計算
-  private calculateWaypointsTo(tr: number, tc: number) {
-    const curR = Math.round(this.characterPos.y);
-    const curC = Math.floor(this.characterPos.x);
-
-    // すでに目標にいる場合
-    if (curR === tr && curC === tc) {
-      this.waypoints = [];
-      return;
-    }
-
-    // 探索の始点ノードを決定
-    let startNode: [number, number] | null = null;
-
-    if (
-      curR >= 0 &&
-      curR < GRID_HEIGHT &&
-      curC >= 0 &&
-      curC < GRID_WIDTH &&
-      this.grid[curR][curC].isConnected
-    ) {
-      // 現在地が接続済みブロック上にある場合
-      startNode = [curR, curC];
-    } else if (curR >= START_ROW) {
-      // START地点にいる場合、START列の接続済みブロックを探す
-      for (const sc of START_COLS) {
-        for (let r = START_ROW; r >= START_ROW - 1; r--) {
-          if (r >= 0 && r < GRID_HEIGHT && this.grid[r][sc].isConnected) {
-            startNode = [r, sc];
-            break;
-          }
-        }
-        if (startNode) break;
-      }
-    }
-
-    // 上記で見つからない場合、接続された回路の中で現在地に最も近いブロックを始点にする
-    if (!startNode && this.connectedPath.length > 0) {
-      let minDist = Number.POSITIVE_INFINITY;
-      for (const [r, c] of this.connectedPath) {
-        const d = Math.hypot(
-          c + 0.5 - this.characterPos.x,
-          r - this.characterPos.y,
-        );
-        if (d < minDist) {
-          minDist = d;
-          startNode = [r, c];
-        }
-      }
-    }
-
-    if (!startNode) {
-      this.waypoints = [];
-      return;
-    }
-
-    // BFSでstartNodeから[tr, tc]までの接続ブロックをたどる最短経路を探索
-    const dirs = [
-      [-1, 0],
-      [1, 0],
-      [0, -1],
-      [0, 1],
-    ];
-    const queue: [number, number][] = [[startNode[0], startNode[1]]];
-    const visited = new Set<string>([`${startNode[0]},${startNode[1]}`]);
-    const parent = new Map<string, [number, number]>();
-    let found = false;
-
-    while (queue.length > 0) {
-      const curr = queue.shift();
-      if (!curr) break;
-      const [cr, cc] = curr;
-      if (cr === tr && cc === tc) {
-        found = true;
-        break;
-      }
-      for (const [dr, dc] of dirs) {
-        const nr = cr + dr;
-        const nc = cc + dc;
-        if (nr >= 0 && nr < GRID_HEIGHT && nc >= 0 && nc < GRID_WIDTH) {
-          if (this.grid[nr][nc].isConnected) {
-            const key = `${nr},${nc}`;
-            if (!visited.has(key)) {
-              visited.add(key);
-              parent.set(key, [cr, cc]);
-              queue.push([nr, nc]);
-            }
-          }
-        }
-      }
-    }
-
-    if (!found) {
-      this.waypoints = [];
-      return;
-    }
-
-    // 経路復元
-    const steps: [number, number][] = [];
-    let curr: [number, number] | undefined = [tr, tc];
-    while (curr) {
-      steps.unshift(curr);
-      const key = `${curr[0]},${curr[1]}`;
-      curr = parent.get(key);
-    }
-
-    // ウェイポイント列に変換（ブロック中央: c + 0.5, r）
-    const newWaypoints = steps.map(([r, c]) => ({
-      x: c + 0.5,
-      y: r,
-    }));
-
-    // 現在位置とほぼ一致する先頭ウェイポイントはスキップ
-    while (
-      newWaypoints.length > 0 &&
-      Math.hypot(
-        newWaypoints[0].x - this.characterPos.x,
-        newWaypoints[0].y - this.characterPos.y,
-      ) < 0.2
-    ) {
-      newWaypoints.shift();
-    }
-
-    this.waypoints = newWaypoints;
   }
 
   // 操作系
@@ -1263,31 +866,20 @@ export class GameEngine {
     this.status = "cleared";
     sounds.playClear();
 
-    // 1. クリア基本ボーナス
-    const clearBonus = isBonusClear
-      ? SCORE_CONFIG.CLEAR_BONUS
-      : SCORE_CONFIG.CLEAR_NORMAL;
-    this.score += clearBonus;
+    const scoreResult = calculateStageClearScore({
+      baseScore: this.score,
+      isBonusClear,
+      elapsedTimeMs: this.elapsedTimeMs,
+      minoCount: this.minoCount,
+      bonusStars: this.bonusStars,
+      hearts: this.hearts,
+    });
 
-    // 2. 時間によるマイナス補正(1秒ごとに -30点のタイムペナルティ)
+    this.score = scoreResult.finalScore;
+    this.timePenalty = scoreResult.timePenalty;
+    this.minoBonus = scoreResult.minoBonus;
+
     const clearSec = Math.floor(this.elapsedTimeMs / 1000);
-    this.timePenalty = clearSec * SCORE_CONFIG.TIME_PENALTY_PER_SEC;
-    this.score = Math.max(0, this.score - this.timePenalty);
-
-    // 3. ミノ数評価(少ない方がプラス評価：基準20ミノに対し少ないほどボーナス加算)
-    this.minoBonus = Math.max(
-      0,
-      (SCORE_CONFIG.MINO_PAR_COUNT - this.minoCount) *
-        SCORE_CONFIG.MINO_BONUS_PER_MINO,
-    );
-    this.score += this.minoBonus;
-
-    // 4. 星ボーナス(スピーディなプレイを促すため星への固執度を下げる控えめ設定: 1個200点)
-    this.score += this.bonusStars * SCORE_CONFIG.STAR_CLEAR_BONUS;
-
-    // 5. 残りハートボーナス
-    this.score += this.hearts * SCORE_CONFIG.HEART_BONUS;
-
     const stats: GameStats = {
       score: this.score,
       clearTimeSeconds: clearSec,
