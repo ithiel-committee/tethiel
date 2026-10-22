@@ -591,6 +591,10 @@ svg {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
 }
+.px-3\.5 {
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+}
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
@@ -2996,6 +3000,33 @@ button:disabled {
   border-radius: 8px;
   backdrop-filter: blur(8px);
   box-sizing: border-box;
+}
+
+/* システムバー専用レイアウト */
+.game-hud-system-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+
+/* ライフ・ハート表示カード専用レイアウト */
+.game-hud-hearts-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+}
+
+/* 各ハートのスロット (フォントメトリクスの影響を排して完全中央揃え) */
+.game-hud-heart-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  line-height: 1;
 }
 
 /* システムバーの正方形コントロールボタン (28px x 28px) */

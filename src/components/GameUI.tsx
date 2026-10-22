@@ -154,7 +154,7 @@ export const GameUI = ({
         {/* ================= 左パネル ================= */}
         <div className="w-full lg:w-[260px] flex flex-col gap-3">
           {/* システムバー (STAGE名 & PAUSE / MUTE / EXIT コントロール) */}
-          <div className="game-hud-card w-full flex items-center justify-between px-3.5 py-2">
+          <div className="game-hud-card game-hud-system-bar w-full">
             <div className="font-pixel-en text-rose-400 text-xs font-bold tracking-wider">
               {stats.gameMode === "endless"
                 ? (isKids ? "エンドレス" : "ENDLESS")
@@ -197,13 +197,13 @@ export const GameUI = ({
           </div>
 
           {/* 1. 残りライフ (ハート5つ) */}
-          <div className="game-hud-card relative flex items-center justify-between px-3.5 py-2.5">
+          <div className="game-hud-card game-hud-hearts-card relative">
             {[0, 1, 2, 3, 4].map((i) => {
               const isBroken = brokenHeartIndices.includes(i);
               const isAlive = i < hearts;
 
               return (
-                <div key={`heart-${i}`} className="relative">
+                <div key={`heart-${i}`} className="game-hud-heart-slot">
                   <Heart
                     size={20}
                     className={`transition-colors duration-300 ${
@@ -214,7 +214,7 @@ export const GameUI = ({
                   />
                   {/* 消える瞬間の破裂アニメーション */}
                   {isBroken && (
-                    <div className="absolute inset-0 animate-heart-break pointer-events-none">
+                    <div className="absolute inset-0 flex items-center justify-center animate-heart-break pointer-events-none">
                       <Heart
                         size={20}
                         className="text-rose-300 fill-rose-500 filter drop-shadow-[0_0_14px_rgba(255,0,85,1)]"
