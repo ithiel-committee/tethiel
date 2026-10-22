@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "format": "biome format --write .",
     "lint": "biome lint .",
-    "test": "node --test tests/**/*.test.mjs",
+    "test": "node --experimental-strip-types --test tests/**/*.test.mjs",
     "generate:stages": "node --experimental-strip-types scripts/generate_stage_images.mjs"
   },
   "dependencies": {
