@@ -168,3 +168,57 @@ test("5. STAGE 3 Implementation and Unlock Verification", () => {
     "STAGE 3 must have configured initialStars",
   );
 });
+
+test("6. STAGE 3 No Straight-Through 2-Column Corridors Verification", () => {
+  const constantsPath = path.join(rootDir, "src", "game", "constants.ts");
+  const constantsContent = fs.readFileSync(constantsPath, "utf-8");
+
+  // Parse initialObstacles from STAGE 3
+  const stage3Block = constantsContent.split('id: 3')[1]?.split('id: 99')[0] || "";
+  const match = stage3Block.match(/initialObstacles:\s*\[([\s\S]*?)\],\s*initialStars/);
+  assert.ok(match, "Must find STAGE 3 initialObstacles block");
+
+  const obstaclePairs = [...match[1].matchAll(/\[(\d+),\s*(\d+)\]/g)].map(m => [
+    Number.parseInt(m[1], 10),
+    Number.parseInt(m[2], 10),
+  ]);
+
+  const grid = Array.from({ length: 22 }, () => Array(12).fill(false));
+  for (const [r, c] of obstaclePairs) {
+    grid[r][c] = true;
+  }
+
+  // Verify that NO adjacent 2-column pair [c, c+1] is completely clear from row 3 to 19
+  for (let c = 0; c < 11; c++) {
+    let clearAll = true;
+    for (let r = 3; r <= 19; r++) {
+      if (grid[r][c] || grid[r][c + 1]) {
+        clearAll = false;
+        break;
+      }
+    }
+    assert.strictEqual(
+      clearAll,
+      false,
+      `Columns [${c}, ${c + 1}] must not be a full-height straight clear corridor`,
+    );
+  }
+
+  // Verify maximum continuous 2-column clear height does not exceed 8 rows
+  for (let c = 0; c < 11; c++) {
+    let maxRun = 0;
+    let curRun = 0;
+    for (let r = 3; r <= 19; r++) {
+      if (!grid[r][c] && !grid[r][c + 1]) {
+        curRun++;
+        if (curRun > maxRun) maxRun = curRun;
+      } else {
+        curRun = 0;
+      }
+    }
+    assert.ok(
+      maxRun <= 8,
+      `Columns [${c}, ${c + 1}] continuous clear height (${maxRun}) must be <= 8 rows to prevent trivial stacking`,
+    );
+  }
+});
