@@ -352,8 +352,10 @@ body {
 }
 
 /* ボタンベース & キーボードアクセシビリティ (Tabフォーカス & Space/Enter操作) */
-button {
+button,
+[role="button"] {
   font-family: inherit;
+  position: relative;
 }
 
 /* マウスクリック時はアウトライン非表示、キーボードTabフォーカス時のみ鮮明に表示 */
@@ -373,6 +375,36 @@ select:focus-visible {
   outline-offset: 3px !important;
   box-shadow: 0 0 0 1px #ffffff, 0 0 16px rgba(255, 26, 75, 0.95), inset 0 0 8px rgba(255, 26, 75, 0.4) !important;
   transition: outline-offset 0.1s ease, box-shadow 0.15s ease !important;
+}
+
+/* Tabキー等によるフォーカス時に右上にイティエルカーソルをオーバーレイ表示 */
+button:focus-visible::after,
+[role="button"]:focus-visible::after {
+  content: "";
+  position: absolute;
+  top: -24px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  background-image: url("./assets/cursor/tethiel_cursor.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 100;
+  animation: tethielFocusPeek 0.18s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes tethielFocusPeek {
+  0% {
+    transform: translateY(6px) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 button:active {
