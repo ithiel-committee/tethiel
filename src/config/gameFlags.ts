@@ -14,14 +14,14 @@ export type PlayerSpriteMode = "deformed" | "pixel";
 export interface GameFlags {
   // クリア後にストーリー(エピローグ)を表示するかどうか
   showStoryOnClear: boolean;
-  // 自機キャラクターの画像種別 ("deformed": デフォルメ立ち絵, "pixel": ドット絵カーソル)
+  // 自機キャラクターの画像種別 ("pixel": ドット絵, "deformed": デフォルメ立ち絵)
   playerSpriteMode: PlayerSpriteMode;
 }
 
 // デフォルト設定フラグ (コード直接編集で切り替える場合はここを変更)
 export const DEFAULT_GAME_FLAGS: GameFlags = {
-  showStoryOnClear: true,
-  playerSpriteMode: "deformed",
+  showStoryOnClear: false,
+  playerSpriteMode: "pixel",
 };
 
 const STORAGE_KEY = "tethiel_game_flags";
@@ -58,7 +58,12 @@ function loadFlags(): GameFlags {
       // ストーリーフラグ: ?story=0 / ?story=false / ?story=1 / ?story=true
       if (params.has("story")) {
         const val = params.get("story")?.toLowerCase();
-        if (val === "false" || val === "0" || val === "off" || val === "no") {
+        if (
+          val === "false" ||
+          val === "0" ||
+          val === "off" ||
+          val === "no"
+        ) {
           flags.showStoryOnClear = false;
         } else if (
           val === "true" ||

@@ -10,6 +10,9 @@ import ithielArmHp0 from "../assets/character/ithiel_arm_hp0_down.png";
 import ithielArmSmug from "../assets/character/ithiel_arm_smug.png";
 import playerLeftImg from "../assets/character/player_left.png";
 import playerRightImg from "../assets/character/player_right.png";
+import playerDotImg from "../assets/character/player_dot.png";
+import playerDotRightImg from "../assets/character/player_dot_right.png";
+import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import virusImg from "../assets/obstacle/virus.png";
 import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 
@@ -27,6 +30,9 @@ export const GAME_ASSET_IMAGES = [
   ithielArmSmug,
   playerLeftImg,
   playerRightImg,
+  playerDotImg,
+  playerDotRightImg,
+  titleKeyVisual,
   virusImg,
   ...Object.values(ITHIEL_EXPRESSION_IMAGES),
 ];

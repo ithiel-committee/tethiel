@@ -1,5 +1,7 @@
 import playerSpriteLeftSrc from "../../assets/character/player_left.png";
 import playerSpriteRightSrc from "../../assets/character/player_right.png";
+import playerDotLeftSrc from "../../assets/character/player_dot.png";
+import playerDotRightSrc from "../../assets/character/player_dot_right.png";
 import tethielCursorSrc from "../../assets/cursor/tethiel_cursor.png";
 import virusSpriteSrc from "../../assets/obstacle/virus.png";
 import type { PlayerSpriteMode } from "../../config/gameFlags.ts";
@@ -15,6 +17,12 @@ playerSpriteLeft.src = playerSpriteLeftSrc;
 
 export const playerSpriteRight = new Image();
 playerSpriteRight.src = playerSpriteRightSrc;
+
+export const playerDotSpriteLeft = new Image();
+playerDotSpriteLeft.src = playerDotLeftSrc;
+
+export const playerDotSpriteRight = new Image();
+playerDotSpriteRight.src = playerDotRightSrc;
 
 export const tethielCursorSprite = new Image();
 tethielCursorSprite.src = tethielCursorSrc;
@@ -213,7 +221,7 @@ export function drawIthielCharacter(
   spriteMode: PlayerSpriteMode = "deformed",
 ) {
   const isPixel = spriteMode === "pixel";
-  const charHeight = isPixel ? 32 : 44;
+  const charHeight = isPixel ? 42 : 44;
   const aspectRatio = isPixel
     ? 1
     : facing === "right"
@@ -235,7 +243,9 @@ export function drawIthielCharacter(
   const groundY = py + BLOCK_SIZE;
 
   // 1. 足場の光るオーラ・影
-  const shadowScale = isMoving ? Math.max(0.6, 1 - (bounceY / 6) * 0.4) : 1;
+  const shadowScale = isMoving
+    ? Math.max(0.6, 1 - (bounceY / 6) * 0.4)
+    : 1;
   const shadowAlpha = isMoving
     ? Math.max(0.2, 0.45 - (bounceY / 6) * 0.25)
     : 0.4;
@@ -260,20 +270,31 @@ export function drawIthielCharacter(
   }
 
   if (isPixel) {
-    // ドット絵カーソル画像 (ピクセル感を保つため平滑化OFF)
+    // 画像①のドット絵自機 (ピクセル感を保つため平滑化OFF)
     const prevSmoothing = ctx.imageSmoothingEnabled;
     ctx.imageSmoothingEnabled = false;
 
-    // 右向き時は左右反転
-    if (facing === "right") {
-      ctx.scale(-1, 1);
-    }
-
-    if (tethielCursorSprite.complete && tethielCursorSprite.naturalWidth > 0) {
+    const dotImg =
+      facing === "right" ? playerDotSpriteRight : playerDotSpriteLeft;
+    if (dotImg.complete && dotImg.naturalWidth > 0) {
       ctx.drawImage(
-        tethielCursorSprite,
+        dotImg,
         -charWidth / 2,
-        -charHeight,
+        -charHeight + 1.5,
+        charWidth,
+        charHeight,
+      );
+    } else if (
+      playerDotSpriteLeft.complete &&
+      playerDotSpriteLeft.naturalWidth > 0
+    ) {
+      if (facing === "right") {
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(
+        playerDotSpriteLeft,
+        -charWidth / 2,
+        -charHeight + 1.5,
         charWidth,
         charHeight,
       );
@@ -287,7 +308,13 @@ export function drawIthielCharacter(
     // デフォルメ立ち絵画像
     const img = facing === "right" ? playerSpriteRight : playerSpriteLeft;
     if (img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, -charWidth / 2, -charHeight, charWidth, charHeight);
+      ctx.drawImage(
+        img,
+        -charWidth / 2,
+        -charHeight,
+        charWidth,
+        charHeight,
+      );
     } else {
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(-3, -charHeight + 5, 6, 6);
