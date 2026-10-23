@@ -27,26 +27,28 @@ export const CreditModal: React.FC<CreditModalProps> = ({
           </div>
           <p className="text-[11px]">
             中央大学 国際情報学部 (iTL) 公式キャラクター
-            「イティエル」をモチーフにした逆テトリス型アクションパズル
+            「イティエル」をモチーフにしたパズルゲーム
           </p>
         </div>
         <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1 text-[11px]">
-          <div>企画・開発: iTL 委員会</div>
-          <div>キャラクターイラスト・原案: iTL 公式</div>
-          <div>サウンド: Web Audio API Synthesizer Engine</div>
-          <div className="pt-1 text-slate-400">
-            SPECIAL THANKS: プレイヤーの皆様
+          <div>企画・イラスト: iSC (iThiel Support Committee)</div>
+          <div>
+            開発: wash (
+            <a href="https://x.com/ln67v" style={{ color: "skyblue" }}>
+              @ln67v
+            </a>
+            ) from iSC
           </div>
+          <div>
+            キャラクター原案: DNP (大日本印刷)・iTLコンテンツプロダクション
+          </div>
+          <div>SPECIAL THANKS: プレイヤーの皆さん！</div>
         </div>
       </div>
 
       <div className="ranking-footer">
         <div />
-        <button
-          type="button"
-          className="ranking-close-btn"
-          onClick={onClose}
-        >
+        <button type="button" className="ranking-close-btn" onClick={onClose}>
           {t("closeButton")}
         </button>
       </div>
