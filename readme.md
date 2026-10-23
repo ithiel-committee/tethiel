@@ -97,13 +97,13 @@ flowchart TD
 
 | コマンド | 説明 |
 | :--- | :--- |
-| `npm run dev` | ローカル開発サーバーを起動する (デフォルト: http://localhost:5180/) |
-| `npm run build` | TypeScript型検査および本番用静的バンドルをビルドする |
-| `npm run preview` | ビルド成果物をローカルでプレビュー実行する |
-| `npm test` | Node.js 標準テストランナーで全自動テストを実行する (レイアウト、ソルバー、進入路検証) |
-| `npm run generate:stages` | constants.ts からステージマップ画像 (SVG) および確認用HTMLギャラリーを生成する |
-| `npm run format` | Biomeを用いてプロジェクト全体のコードフォーマットを実行する |
-| `npm run lint` | Biomeを用いて静的コード解析を実行する |
+| `pnpm dev` | ローカル開発サーバーを起動する (デフォルト: http://localhost:5180/) |
+| `pnpm build` | TypeScript型検査および本番用静的バンドルをビルドする |
+| `pnpm preview` | ビルド成果物をローカルでプレビュー実行する |
+| `pnpm test` | Node.js 標準テストランナーで全自動テストを実行する (レイアウト、ソルバー、進入路検証) |
+| `pnpm generate:stages` | constants.ts からステージマップ画像 (SVG) および確認用HTMLギャラリーを生成する |
+| `pnpm format` | Biomeを用いてプロジェクト全体のコードフォーマットを実行する |
+| `pnpm lint` | Biomeを用いて静的コード解析を実行する |
 
 ## ディレクトリ構造
 
