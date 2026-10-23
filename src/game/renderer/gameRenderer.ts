@@ -1,6 +1,8 @@
 import playerSpriteLeftSrc from "../../assets/character/player_left.png";
 import playerSpriteRightSrc from "../../assets/character/player_right.png";
+import tethielCursorSrc from "../../assets/cursor/tethiel_cursor.png";
 import virusSpriteSrc from "../../assets/obstacle/virus.png";
+import type { PlayerSpriteMode } from "../../config/gameFlags.ts";
 import { GRID_HEIGHT, GRID_WIDTH } from "../constants";
 
 export const BLOCK_SIZE = 28;
@@ -13,6 +15,9 @@ playerSpriteLeft.src = playerSpriteLeftSrc;
 
 export const playerSpriteRight = new Image();
 playerSpriteRight.src = playerSpriteRightSrc;
+
+export const tethielCursorSprite = new Image();
+tethielCursorSprite.src = tethielCursorSrc;
 
 export const virusSprite = new Image();
 virusSprite.src = virusSpriteSrc;
@@ -205,10 +210,15 @@ export function drawIthielCharacter(
   time: number,
   isMoving: boolean,
   facing: "left" | "right" = "left",
+  spriteMode: PlayerSpriteMode = "deformed",
 ) {
-  const img = facing === "right" ? playerSpriteRight : playerSpriteLeft;
-  const charHeight = 44;
-  const aspectRatio = facing === "right" ? 249 / 423 : 225 / 426;
+  const isPixel = spriteMode === "pixel";
+  const charHeight = isPixel ? 32 : 44;
+  const aspectRatio = isPixel
+    ? 1
+    : facing === "right"
+      ? 249 / 423
+      : 225 / 426;
   const charWidth = charHeight * aspectRatio;
 
   let bounceY = 0;
@@ -249,14 +259,42 @@ export function drawIthielCharacter(
     ctx.rotate(tilt);
   }
 
-  if (img.complete && img.naturalWidth > 0) {
-    ctx.drawImage(img, -charWidth / 2, -charHeight, charWidth, charHeight);
+  if (isPixel) {
+    // ドット絵カーソル画像 (ピクセル感を保つため平滑化OFF)
+    const prevSmoothing = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
+
+    // 右向き時は左右反転
+    if (facing === "right") {
+      ctx.scale(-1, 1);
+    }
+
+    if (tethielCursorSprite.complete && tethielCursorSprite.naturalWidth > 0) {
+      ctx.drawImage(
+        tethielCursorSprite,
+        -charWidth / 2,
+        -charHeight,
+        charWidth,
+        charHeight,
+      );
+    } else {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-charWidth / 2, -charHeight, charWidth, charHeight);
+    }
+
+    ctx.imageSmoothingEnabled = prevSmoothing;
   } else {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(-3, -charHeight + 5, 6, 6);
-    ctx.fillRect(-4, -charHeight + 12, 8, 8);
-    ctx.fillRect(-3, -charHeight + 20, 2, 3);
-    ctx.fillRect(1, -charHeight + 20, 2, 3);
+    // デフォルメ立ち絵画像
+    const img = facing === "right" ? playerSpriteRight : playerSpriteLeft;
+    if (img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, -charWidth / 2, -charHeight, charWidth, charHeight);
+    } else {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-3, -charHeight + 5, 6, 6);
+      ctx.fillRect(-4, -charHeight + 12, 8, 8);
+      ctx.fillRect(-3, -charHeight + 20, 2, 3);
+      ctx.fillRect(1, -charHeight + 20, 2, 3);
+    }
   }
   ctx.restore();
 

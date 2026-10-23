@@ -21,6 +21,7 @@ import {
   drawObstacleBlock,
   drawStarItem,
 } from "../game/renderer/gameRenderer";
+import { getGameFlags } from "../config/gameFlags.ts";
 
 interface GameCanvasProps {
   engine: GameEngine;
@@ -238,7 +239,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         }
       }
 
-      // 10. イティエル（登るキャラクター）の描画
+      // 10. イティエル (登るキャラクター) の描画
       drawIthielCharacter(
         ctx,
         engine.characterPos.x * BLOCK_SIZE,
@@ -246,6 +247,7 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         time,
         engine.characterPos.isMoving,
         engine.characterPos.facing,
+        getGameFlags().playerSpriteMode,
       );
 
       // 10.5 ゴール到達時のセレブレーション演出（キャラクターが到着した瞬間に発動）

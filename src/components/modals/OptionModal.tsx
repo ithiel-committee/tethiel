@@ -1,4 +1,11 @@
+import { useState } from "react";
 import { Settings, Volume2, VolumeX } from "lucide-react";
+import {
+  type GameFlags,
+  type PlayerSpriteMode,
+  getGameFlags,
+  setGameFlags,
+} from "../../config/gameFlags.ts";
 import { useUIText } from "../../context/UIModeContext";
 import { KeyboardGuide } from "../KeyboardGuide";
 import { ModalShell } from "../ui/ModalShell";
@@ -17,7 +24,22 @@ export const OptionModal: React.FC<OptionModalProps> = ({
   isMuted,
   onToggleMute,
 }) => {
-  const { t } = useUIText();
+  const { t, isKids } = useUIText();
+  const [flags, setFlagsState] = useState<GameFlags>(() => getGameFlags());
+
+  const handleTogglePlayerSprite = () => {
+    const nextMode: PlayerSpriteMode =
+      flags.playerSpriteMode === "pixel" ? "deformed" : "pixel";
+    const updated = setGameFlags({ playerSpriteMode: nextMode });
+    setFlagsState({ ...updated });
+  };
+
+  const handleToggleShowStory = () => {
+    const updated = setGameFlags({
+      showStoryOnClear: !flags.showStoryOnClear,
+    });
+    setFlagsState({ ...updated });
+  };
 
   return (
     <ModalShell
@@ -39,6 +61,56 @@ export const OptionModal: React.FC<OptionModalProps> = ({
             </div>
           </div>
           <UIModeToggle size="sm" />
+        </div>
+
+        {/* 自機キャラクター設定 */}
+        <div className="flex items-center justify-between p-3 bg-slate-900/80 rounded border border-rose-500/30">
+          <div>
+            <div className="font-bold text-slate-200">
+              {isKids ? "じき (プレイヤー) えらび" : "自機グラフィック"}
+            </div>
+            <div className="text-[11px] text-slate-400">
+              {isKids
+                ? "イラスト / ドットえ"
+                : "デフォルメ立ち絵 / ドット絵カーソル"}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleTogglePlayerSprite}
+            className="flex items-center gap-2 px-3 py-1.5 rounded font-pixel-en text-xs transition-all bg-rose-950/80 text-rose-300 border border-rose-500/60 shadow-[0_0_10px_rgba(255,26,75,0.3)] hover:bg-rose-900/80"
+          >
+            {flags.playerSpriteMode === "pixel" ? (
+              <span>{isKids ? "ドットえ" : "ドット絵"}</span>
+            ) : (
+              <span>{isKids ? "イラスト" : "デフォルメ"}</span>
+            )}
+          </button>
+        </div>
+
+        {/* クリア後ストーリー設定 */}
+        <div className="flex items-center justify-between p-3 bg-slate-900/80 rounded border border-rose-500/30">
+          <div>
+            <div className="font-bold text-slate-200">
+              {isKids ? "クリア後のおはなし" : "クリア後ストーリー"}
+            </div>
+            <div className="text-[11px] text-slate-400">
+              {isKids
+                ? "おはなしをみる / スキップ"
+                : "エピローグ表示 / スキップ"}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleShowStory}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded font-pixel-en text-xs transition-all ${
+              flags.showStoryOnClear
+                ? "bg-rose-950/80 text-rose-300 border border-rose-500/60 shadow-[0_0_10px_rgba(255,26,75,0.3)] hover:bg-rose-900/80"
+                : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
+            }`}
+          >
+            <span>{flags.showStoryOnClear ? "ON" : "OFF (スキップ)"}</span>
+          </button>
         </div>
 
         {/* サウンド設定 */}

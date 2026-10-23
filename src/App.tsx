@@ -18,6 +18,7 @@ import type {
 } from "./types/game";
 import { getStageBestRecords, saveGameResult } from "./utils/scoreStorage";
 import { cleanStageUrl, parseStageFromUrl } from "./utils/url";
+import { getGameFlags } from "./config/gameFlags.ts";
 
 type Screen = "title" | "prologue" | "game" | "epilogue" | "result";
 
@@ -75,7 +76,10 @@ export function App() {
             isCleared: true,
             isBonusClear: isBonus,
           });
-          const epilogue = getStoryScene(selectedStage.id, "epilogue");
+          const flags = getGameFlags();
+          const epilogue = flags.showStoryOnClear
+            ? getStoryScene(selectedStage.id, "epilogue")
+            : null;
           if (epilogue) {
             setScreen("epilogue");
           } else {
