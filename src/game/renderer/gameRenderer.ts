@@ -221,7 +221,8 @@ export function drawIthielCharacter(
   spriteMode: PlayerSpriteMode = "deformed",
 ) {
   const isPixel = spriteMode === "pixel";
-  const charHeight = isPixel ? 42 : 44;
+  // ドット絵モード時は原寸50x50(実キャラ高47px)で1ドット=1画面ピクセルの等倍描画を行い、縮小によるモアレやちらつきを根本防止
+  const charHeight = isPixel ? 50 : 44;
   const aspectRatio = isPixel
     ? 1
     : facing === "right"
@@ -234,7 +235,8 @@ export function drawIthielCharacter(
   if (isMoving) {
     const stepPhase = (time / 80) % Math.PI;
     bounceY = Math.sin(stepPhase) * 6;
-    tilt = (facing === "right" ? 0.05 : -0.05) * Math.sin(stepPhase);
+    // ドット絵モード時は斜めサンプリングによるジャギーの波打ち・ちらつきを防ぐため回転(tilt)をOFF
+    tilt = isPixel ? 0 : (facing === "right" ? 0.05 : -0.05) * Math.sin(stepPhase);
   } else {
     bounceY = Math.sin(time / 300) * 1.5;
   }
@@ -262,25 +264,32 @@ export function drawIthielCharacter(
   );
   ctx.fill();
 
-  // 2. 自機スプライトの描画
+  // 2. 自機スプライトの描画 (ピクセル境界への整数スナップでシマリングを解消)
+  const drawX = isPixel ? Math.round(cx) : cx;
+  const drawY = isPixel ? Math.round(groundY - bounceY) : groundY - bounceY;
+
   ctx.save();
-  ctx.translate(cx, groundY - bounceY);
+  ctx.translate(drawX, drawY);
   if (tilt !== 0) {
     ctx.rotate(tilt);
   }
 
   if (isPixel) {
-    // 画像①のドット絵自機 (ピクセル感を保つため平滑化OFF)
+    // 50x50原寸ドット絵自機 (等倍1:1のため平滑化OFFで最高鮮明度・ブレなし)
     const prevSmoothing = ctx.imageSmoothingEnabled;
     ctx.imageSmoothingEnabled = false;
 
     const dotImg =
       facing === "right" ? playerDotSpriteRight : playerDotSpriteLeft;
+    // 原寸ドット絵の下部余白2px分を考慮して接地位置をぴったり補正
+    const drawOffsetX = -Math.round(charWidth / 2);
+    const drawOffsetY = -charHeight + 2;
+
     if (dotImg.complete && dotImg.naturalWidth > 0) {
       ctx.drawImage(
         dotImg,
-        -charWidth / 2,
-        -charHeight + 1.5,
+        drawOffsetX,
+        drawOffsetY,
         charWidth,
         charHeight,
       );
@@ -293,8 +302,8 @@ export function drawIthielCharacter(
       }
       ctx.drawImage(
         playerDotSpriteLeft,
-        -charWidth / 2,
-        -charHeight + 1.5,
+        drawOffsetX,
+        drawOffsetY,
         charWidth,
         charHeight,
       );
@@ -326,12 +335,14 @@ export function drawIthielCharacter(
   ctx.restore();
 
   // 3. 頭上のネームラベル「イティエル」
-  const labelY = groundY - charHeight - bounceY - 6;
+  const labelY = isPixel
+    ? Math.round(drawY - charHeight - 3)
+    : groundY - charHeight - bounceY - 6;
   ctx.fillStyle = "#ffffff";
   ctx.font = '9px "DotGothic16", monospace';
   ctx.textAlign = "center";
   ctx.shadowColor = "rgba(0, 240, 255, 0.8)";
   ctx.shadowBlur = 4;
-  ctx.fillText("イティエル", cx, labelY);
+  ctx.fillText("イティエル", drawX, labelY);
   ctx.shadowBlur = 0;
 }
