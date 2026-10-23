@@ -14,7 +14,6 @@ import { useUIText } from "../context/UIModeContext";
 import type { GameStats, StageData } from "../types/game";
 import { STAGE_TEXTS } from "../data/uiTexts";
 import { calculateRank } from "../utils/scoreStorage";
-import { UIModeToggle } from "./ui";
 
 interface ResultScreenProps {
   isCleared: boolean;
@@ -88,11 +87,6 @@ export const ResultScreen = ({
 
   return (
     <div className="result-modal-card animate-fadeIn">
-      {/* 右上 モード切り替えトグル (未就学児/通常) */}
-      <div className="result-mode-toggle-wrap">
-        <UIModeToggle size="sm" />
-      </div>
-
       <div className="result-header-area">
         {/* イティエル カーソルアイコン (フチ・背景なし) */}
         <div className="inline-flex items-center justify-center">
