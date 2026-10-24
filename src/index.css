@@ -13,6 +13,8 @@
   --amber-main: #f59e0b;
   --amber-glow: rgba(245, 158, 11, 0.4);
   --border-cyber: rgba(255, 35, 75, 0.35);
+  --cursor-default: url("./assets/cursor/tethiel_cursor_32.png") 0 0, auto;
+  --cursor-pointer: url("./assets/cursor/tethiel_cursor_32.png") 0 0, pointer;
 }
 
 * {
@@ -29,7 +31,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  cursor: url("./assets/cursor/tethiel_cursor_32.png") 0 0, auto;
+  cursor: var(--cursor-default);
 }
 
 body {
@@ -1328,7 +1330,7 @@ button:disabled {
   color: #cbd5e1;
   background: rgba(22, 7, 13, 0.85);
   border: 1px solid rgba(255, 35, 75, 0.3);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.2s ease;
 }
 
@@ -1400,7 +1402,7 @@ button:disabled {
   padding: 0 16px 16px 16px;
   background: transparent;
   border: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -1986,7 +1988,7 @@ button:disabled {
   );
   border: 1px solid rgba(255, 120, 150, 0.7);
   border-radius: 6px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   box-shadow: 0 0 14px rgba(255, 26, 75, 0.45);
   transition: all 0.12s ease;
   flex-shrink: 0;
@@ -2115,7 +2117,7 @@ button:disabled {
   color: #e2e8f0;
   font-size: 11px;
   font-family: var(--font-pixel);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.12s ease;
 }
 
@@ -2162,7 +2164,7 @@ button:disabled {
   animation: ithielFloating 5s ease-in-out infinite;
   user-select: none;
   pointer-events: auto;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: filter 0.25s ease, transform 0.25s ease;
   touch-action: none;
 }
@@ -2349,7 +2351,7 @@ button:disabled {
   font-family: var(--font-pixel);
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
   user-select: none;
   border: 1px solid transparent;
@@ -2417,7 +2419,7 @@ button:disabled {
   color: #ffaec0;
   font-size: 11px;
   font-family: var(--font-pixel);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.12s ease;
 }
 
@@ -2477,7 +2479,7 @@ button:disabled {
   background: transparent;
   border: none;
   color: #94a3b8;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   padding: 2px 6px;
   font-size: 14px;
   border-radius: 4px;
@@ -2520,7 +2522,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 18px rgba(255, 26, 75, 0.35);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -2553,7 +2555,7 @@ button:disabled {
   font-weight: 700;
   border-radius: 6px;
   border: 1px solid transparent;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
   user-select: none;
 }
@@ -2702,7 +2704,7 @@ button:disabled {
   color: #fda4af;
   font-family: var(--font-pixel);
   font-size: 11px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
 }
 
@@ -2725,7 +2727,7 @@ button:disabled {
   color: #ffaec0;
   font-family: var(--font-pixel);
   font-size: 11px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
 }
 
@@ -2865,7 +2867,7 @@ button:disabled {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
   user-select: none;
   border: 1px solid transparent;
@@ -2935,7 +2937,7 @@ button:disabled {
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 26, 75, 0.25);
   backdrop-filter: blur(8px);
   user-select: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   box-sizing: border-box;
 }
 
@@ -2988,7 +2990,7 @@ button:disabled {
   font-size: 11px;
   font-weight: 700;
   color: #94a3b8;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: color 0.2s ease;
   white-space: nowrap;
   outline: none;
@@ -3072,7 +3074,7 @@ button:disabled {
   border: 1px solid rgba(255, 26, 75, 0.35);
   border-radius: 5px;
   color: #ff88a3;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
   user-select: none;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
@@ -3109,7 +3111,7 @@ button:disabled {
   font-weight: 700;
   letter-spacing: 0.05em;
   box-shadow: 0 0 8px rgba(255, 26, 75, 0.3);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
   user-select: none;
   box-sizing: border-box;
