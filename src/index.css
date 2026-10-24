@@ -29,7 +29,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  cursor: url("./assets/cursor/tethiel_cursor_32.png") 16 16, auto;
+  cursor: url("./assets/cursor/tethiel_cursor_32.png") 0 0, auto;
 }
 
 body {
@@ -977,7 +977,7 @@ svg {
 button,
 a,
 [role="button"] {
-  cursor: url("./assets/cursor/tethiel_cursor_32.png") 16 16, pointer;
+  cursor: url("./assets/cursor/tethiel_cursor_32.png") 0 0, pointer;
 }
 .cursor-not-allowed,
 button:disabled {

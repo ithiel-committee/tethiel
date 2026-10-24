@@ -109,54 +109,21 @@ function encodePng(width, height, rgbaBuffer) {
   ]);
 }
 
-const inputPath = "src/assets/cursor/tethiel_cursor.png";
+const inputPath = "src/assets/cursor/tethiel_cursor_2.png";
 const orig = decodePng(fs.readFileSync(inputPath));
 
-// Analyze bounds
-let minX = orig.w;
-let maxX = 0;
-let minY = orig.h;
-let maxY = 0;
-for (let y = 0; y < orig.h; y++) {
-  for (let x = 0; x < orig.w; x++) {
-    const a = orig.rgba[(y * orig.w + x) * 4 + 3];
-    if (a > 10) {
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
-    }
-  }
-}
-const contentW = maxX - minX + 1;
-const contentH = maxY - minY + 1;
-const contentCenterX = (minX + maxX) / 2;
-const contentCenterY = (minY + maxY) / 2;
+console.log(`Original cursor dimensions: ${orig.w}x${orig.h}`);
 
-console.log(
-  `Content Bounds: [${minX}..${maxX}], [${minY}..${maxY}] (${contentW}x${contentH})`,
-);
-console.log(
-  `Visual Center: (${contentCenterX.toFixed(2)}, ${contentCenterY.toFixed(2)})`,
-);
-
-function generateResampled(targetSize, outline = true) {
-  const pad = outline ? 2 : 1;
-  const maxW = targetSize - pad * 2;
-  const maxH = targetSize - pad * 2;
-  const scale = Math.min(maxW / contentW, maxH / contentH);
-
+function generateResampled(targetSize) {
   const outBuf = Buffer.alloc(targetSize * targetSize * 4, 0);
-  const targetCenterX = (targetSize - 1) / 2;
-  const targetCenterY = (targetSize - 1) / 2;
+  const scale = targetSize / orig.w;
 
-  // Box filter supersampling for smooth downscaling
   for (let ty = 0; ty < targetSize; ty++) {
     for (let tx = 0; tx < targetSize; tx++) {
-      const srcX0 = (tx - 0.5 - targetCenterX) / scale + contentCenterX;
-      const srcX1 = (tx + 0.5 - targetCenterX) / scale + contentCenterX;
-      const srcY0 = (ty - 0.5 - targetCenterY) / scale + contentCenterY;
-      const srcY1 = (ty + 0.5 - targetCenterY) / scale + contentCenterY;
+      const srcX0 = tx / scale;
+      const srcX1 = (tx + 1) / scale;
+      const srcY0 = ty / scale;
+      const srcY1 = (ty + 1) / scale;
 
       const sxStart = Math.max(0, Math.floor(srcX0));
       const sxEnd = Math.min(orig.w - 1, Math.floor(srcX1));
@@ -212,65 +179,32 @@ function generateResampled(targetSize, outline = true) {
     }
   }
 
-  // 1px subtle white outline for contrast on dark cyber background
-  if (outline) {
-    const copy = Buffer.from(outBuf);
-    for (let ty = 0; ty < targetSize; ty++) {
-      for (let tx = 0; tx < targetSize; tx++) {
-        const idx = (ty * targetSize + tx) * 4;
-        const curA = copy[idx + 3];
-        if (curA < 180) {
-          let maxNeighborA = 0;
-          for (let dy = -1; dy <= 1; dy++) {
-            for (let dx = -1; dx <= 1; dx++) {
-              if (dx === 0 && dy === 0) continue;
-              const ny = ty + dy;
-              const nx = tx + dx;
-              if (
-                ny >= 0 &&
-                ny < targetSize &&
-                nx >= 0 &&
-                nx < targetSize
-              ) {
-                const nIdx = (ny * targetSize + nx) * 4;
-                if (copy[nIdx + 3] > maxNeighborA)
-                  maxNeighborA = copy[nIdx + 3];
-              }
-            }
-          }
-          if (maxNeighborA > 150) {
-            const outAlpha = Math.min(
-              255,
-              Math.round(maxNeighborA * 0.85),
-            );
-            outBuf[idx] = 255;
-            outBuf[idx + 1] = 255;
-            outBuf[idx + 2] = 255;
-            outBuf[idx + 3] = Math.max(outBuf[idx + 3], outAlpha);
-          }
-        }
-      }
-    }
+  // 矢印の先端 (0,0) を確実にポインタ先端にする
+  if (outBuf[3] < 120) {
+    outBuf[0] = 0;
+    outBuf[1] = 0;
+    outBuf[2] = 0;
+    outBuf[3] = 255;
   }
 
   return encodePng(targetSize, targetSize, outBuf);
 }
 
 const targets = [
-  { size: 32, outline: true, name: "tethiel_cursor_32.png" },
-  { size: 32, outline: false, name: "tethiel_cursor_32_raw.png" },
-  { size: 40, outline: true, name: "tethiel_cursor_40.png" },
-  { size: 48, outline: true, name: "tethiel_cursor_48.png" },
+  { size: 32, name: "tethiel_cursor_32.png" },
+  { size: 32, name: "tethiel_cursor_32_raw.png" },
+  { size: 40, name: "tethiel_cursor_40.png" },
+  { size: 48, name: "tethiel_cursor_48.png" },
 ];
 
 fs.mkdirSync("public/assets/cursor", { recursive: true });
 fs.mkdirSync("src/assets/cursor", { recursive: true });
 
 for (const t of targets) {
-  const png = generateResampled(t.size, t.outline);
+  const png = generateResampled(t.size);
   fs.writeFileSync(`public/assets/cursor/${t.name}`, png);
   fs.writeFileSync(`src/assets/cursor/${t.name}`, png);
   console.log(
-    `Generated: ${t.name} (${t.size}x${t.size}) [Center hotspot: ${t.size / 2} ${t.size / 2}]`,
+    `Generated: ${t.name} (${t.size}x${t.size}) [Top-left hotspot: 0 0]`,
   );
 }
