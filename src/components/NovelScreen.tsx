@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useUIText } from "../context/UIModeContext";
+import virusImage from "../assets/obstacle/virus.png";
 import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 import type { StoryDialogue, StoryScene } from "../types/story";
 import { CyberBadge, CyberButton } from "./ui";
@@ -167,9 +168,11 @@ export const NovelScreen = ({
 
   if (!currentDialogue) return null;
 
-  const currentImgSrc =
-    ITHIEL_EXPRESSION_IMAGES[currentDialogue.expression] ??
-    ITHIEL_EXPRESSION_IMAGES.default;
+  const isMalware = currentDialogue.speaker === "マルウェア";
+  const currentImgSrc = isMalware
+    ? virusImage
+    : (ITHIEL_EXPRESSION_IMAGES[currentDialogue.expression] ??
+      ITHIEL_EXPRESSION_IMAGES.default);
 
   return (
     <div className="novel-wrapper">
@@ -252,7 +255,7 @@ export const NovelScreen = ({
           alt={currentDialogue.speaker}
           loading="eager"
           decoding="async"
-          className={`novel-char-img ${isCharacterBumping ? "novel-char-bump" : ""}`}
+          className={`novel-char-img ${isMalware ? "novel-char-virus" : ""} ${isCharacterBumping ? "novel-char-bump" : ""}`}
         />
       </div>
 
@@ -263,8 +266,15 @@ export const NovelScreen = ({
         className="novel-msg-container"
       >
         {/* ネームプレート (左上に飛び出たサイバーバッジ) */}
-        <div className="novel-nameplate">
-          <Sparkles size={14} className="text-amber-300 animate-spin" />
+        <div className={`novel-nameplate ${isMalware ? "novel-nameplate-malware" : ""}`}>
+          <Sparkles
+            size={14}
+            className={
+              isMalware
+                ? "text-rose-400 animate-pulse"
+                : "text-amber-300 animate-spin"
+            }
+          />
           <span>{currentDialogue.speaker}</span>
         </div>
 
