@@ -263,8 +263,9 @@ export function App() {
 
   return (
     <UIModeProvider>
+      <div className="app-global-bg" aria-hidden="true" />
       <div
-        className={`w-full h-full max-h-screen text-slate-100 flex flex-col items-center justify-center select-none overflow-hidden ${
+        className={`relative z-10 w-full h-full max-h-screen text-slate-100 flex flex-col items-center justify-center select-none overflow-hidden ${
           screen === "title" ? "p-0" : "p-1 sm:p-2"
         }`}
       >
