@@ -170,7 +170,7 @@ export const OptionModal: React.FC<OptionModalProps> = ({
           </div>
 
           {/* SE 音量 */}
-          <div className="flex items-center justify-between gap-3 pt-2 border-t border-rose-500/15">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Volume2 size={15} className="text-rose-400 shrink-0" />
               <span className="font-bold text-slate-200">

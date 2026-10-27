@@ -3397,55 +3397,58 @@ button:disabled {
   appearance: none;
   width: 100%;
   height: 6px;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(255, 255, 255, 0.22);
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.38);
   outline: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .cyber-slider:hover {
-  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .cyber-slider:focus {
   outline: none;
 }
 
-/* BGMスライダー用 (ローズピンク) */
+/* スライダーつまみ (白を基調に赤系アクセント＆グロー) */
 .cyber-slider-rose::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ff2a6d;
+  background: #ffffff;
   cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(255, 42, 109, 0.8), 0 0 4px #ff2a6d;
+  border: 2.5px solid #ff3366;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 51, 102, 0.7);
   transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .cyber-slider-rose::-webkit-slider-thumb:hover {
   transform: scale(1.18);
-  box-shadow: 0 0 14px rgba(255, 42, 109, 1), 0 0 6px #ffffff;
+  background: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 1), 0 0 12px #ff1a4b;
 }
 
 .cyber-slider-rose::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ff2a6d;
+  background: #ffffff;
   cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(255, 42, 109, 0.8), 0 0 4px #ff2a6d;
+  border: 2.5px solid #ff3366;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 51, 102, 0.7);
   transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .cyber-slider-rose::-moz-range-thumb:hover {
   transform: scale(1.18);
-  box-shadow: 0 0 14px rgba(255, 42, 109, 1), 0 0 6px #ffffff;
+  background: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 1), 0 0 12px #ff1a4b;
 }
 
 /* SEスライダー用 (スカイシアン) */
