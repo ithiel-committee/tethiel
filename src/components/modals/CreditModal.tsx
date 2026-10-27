@@ -44,6 +44,18 @@ export const CreditModal: React.FC<CreditModalProps> = ({
           </div>
           <div>SPECIAL THANKS: プレイヤーの皆さん！</div>
         </div>
+        <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1 text-[11px]">
+          <div className="text-rose-400 font-bold mb-1">BGM / 音楽</div>
+          <div>
+            タイトル: <span className="text-white font-mono">J'azz Blue</span> by RoccoW (CC BY-SA)
+          </div>
+          <div>
+            ゲーム: <span className="text-white font-mono">Hellish Revenge</span> by Weeppiko (CC BY-NC-SA 3.0)
+          </div>
+          <div>
+            ストーリー・リザルト: <span className="text-white font-mono">Messeah</span> by RoccoW (CC BY 3.0)
+          </div>
+        </div>
       </div>
 
       <div className="ranking-footer">

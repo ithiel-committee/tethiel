@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { bgm } from "./audio/bgmManager";
 import { sounds } from "./audio/soundSystem";
 import { GameCanvas } from "./components/GameCanvas";
 import { GameUI } from "./components/GameUI";
@@ -123,8 +124,29 @@ export function App() {
   // サウンド切り替え
   const handleToggleMute = useCallback(() => {
     const muted = sounds.toggleMute();
+    bgm.setMuted(muted);
     setIsMuted(muted);
   }, []);
+
+  // 画面遷移・ゲーム状態とBGMの同期
+  useEffect(() => {
+    bgm.setMuted(isMuted);
+  }, [isMuted]);
+
+  useEffect(() => {
+    if (screen === "title") {
+      bgm.play("title");
+    } else if (
+      screen === "prologue" ||
+      screen === "epilogue" ||
+      screen === "result"
+    ) {
+      bgm.play("story");
+    } else if (screen === "game") {
+      bgm.play("game");
+      bgm.setDucked(gameStatus === "paused");
+    }
+  }, [screen, gameStatus]);
 
   // ステージ選択 (プロローグが存在すればプロローグへ、なければゲーム開始)
   const handleSelectStage = useCallback((stage: StageData) => {
