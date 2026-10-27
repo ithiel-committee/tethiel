@@ -1,4 +1,4 @@
-// BGM管理システム (超軽量オンデマンド読み込み・クロスフェード・ミュート・ポーズ連動)
+// BGM管理システム (超軽量オンデマンド読み込み・独立クロスフェード・完全排他制御・ミュート連動)
 
 export type BGMTrack = "title" | "game" | "story";
 
@@ -6,12 +6,12 @@ class BGMManager {
   private currentTrack: BGMTrack | null = null;
   private currentAudio: HTMLAudioElement | null = null;
   private audioInstances: Map<BGMTrack, HTMLAudioElement> = new Map();
+  private fadeIntervals: Map<HTMLAudioElement, number> = new Map();
   private muted = false;
   private baseVolume = 0.28; // 効果音(SE)を邪魔しない心地よい音量
   private isDucked = false; // ポーズ時の音量減衰
   private hasUserInteracted = false;
   private pendingTrack: BGMTrack | null = null;
-  private fadeTimer: number | null = null;
 
   constructor() {
     if (typeof window !== "undefined") {
@@ -56,25 +56,33 @@ class BGMManager {
     return this.isDucked ? this.baseVolume * 0.35 : this.baseVolume;
   }
 
-  // フェードアニメーション
-  private fadeTo(
+  // 指定オーディオのフェードアニメーション (オーディオごとに独立タイマーを管理し上書き衝突を防止)
+  private fadeAudio(
     audio: HTMLAudioElement,
     targetVolume: number,
     durationMs: number,
     onComplete?: () => void,
   ) {
-    if (this.fadeTimer !== null) {
-      clearInterval(this.fadeTimer);
-      this.fadeTimer = null;
+    // 既存のこのオーディオのタイマーがあれば破棄
+    const existing = this.fadeIntervals.get(audio);
+    if (existing !== undefined) {
+      clearInterval(existing);
+      this.fadeIntervals.delete(audio);
     }
 
-    const steps = 16;
+    if (durationMs <= 0) {
+      audio.volume = targetVolume;
+      if (onComplete) onComplete();
+      return;
+    }
+
+    const steps = 15;
     const interval = Math.max(10, Math.floor(durationMs / steps));
     const startVolume = audio.volume;
     const diff = targetVolume - startVolume;
     let stepCount = 0;
 
-    this.fadeTimer = window.setInterval(() => {
+    const timer = window.setInterval(() => {
       stepCount++;
       const current = Math.min(
         1,
@@ -83,37 +91,43 @@ class BGMManager {
       audio.volume = current;
 
       if (stepCount >= steps) {
-        if (this.fadeTimer !== null) {
-          clearInterval(this.fadeTimer);
-          this.fadeTimer = null;
-        }
+        clearInterval(timer);
+        this.fadeIntervals.delete(audio);
         audio.volume = targetVolume;
         if (onComplete) onComplete();
       }
     }, interval);
+
+    this.fadeIntervals.set(audio, timer);
   }
 
-  // BGM再生 (画面切り替え時に自動フェード)
+  // BGM再生 (他トラックの完全停止・確実な排他切り替え)
   public play(track: BGMTrack) {
     if (this.currentTrack === track && this.currentAudio && !this.currentAudio.paused) {
       return;
     }
 
     this.currentTrack = track;
+    this.pendingTrack = track;
 
     if (this.muted) {
+      this.stopAll();
       return;
     }
 
     const newAudio = this.getAudioInstance(track);
-    const oldAudio = this.currentAudio;
 
-    // 前のトラックをフェードアウト
-    if (oldAudio && oldAudio !== newAudio) {
-      this.fadeTo(oldAudio, 0, 300, () => {
-        oldAudio.pause();
-        oldAudio.currentTime = 0;
-      });
+    // 【重要】再生対象以外のすべてのBGMを確実にフェードアウト＆停止
+    for (const [t, audio] of this.audioInstances.entries()) {
+      if (t !== track) {
+        const a = audio;
+        if (!a.paused) {
+          this.fadeAudio(a, 0, 250, () => {
+            a.pause();
+            a.currentTime = 0;
+          });
+        }
+      }
     }
 
     this.currentAudio = newAudio;
@@ -125,48 +139,59 @@ class BGMManager {
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          this.fadeTo(newAudio, targetVolume, 400);
+          this.pendingTrack = null;
+          this.fadeAudio(newAudio, targetVolume, 300);
         })
         .catch(() => {
-          // ブラウザのAutoplayブロック時: ユーザーの初回操作まで保留
-          this.pendingTrack = track;
+          // ブラウザのAutoplay制限時: 次のユーザー操作時に安全に再生
         });
     }
   }
 
-  // 一時停止/減衰 (ポーズ画面用)
+  // ポーズ時の音量減衰
   public setDucked(ducked: boolean) {
     this.isDucked = ducked;
-    if (this.currentAudio && !this.muted) {
+    if (this.currentAudio && !this.muted && !this.currentAudio.paused) {
       const targetVolume = this.getEffectiveVolume();
-      this.fadeTo(this.currentAudio, targetVolume, 200);
+      this.fadeAudio(this.currentAudio, targetVolume, 200);
     }
+  }
+
+  // 全トラックの即時完全停止
+  public stopAll() {
+    for (const timer of this.fadeIntervals.values()) {
+      clearInterval(timer);
+    }
+    this.fadeIntervals.clear();
+
+    for (const audio of this.audioInstances.values()) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = 0;
+    }
+    this.currentAudio = null;
+    this.pendingTrack = null;
   }
 
   // ミュート状態の設定
   public setMuted(muted: boolean) {
     this.muted = muted;
     if (muted) {
-      if (this.currentAudio) {
-        this.currentAudio.pause();
-      }
+      this.stopAll();
     } else {
       if (this.currentTrack) {
-        const audio = this.getAudioInstance(this.currentTrack);
-        this.currentAudio = audio;
-        audio.volume = this.getEffectiveVolume();
-        audio.play().catch(() => {
-          this.pendingTrack = this.currentTrack;
-        });
+        const track = this.currentTrack;
+        this.currentTrack = null;
+        this.play(track);
       }
     }
   }
 
   // 停止
-  public stop(fadeDuration = 300) {
+  public stop(fadeDuration = 250) {
     if (this.currentAudio) {
       const audio = this.currentAudio;
-      this.fadeTo(audio, 0, fadeDuration, () => {
+      this.fadeAudio(audio, 0, fadeDuration, () => {
         audio.pause();
         audio.currentTime = 0;
       });

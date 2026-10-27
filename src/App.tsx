@@ -133,6 +133,7 @@ export function App() {
     bgm.setMuted(isMuted);
   }, [isMuted]);
 
+  // 画面遷移に応じたBGM切り替え
   useEffect(() => {
     if (screen === "title") {
       bgm.play("title");
@@ -144,6 +145,12 @@ export function App() {
       bgm.play("story");
     } else if (screen === "game") {
       bgm.play("game");
+    }
+  }, [screen]);
+
+  // ゲーム中の一時停止(ポーズ)時の音量制御
+  useEffect(() => {
+    if (screen === "game") {
       bgm.setDucked(gameStatus === "paused");
     }
   }, [screen, gameStatus]);
