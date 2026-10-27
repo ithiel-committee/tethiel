@@ -2,7 +2,21 @@
 
 class SoundSystem {
   private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
   private muted = false;
+  private volume = 0.8; // 0.0 〜 1.0 (デフォルト 80%)
+
+  constructor() {
+    if (typeof localStorage !== "undefined") {
+      const saved = localStorage.getItem("tethiel_se_volume");
+      if (saved !== null) {
+        const val = Number.parseInt(saved, 10);
+        if (!Number.isNaN(val) && val >= 0 && val <= 100) {
+          this.volume = val / 100;
+        }
+      }
+    }
+  }
 
   private initCtx() {
     if (!this.ctx) {
@@ -15,10 +29,46 @@ class SoundSystem {
     if (this.ctx.state === "suspended") {
       this.ctx.resume();
     }
+    if (!this.masterGain && this.ctx) {
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(
+        this.muted ? 0 : this.volume,
+        this.ctx.currentTime,
+      );
+      this.masterGain.connect(this.ctx.destination);
+    }
+  }
+
+  private getDestination(): AudioNode {
+    this.initCtx();
+    return this.masterGain ?? this.ctx?.destination ?? ({} as AudioNode);
+  }
+
+  public setVolume(val: number) {
+    this.volume = Math.max(0, Math.min(1, val));
+    if (this.ctx && this.masterGain) {
+      this.masterGain.gain.setValueAtTime(
+        this.muted ? 0 : this.volume,
+        this.ctx.currentTime,
+      );
+    }
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("tethiel_se_volume", String(Math.round(this.volume * 100)));
+    }
+  }
+
+  public getVolume(): number {
+    return this.volume;
   }
 
   public toggleMute(): boolean {
     this.muted = !this.muted;
+    if (this.ctx && this.masterGain) {
+      this.masterGain.gain.setValueAtTime(
+        this.muted ? 0 : this.volume,
+        this.ctx.currentTime,
+      );
+    }
     return this.muted;
   }
 
@@ -48,7 +98,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.05);
     } catch {
@@ -78,7 +128,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.07);
     } catch {}
@@ -106,7 +156,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.08);
     } catch {}
@@ -134,7 +184,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.12);
     } catch {}
@@ -162,7 +212,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.06);
     } catch {}
@@ -196,7 +246,7 @@ class SoundSystem {
         );
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.getDestination());
         osc.start(this.ctx.currentTime + index * 0.06);
         osc.stop(this.ctx.currentTime + index * 0.06 + 0.25);
       });
@@ -224,7 +274,7 @@ class SoundSystem {
         );
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.getDestination());
         osc.start(this.ctx.currentTime + i * 0.07);
         osc.stop(this.ctx.currentTime + i * 0.07 + 0.15);
       });
@@ -255,7 +305,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.4);
 
@@ -281,7 +331,7 @@ class SoundSystem {
       );
 
       noise.connect(noiseGain);
-      noiseGain.connect(this.ctx.destination);
+      noiseGain.connect(this.getDestination());
       noise.start();
       noise.stop(this.ctx.currentTime + 0.3);
     } catch {}
@@ -311,7 +361,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.25);
 
@@ -337,7 +387,7 @@ class SoundSystem {
       );
 
       noise.connect(noiseGain);
-      noiseGain.connect(this.ctx.destination);
+      noiseGain.connect(this.getDestination());
       noise.start();
       noise.stop(this.ctx.currentTime + 0.2);
     } catch {}
@@ -362,7 +412,7 @@ class SoundSystem {
       );
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.getDestination());
       osc.start();
       osc.stop(this.ctx.currentTime + 0.16);
     } catch {}
@@ -396,7 +446,7 @@ class SoundSystem {
         );
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.getDestination());
         osc.start(this.ctx.currentTime + idx * 0.12);
         osc.stop(this.ctx.currentTime + idx * 0.12 + 0.4);
       });
@@ -427,7 +477,7 @@ class SoundSystem {
         );
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.getDestination());
         osc.start(this.ctx.currentTime + idx * 0.18);
         osc.stop(this.ctx.currentTime + idx * 0.18 + 0.35);
       });

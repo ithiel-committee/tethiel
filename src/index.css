@@ -3345,3 +3345,96 @@ button:disabled {
   user-select: none;
   white-space: nowrap;
 }
+
+/* サイバーレンジスライダー (BGM / SE 音量調整用) */
+.cyber-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cyber-slider:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.cyber-slider:focus {
+  outline: none;
+}
+
+/* BGMスライダー用 (ローズピンク) */
+.cyber-slider-rose::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff2a6d;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(255, 42, 109, 0.8), 0 0 4px #ff2a6d;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.cyber-slider-rose::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+  box-shadow: 0 0 14px rgba(255, 42, 109, 1), 0 0 6px #ffffff;
+}
+
+.cyber-slider-rose::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff2a6d;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(255, 42, 109, 0.8), 0 0 4px #ff2a6d;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.cyber-slider-rose::-moz-range-thumb:hover {
+  transform: scale(1.18);
+  box-shadow: 0 0 14px rgba(255, 42, 109, 1), 0 0 6px #ffffff;
+}
+
+/* SEスライダー用 (スカイシアン) */
+.cyber-slider-sky::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #38bdf8;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 4px #38bdf8;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.cyber-slider-sky::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 1), 0 0 6px #ffffff;
+}
+
+.cyber-slider-sky::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #38bdf8;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 4px #38bdf8;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.cyber-slider-sky::-moz-range-thumb:hover {
+  transform: scale(1.18);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 1), 0 0 6px #ffffff;
+}
+

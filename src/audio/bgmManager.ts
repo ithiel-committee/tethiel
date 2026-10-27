@@ -8,12 +8,23 @@ class BGMManager {
   private audioInstances: Map<BGMTrack, HTMLAudioElement> = new Map();
   private fadeIntervals: Map<HTMLAudioElement, number> = new Map();
   private muted = false;
-  private baseVolume = 0.28; // 効果音(SE)を邪魔しない心地よい音量
+  private userVolume = 0.7; // ユーザー設定音量 (0.0 〜 1.0, デフォルト 70%)
+  private maxScale = 0.35; // BGMの最大実効音量 (SEとバランスが良く耳に心地よい上限)
   private isDucked = false; // ポーズ時の音量減衰
   private hasUserInteracted = false;
   private pendingTrack: BGMTrack | null = null;
 
   constructor() {
+    if (typeof localStorage !== "undefined") {
+      const saved = localStorage.getItem("tethiel_bgm_volume");
+      if (saved !== null) {
+        const val = Number.parseInt(saved, 10);
+        if (!Number.isNaN(val) && val >= 0 && val <= 100) {
+          this.userVolume = val / 100;
+        }
+      }
+    }
+
     if (typeof window !== "undefined") {
       const unlockAudio = () => {
         if (!this.hasUserInteracted) {
@@ -52,8 +63,23 @@ class BGMManager {
   }
 
   private getEffectiveVolume(): number {
-    if (this.muted) return 0;
-    return this.isDucked ? this.baseVolume * 0.35 : this.baseVolume;
+    if (this.muted || this.userVolume <= 0) return 0;
+    const base = this.userVolume * this.maxScale;
+    return this.isDucked ? base * 0.35 : base;
+  }
+
+  public setVolume(val: number) {
+    this.userVolume = Math.max(0, Math.min(1, val));
+    if (this.currentAudio && !this.muted && !this.currentAudio.paused) {
+      this.currentAudio.volume = this.getEffectiveVolume();
+    }
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("tethiel_bgm_volume", String(Math.round(this.userVolume * 100)));
+    }
+  }
+
+  public getVolume(): number {
+    return this.userVolume;
   }
 
   // 指定オーディオのフェードアニメーション (オーディオごとに独立タイマーを管理し上書き衝突を防止)
