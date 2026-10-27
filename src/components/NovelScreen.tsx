@@ -254,9 +254,26 @@ export const NovelScreen = ({
           src={currentImgSrc}
           alt={currentDialogue.speaker}
           loading="eager"
-          decoding="async"
+          decoding="sync"
           className={`novel-char-img ${isMalware ? "novel-char-virus" : ""} ${isCharacterBumping ? "novel-char-bump" : ""}`}
         />
+        {/* 会話進行時の表情変化でチラつき・白飛びが一切起きないよう全表情をGPUキャッシュ常駐 */}
+        <div
+          style={{
+            position: "absolute",
+            width: 0,
+            height: 0,
+            overflow: "hidden",
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+          aria-hidden="true"
+        >
+          {Object.entries(ITHIEL_EXPRESSION_IMAGES).map(([expr, src]) => (
+            <img key={expr} src={src} alt="" loading="eager" decoding="sync" />
+          ))}
+          <img src={virusImage} alt="" loading="eager" decoding="sync" />
+        </div>
       </div>
 
       {/* 4. ノベルメッセージウィンドウ (画面下部) */}

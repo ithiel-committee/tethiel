@@ -16,8 +16,15 @@ import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import virusImg from "../assets/obstacle/virus.png";
 import { ITHIEL_EXPRESSION_IMAGES } from "../data/storyData";
 
-// ゲームおよびストーリー画面で使用する画像アセットリスト
+// ミニストーリー (プロローグ・エピローグ) で使用する全キャラ画像リスト (最優先)
+export const STORY_ASSET_IMAGES = [
+  ...Object.values(ITHIEL_EXPRESSION_IMAGES),
+  virusImg,
+];
+
+// ゲームおよびストーリー画面で使用する全画像アセットリスト
 export const GAME_ASSET_IMAGES = [
+  ...STORY_ASSET_IMAGES,
   ithielStandingDefault,
   ithielStandingImg,
   ithielStandingSmug,
@@ -33,38 +40,44 @@ export const GAME_ASSET_IMAGES = [
   playerDotImg,
   playerDotRightImg,
   titleKeyVisual,
-  virusImg,
-  ...Object.values(ITHIEL_EXPRESSION_IMAGES),
 ];
 
 // GCによるデコード結果解放を防ぐための参照保持キャッシュ
 const imageCache = new Map<string, HTMLImageElement>();
 
 /**
- * ゲーム画面で使用する画像アセットを事前ロード・デコードする
+ * 指定画像リストを事前ロード・デコードする共通ヘルパー
  */
-export function preloadGameAssets(): Promise<void> {
+function preloadImages(
+  sources: string[],
+  priority: "high" | "auto" = "auto",
+): Promise<void> {
   if (typeof window === "undefined") {
     return Promise.resolve();
   }
 
-  // <link rel="preload" as="image"> の追加 (ブラウザスケジューラへの最優先ヒント)
-  for (const src of GAME_ASSET_IMAGES) {
-    const existing = document.querySelector(
-      `link[rel="preload"][href="${src}"]`,
-    );
-    if (!existing) {
+  // <link rel="preload" as="image"> の追加 (ブラウザスケジューラへの先行フェッチ指示)
+  for (const src of sources) {
+    const selector = `link[rel="preload"][href="${src}"]`;
+    if (!document.querySelector(selector)) {
       const link = document.createElement("link");
       link.rel = "preload";
       link.as = "image";
       link.href = src;
+      if (priority === "high") {
+        link.setAttribute("fetchpriority", "high");
+      }
       document.head.appendChild(link);
     }
   }
 
   // Imageインスタンス生成とデコード
-  const promises = GAME_ASSET_IMAGES.map((src) => {
-    if (imageCache.has(src)) {
+  const promises = sources.map((src) => {
+    const cached = imageCache.get(src);
+    if (cached) {
+      if (typeof cached.decode === "function") {
+        return cached.decode().catch(() => {});
+      }
       return Promise.resolve();
     }
 
@@ -78,11 +91,27 @@ export function preloadGameAssets(): Promise<void> {
       if (typeof img.decode === "function") {
         img.decode().then(done).catch(done);
       } else {
-        (img as HTMLImageElement).onload = done;
-        (img as HTMLImageElement).onerror = done;
+        img.onload = done;
+        img.onerror = done;
       }
     });
   });
 
   return Promise.all(promises).then(() => {});
+}
+
+/**
+ * ミニストーリーのキャラ画像を最優先で余裕をもって事前ロード・デコードする
+ */
+export function preloadStoryAssets(): Promise<void> {
+  return preloadImages(STORY_ASSET_IMAGES, "high");
+}
+
+/**
+ * ゲーム画面で使用する全画像アセットを事前ロード・デコードする
+ */
+export function preloadGameAssets(): Promise<void> {
+  // まずストーリー画像を最優先、続けて全アセットを読み込み
+  preloadStoryAssets();
+  return preloadImages(GAME_ASSET_IMAGES);
 }

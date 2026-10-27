@@ -16,7 +16,7 @@ import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import { useUIText } from "../context/UIModeContext";
 import { STAGE_TEXTS } from "../data/uiTexts";
 import type { StageData } from "../types/game";
-import { preloadGameAssets } from "../utils/preloadAssets";
+import { preloadGameAssets, preloadStoryAssets } from "../utils/preloadAssets";
 import {
   getScoreLogs,
   getStageBestRecords,
@@ -204,8 +204,16 @@ export const TitleScreen = ({
   };
 
   useEffect(() => {
+    preloadStoryAssets();
     preloadGameAssets();
   }, []);
+
+  // ステージ選択画面を開いた時にも余裕をもってストーリー画像を先行ウォームアップ
+  useEffect(() => {
+    if (menuView === "select_level") {
+      preloadStoryAssets();
+    }
+  }, [menuView]);
 
   return (
     <div className="title-screen-container">

@@ -20,6 +20,11 @@ import type {
 import { getStageBestRecords, saveGameResult } from "./utils/scoreStorage";
 import { cleanStageUrl, parseStageFromUrl } from "./utils/url";
 import { getGameFlags } from "./config/gameFlags.ts";
+import {
+  preloadStoryAssets,
+  preloadGameAssets,
+  STORY_ASSET_IMAGES,
+} from "./utils/preloadAssets";
 
 type Screen = "title" | "prologue" | "game" | "epilogue" | "result";
 
@@ -35,6 +40,12 @@ export function App() {
     directStage ?? STAGES[0],
   );
   const [isMuted, setIsMuted] = useState<boolean>(sounds.isMuted());
+
+  // アプリ起動時に最優先でミニストーリーの全キャラ画像を事前ロード・デコード (余裕をもった先読み)
+  useEffect(() => {
+    preloadStoryAssets();
+    preloadGameAssets();
+  }, []);
 
   // ゲームステート
   const [gameStatus, setGameStatus] = useState<GameStatus>("ready");
@@ -394,6 +405,26 @@ export function App() {
           />
         </div>
       )}
+
+      {/* ミニストーリー画像・主要アセットの事前テクスチャ常駐用隠しコンテナ (GPU先読み) */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          right: 0,
+          width: 0,
+          height: 0,
+          overflow: "hidden",
+          opacity: 0,
+          pointerEvents: "none",
+          zIndex: -1,
+        }}
+        aria-hidden="true"
+      >
+        {STORY_ASSET_IMAGES.map((src) => (
+          <img key={src} src={src} alt="" loading="eager" decoding="async" />
+        ))}
+      </div>
       </div>
     </UIModeProvider>
   );
