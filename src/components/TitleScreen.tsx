@@ -284,6 +284,23 @@ export const TitleScreen = ({
                   </div>
                 </button>
               </div>
+
+              {/* ホーム画面 操作ヒント (キートップ風バッジ) */}
+              <div className="title-control-hint">
+                <span className="inline-flex items-center gap-1.5">
+                  <span role="img" aria-label="cursor">
+                    🖱️
+                  </span>
+                  <span>カーソル</span>
+                </span>
+                <span className="text-slate-500">または</span>
+                <span className="inline-flex items-center gap-1">
+                  <kbd className="title-control-hint-kbd">Tab</kbd>
+                  <span className="text-slate-500">/</span>
+                  <kbd className="title-control-hint-kbd">Space</kbd>
+                </span>
+                <span>キーで操作</span>
+              </div>
             </div>
           </div>
 
