@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Music, Settings, Volume2, VolumeX } from "lucide-react";
+import { Music, Settings, Volume2 } from "lucide-react";
 import { bgm } from "../../audio/bgmManager.ts";
 import { sounds } from "../../audio/soundSystem.ts";
 import {
@@ -141,55 +141,16 @@ export const OptionModal: React.FC<OptionModalProps> = ({
         </div>
 
         {/* サウンド設定 (BGM / SE 独立スライダー) */}
-        <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-bold text-slate-200 flex items-center gap-2">
-                <Volume2 size={15} className="text-rose-400" />
-                <span>{isKids ? "おとの せってい" : "音量設定"}</span>
-              </div>
-              <div className="text-[11px] text-slate-400">
-                {isKids
-                  ? "スライダーでおとのおおきさを かえられるよ"
-                  : "BGMと効果音(SE)の音量を個別に調整"}
-              </div>
+        <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-2.5">
+          {/* BGM 音量 */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Music size={15} className="text-rose-400 shrink-0" />
+              <span className="font-bold text-slate-200">
+                {isKids ? "BGM (おんがく)" : "BGM 音量"}
+              </span>
             </div>
-            <button
-              type="button"
-              onClick={onToggleMute}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded font-pixel-en text-[11px] transition-all ${
-                isMuted
-                  ? "bg-rose-950/90 text-rose-300 border border-rose-500/80 shadow-[0_0_8px_rgba(255,26,75,0.4)]"
-                  : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
-              }`}
-              title={isMuted ? "ミュート解除" : "全音量をミュート"}
-            >
-              {isMuted ? (
-                <>
-                  <VolumeX size={13} className="text-rose-400" />
-                  <span>{isKids ? "消音ちゅう" : "MUTE (消音)"}</span>
-                </>
-              ) : (
-                <>
-                  <Volume2 size={13} className="text-slate-400" />
-                  <span>{isKids ? "おと ON" : "ALL ON"}</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="space-y-3 pt-1">
-            {/* BGM音量スライダー */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1.5 font-bold text-rose-300">
-                  <Music size={13} className="text-rose-400" />
-                  <span>{isKids ? "BGM (おんがく)" : "BGM 音量"}</span>
-                </span>
-                <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider">
-                  {bgmVol}%
-                </span>
-              </div>
+            <div className="flex items-center gap-3">
               <input
                 type="range"
                 min="0"
@@ -199,22 +160,24 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 onChange={(e) =>
                   handleBgmVolumeChange(Number.parseInt(e.target.value, 10))
                 }
-                className="cyber-slider cyber-slider-rose"
+                className="cyber-slider cyber-slider-rose w-32 sm:w-44"
                 aria-label="BGM Volume"
               />
+              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-8 text-right shrink-0">
+                {bgmVol}%
+              </span>
             </div>
+          </div>
 
-            {/* SE音量スライダー */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1.5 font-bold text-sky-300">
-                  <Volume2 size={13} className="text-sky-400" />
-                  <span>{isKids ? "SE (こうかおん)" : "SE 音量 (効果音)"}</span>
-                </span>
-                <span className="font-pixel-en text-[11px] text-sky-300 font-bold tracking-wider">
-                  {seVol}%
-                </span>
-              </div>
+          {/* SE 音量 */}
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-rose-500/15">
+            <div className="flex items-center gap-2">
+              <Volume2 size={15} className="text-rose-400 shrink-0" />
+              <span className="font-bold text-slate-200">
+                {isKids ? "SE (こうかおん)" : "SE 音量"}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
               <input
                 type="range"
                 min="0"
@@ -224,9 +187,12 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 onChange={(e) =>
                   handleSeVolumeChange(Number.parseInt(e.target.value, 10))
                 }
-                className="cyber-slider cyber-slider-sky"
+                className="cyber-slider cyber-slider-rose w-32 sm:w-44"
                 aria-label="SE Volume"
               />
+              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-8 text-right shrink-0">
+                {seVol}%
+              </span>
             </div>
           </div>
         </div>
