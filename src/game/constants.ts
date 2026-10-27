@@ -138,8 +138,7 @@ export const STAGES: StageData[] = [
     name: "STAGE 1",
     codeName: "STAGE 1",
     subtitle: "入門・回路接続",
-    description:
-      "回路を繋いでイティエルをGOALへ導こう！小さなお子様やご家族連れでも楽しめるやさしい難易度。",
+    description: "回路を繋いでイティエルをGOALへ導こう！",
     isUnlocked: true,
     infectionIntervalMs: 4500, // 4.5秒ごと（2ミノ配置後から開始。落ち着いてプレイできるゆったり速度）
     goalRow: GOAL_ROW,
@@ -165,8 +164,7 @@ export const STAGES: StageData[] = [
     name: "STAGE 2",
     codeName: "STAGE 2",
     subtitle: "サイバー迂回ルート",
-    description:
-      "トゲ障害物を巧みに回避しながら回路を繋ぎ、迫り来るウイルスからイティエルを守り抜け！",
+    description: "トゲを巧みに回避し、迫り来るウイルスから守り抜け！",
     isUnlocked: true,
     infectionIntervalMs: 1400,
     goalRow: GOAL_ROW,
@@ -214,8 +212,7 @@ export const STAGES: StageData[] = [
     name: "STAGE 3",
     codeName: "STAGE 3",
     subtitle: "最終防衛戦",
-    description:
-      "サーバーコア中枢での最終防衛戦！複雑に入り組むトゲを回避し、迫る高速マルウェアからサーバーを守り抜け！",
+    description: "サーバー中枢の最終防衛戦！迫る高速ウイルスを突破せよ！",
     isUnlocked: true,
     infectionIntervalMs: 1600, // 1.6秒ごと (手応えと操作余裕を両立した適正スピード)
     goalRow: GOAL_ROW,
@@ -269,8 +266,7 @@ export const ENDLESS_STAGE: StageData = {
   name: "ENDLESS",
   codeName: "ENDLESS",
   subtitle: "無限クライミング",
-  description:
-    "天井のないサイバー空間をどこまでも登り続けろ！登った総高度とスコアの極限を目指すサバイバルモード。",
+  description: "天井のないサイバー空間をどこまでも登り続けろ！",
   isUnlocked: true,
   infectionIntervalMs: 3800, // 初期3.8秒。高度に応じて加速
   goalRow: -999, // ゴールなし (無限進行)
