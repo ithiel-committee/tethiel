@@ -47,13 +47,40 @@ export const CreditModal: React.FC<CreditModalProps> = ({
         <div className="p-2.5 bg-slate-900/80 rounded border border-rose-500/30 space-y-1 text-[11px]">
           <div className="text-rose-400 font-bold mb-1">BGM / 音楽</div>
           <div>
-            タイトル: <span className="text-white font-mono">J'azz Blue</span> by RoccoW (CC BY-SA)
+            タイトル:{" "}
+            <a
+              href="https://www.youtube.com/watch?v=xW1cyHu-Bog"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 hover:underline font-mono"
+            >
+              J'azz Blue
+            </a>{" "}
+            by RoccoW (CC BY-SA)
           </div>
           <div>
-            ゲーム: <span className="text-white font-mono">Hellish Revenge</span> by Weeppiko (CC BY-NC-SA 3.0)
+            ゲーム:{" "}
+            <a
+              href="https://www.youtube.com/watch?v=mit5CYgctLQ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 hover:underline font-mono"
+            >
+              Hellish Revenge
+            </a>{" "}
+            by Weeppiko (CC BY-NC-SA 3.0)
           </div>
           <div>
-            ストーリー・リザルト: <span className="text-white font-mono">Messeah</span> by RoccoW (CC BY 3.0)
+            ストーリー・リザルト:{" "}
+            <a
+              href="https://youtu.be/Y2qWBZQT3go"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 hover:underline font-mono"
+            >
+              Messeah
+            </a>{" "}
+            by RoccoW (CC BY 3.0)
           </div>
         </div>
       </div>
