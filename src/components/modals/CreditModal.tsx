@@ -52,7 +52,7 @@ export const CreditModal: React.FC<CreditModalProps> = ({
               href="https://www.youtube.com/watch?v=xW1cyHu-Bog"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-400 hover:underline font-mono"
+              style={{ color: "skyblue" }}
             >
               J'azz Blue
             </a>{" "}
@@ -64,7 +64,7 @@ export const CreditModal: React.FC<CreditModalProps> = ({
               href="https://www.youtube.com/watch?v=mit5CYgctLQ"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-400 hover:underline font-mono"
+              style={{ color: "skyblue" }}
             >
               Hellish Revenge
             </a>{" "}
@@ -76,7 +76,7 @@ export const CreditModal: React.FC<CreditModalProps> = ({
               href="https://youtu.be/Y2qWBZQT3go"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-400 hover:underline font-mono"
+              style={{ color: "skyblue" }}
             >
               Messeah
             </a>{" "}
