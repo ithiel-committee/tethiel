@@ -1,16 +1,26 @@
-// BGM管理システム (超軽量オンデマンド読み込み・独立クロスフェード・完全排他制御・ミュート連動)
+// BGM管理システム (Web Audio APIによる完全シームレスループ・超軽量オンデマンド読み込み・ハードウェアクロスフェード)
 
 export type BGMTrack = "title" | "game" | "story";
 
+interface ActiveTrack {
+  source: AudioBufferSourceNode;
+  gainNode: GainNode;
+  track: BGMTrack;
+}
+
 class BGMManager {
+  private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
+  private audioBuffers: Map<BGMTrack, AudioBuffer> = new Map();
+  private loadingPromises: Map<BGMTrack, Promise<AudioBuffer>> = new Map();
+  private activeTrack: ActiveTrack | null = null;
+  private fadingTracks: Set<ActiveTrack> = new Set();
+
   private currentTrack: BGMTrack | null = null;
-  private currentAudio: HTMLAudioElement | null = null;
-  private audioInstances: Map<BGMTrack, HTMLAudioElement> = new Map();
-  private fadeIntervals: Map<HTMLAudioElement, number> = new Map();
   private muted = false;
-  private userVolume = 0.7; // ユーザー設定音量 (0.0 〜 1.0, デフォルト 70%)
-  private maxScale = 0.35; // BGMの最大実効音量 (SEとバランスが良く耳に心地よい上限)
-  private isDucked = false; // ポーズ時の音量減衰
+  private userVolume = 0.7; // 0.0 〜 1.0 (デフォルト 70%)
+  private maxScale = 0.35; // BGMの実効音量上限 (SEと調和する心地よい上限)
+  private isDucked = false;
   private hasUserInteracted = false;
   private pendingTrack: BGMTrack | null = null;
 
@@ -29,6 +39,10 @@ class BGMManager {
       const unlockAudio = () => {
         if (!this.hasUserInteracted) {
           this.hasUserInteracted = true;
+          this.initCtx();
+          if (this.ctx && this.ctx.state === "suspended") {
+            this.ctx.resume();
+          }
           if (this.pendingTrack && !this.muted) {
             const track = this.pendingTrack;
             this.pendingTrack = null;
@@ -46,20 +60,20 @@ class BGMManager {
     }
   }
 
-  // オンデマンド取得 (必要な時までインスタンス化・HTTP通信しない)
-  private getAudioInstance(track: BGMTrack): HTMLAudioElement {
-    let audio = this.audioInstances.get(track);
-    if (!audio) {
-      const basePath = import.meta.env.BASE_URL || "./";
-      const cleanBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
-      const url = `${cleanBase}audio/bgm/bgm_${track}.mp3`;
-
-      audio = new Audio(url);
-      audio.loop = true;
-      audio.preload = "auto";
-      this.audioInstances.set(track, audio);
+  private initCtx() {
+    if (!this.ctx && typeof window !== "undefined") {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
+      this.ctx = new AudioContextClass();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(
+        this.getEffectiveVolume(),
+        this.ctx.currentTime,
+      );
+      this.masterGain.connect(this.ctx.destination);
     }
-    return audio;
   }
 
   private getEffectiveVolume(): number {
@@ -70,11 +84,17 @@ class BGMManager {
 
   public setVolume(val: number) {
     this.userVolume = Math.max(0, Math.min(1, val));
-    if (this.currentAudio && !this.muted && !this.currentAudio.paused) {
-      this.currentAudio.volume = this.getEffectiveVolume();
+    if (this.ctx && this.masterGain) {
+      this.masterGain.gain.setValueAtTime(
+        this.getEffectiveVolume(),
+        this.ctx.currentTime,
+      );
     }
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem("tethiel_bgm_volume", String(Math.round(this.userVolume * 100)));
+      localStorage.setItem(
+        "tethiel_bgm_volume",
+        String(Math.round(this.userVolume * 100)),
+      );
     }
   }
 
@@ -82,54 +102,38 @@ class BGMManager {
     return this.userVolume;
   }
 
-  // 指定オーディオのフェードアニメーション (オーディオごとに独立タイマーを管理し上書き衝突を防止)
-  private fadeAudio(
-    audio: HTMLAudioElement,
-    targetVolume: number,
-    durationMs: number,
-    onComplete?: () => void,
-  ) {
-    // 既存のこのオーディオのタイマーがあれば破棄
-    const existing = this.fadeIntervals.get(audio);
-    if (existing !== undefined) {
-      clearInterval(existing);
-      this.fadeIntervals.delete(audio);
-    }
+  // オンデマンド読み込み＆デコード (AudioBufferキャッシュ)
+  private async loadBuffer(track: BGMTrack): Promise<AudioBuffer> {
+    const cached = this.audioBuffers.get(track);
+    if (cached) return cached;
 
-    if (durationMs <= 0) {
-      audio.volume = targetVolume;
-      if (onComplete) onComplete();
-      return;
-    }
+    const existingPromise = this.loadingPromises.get(track);
+    if (existingPromise) return existingPromise;
 
-    const steps = 15;
-    const interval = Math.max(10, Math.floor(durationMs / steps));
-    const startVolume = audio.volume;
-    const diff = targetVolume - startVolume;
-    let stepCount = 0;
+    this.initCtx();
+    const ctx = this.ctx;
+    if (!ctx) throw new Error("AudioContext not initialized");
 
-    const timer = window.setInterval(() => {
-      stepCount++;
-      const current = Math.min(
-        1,
-        Math.max(0, startVolume + diff * (stepCount / steps)),
-      );
-      audio.volume = current;
+    const loadPromise = (async () => {
+      const basePath = import.meta.env.BASE_URL || "./";
+      const cleanBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+      const url = `${cleanBase}audio/bgm/bgm_${track}.mp3`;
 
-      if (stepCount >= steps) {
-        clearInterval(timer);
-        this.fadeIntervals.delete(audio);
-        audio.volume = targetVolume;
-        if (onComplete) onComplete();
-      }
-    }, interval);
+      const res = await fetch(url);
+      const arrayBuffer = await res.arrayBuffer();
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+      this.audioBuffers.set(track, audioBuffer);
+      this.loadingPromises.delete(track);
+      return audioBuffer;
+    })();
 
-    this.fadeIntervals.set(audio, timer);
+    this.loadingPromises.set(track, loadPromise);
+    return loadPromise;
   }
 
-  // BGM再生 (他トラックの完全停止・確実な排他切り替え)
-  public play(track: BGMTrack) {
-    if (this.currentTrack === track && this.currentAudio && !this.currentAudio.paused) {
+  // BGM再生 (AudioBufferSourceNodeによる完全ギャップレス・ゼロレイテンシループ)
+  public async play(track: BGMTrack) {
+    if (this.currentTrack === track && this.activeTrack) {
       return;
     }
 
@@ -141,67 +145,120 @@ class BGMManager {
       return;
     }
 
-    const newAudio = this.getAudioInstance(track);
-
-    // 【重要】再生対象以外のすべてのBGMを確実にフェードアウト＆停止
-    for (const [t, audio] of this.audioInstances.entries()) {
-      if (t !== track) {
-        const a = audio;
-        if (!a.paused) {
-          this.fadeAudio(a, 0, 250, () => {
-            a.pause();
-            a.currentTime = 0;
-          });
-        }
-      }
+    this.initCtx();
+    if (!this.ctx) return;
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume();
     }
 
-    this.currentAudio = newAudio;
-    newAudio.volume = 0;
-
-    const targetVolume = this.getEffectiveVolume();
-    const playPromise = newAudio.play();
-
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          this.pendingTrack = null;
-          this.fadeAudio(newAudio, targetVolume, 300);
-        })
-        .catch(() => {
-          // ブラウザのAutoplay制限時: 次のユーザー操作時に安全に再生
-        });
+    let buffer: AudioBuffer;
+    try {
+      buffer = await this.loadBuffer(track);
+    } catch {
+      return;
     }
-  }
 
-  // ポーズ時の音量減衰
-  public setDucked(ducked: boolean) {
-    this.isDucked = ducked;
-    if (this.currentAudio && !this.muted && !this.currentAudio.paused) {
-      const targetVolume = this.getEffectiveVolume();
-      this.fadeAudio(this.currentAudio, targetVolume, 200);
+    // 読み込み中に曲変更やミュート等があった場合は再生中止
+    if (this.currentTrack !== track || this.muted) {
+      return;
     }
-  }
 
-  // 全トラックの即時完全停止
-  public stopAll() {
-    for (const timer of this.fadeIntervals.values()) {
-      clearInterval(timer);
-    }
-    this.fadeIntervals.clear();
+    const ctx = this.ctx;
+    if (!ctx || !this.masterGain) return;
 
-    for (const audio of this.audioInstances.values()) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.volume = 0;
+    // 既存のアクティブトラックをスムーズにフェードアウト停止
+    if (this.activeTrack) {
+      const old = this.activeTrack;
+      this.activeTrack = null;
+      this.fadeOutAndStop(old, 0.25);
     }
-    this.currentAudio = null;
+
+    // 新しいトラックの生成 (Web Audio APIの完全シームレスループ)
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true; // ★ブラウザのデコーダーシークを経由しないため、末尾での乱れ・ブツブツが一切発生しない！
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.3); // スムーズフェードイン
+
+    source.connect(gainNode);
+    gainNode.connect(this.masterGain);
+
+    source.start(0);
+
+    this.activeTrack = {
+      source,
+      gainNode,
+      track,
+    };
     this.pendingTrack = null;
   }
 
-  // ミュート状態の設定
+  private fadeOutAndStop(item: ActiveTrack, durationSec: number) {
+    if (!this.ctx) return;
+    this.fadingTracks.add(item);
+    const now = this.ctx.currentTime;
+    try {
+      item.gainNode.gain.setValueAtTime(item.gainNode.gain.value, now);
+      item.gainNode.gain.linearRampToValueAtTime(0, now + durationSec);
+    } catch {}
+
+    setTimeout(() => {
+      try {
+        item.source.stop();
+        item.source.disconnect();
+        item.gainNode.disconnect();
+      } catch {}
+      this.fadingTracks.delete(item);
+    }, durationSec * 1000 + 50);
+  }
+
+  // ポーズ時の音量制御
+  public setDucked(ducked: boolean) {
+    this.isDucked = ducked;
+    if (this.ctx && this.masterGain) {
+      const target = this.getEffectiveVolume();
+      const now = this.ctx.currentTime;
+      try {
+        this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+        this.masterGain.gain.linearRampToValueAtTime(target, now + 0.15);
+      } catch {
+        this.masterGain.gain.value = target;
+      }
+    }
+  }
+
+  // 全トラックの即時停止
+  public stopAll() {
+    if (this.activeTrack) {
+      try {
+        this.activeTrack.source.stop();
+        this.activeTrack.source.disconnect();
+        this.activeTrack.gainNode.disconnect();
+      } catch {}
+      this.activeTrack = null;
+    }
+    for (const item of this.fadingTracks) {
+      try {
+        item.source.stop();
+        item.source.disconnect();
+        item.gainNode.disconnect();
+      } catch {}
+    }
+    this.fadingTracks.clear();
+    this.pendingTrack = null;
+    this.currentTrack = null;
+  }
+
   public setMuted(muted: boolean) {
     this.muted = muted;
+    if (this.ctx && this.masterGain) {
+      this.masterGain.gain.setValueAtTime(
+        this.getEffectiveVolume(),
+        this.ctx.currentTime,
+      );
+    }
     if (muted) {
       this.stopAll();
     } else {
@@ -213,17 +270,12 @@ class BGMManager {
     }
   }
 
-  // 停止
-  public stop(fadeDuration = 250) {
-    if (this.currentAudio) {
-      const audio = this.currentAudio;
-      this.fadeAudio(audio, 0, fadeDuration, () => {
-        audio.pause();
-        audio.currentTime = 0;
-      });
+  public stop(fadeDurationSec = 0.25) {
+    if (this.activeTrack) {
+      this.fadeOutAndStop(this.activeTrack, fadeDurationSec);
+      this.activeTrack = null;
     }
     this.currentTrack = null;
-    this.currentAudio = null;
     this.pendingTrack = null;
   }
 }
