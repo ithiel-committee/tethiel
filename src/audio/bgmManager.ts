@@ -43,7 +43,7 @@ class BGMManager {
           if (this.ctx && this.ctx.state === "suspended") {
             this.ctx.resume();
           }
-          if (this.pendingTrack && !this.muted) {
+          if (this.pendingTrack) {
             const track = this.pendingTrack;
             this.pendingTrack = null;
             this.play(track);
@@ -85,10 +85,15 @@ class BGMManager {
   public setVolume(val: number) {
     this.userVolume = Math.max(0, Math.min(1, val));
     if (this.ctx && this.masterGain) {
-      this.masterGain.gain.setValueAtTime(
-        this.getEffectiveVolume(),
-        this.ctx.currentTime,
-      );
+      const now = this.ctx.currentTime;
+      const target = this.getEffectiveVolume();
+      try {
+        this.masterGain.gain.cancelScheduledValues(now);
+        this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+        this.masterGain.gain.linearRampToValueAtTime(target, now + 0.05);
+      } catch {
+        this.masterGain.gain.setValueAtTime(target, now);
+      }
     }
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(
@@ -140,11 +145,6 @@ class BGMManager {
     this.currentTrack = track;
     this.pendingTrack = track;
 
-    if (this.muted) {
-      this.stopAll();
-      return;
-    }
-
     this.initCtx();
     if (!this.ctx) return;
     if (this.ctx.state === "suspended") {
@@ -158,8 +158,8 @@ class BGMManager {
       return;
     }
 
-    // 読み込み中に曲変更やミュート等があった場合は再生中止
-    if (this.currentTrack !== track || this.muted) {
+    // 読み込み中に曲変更があった場合は再生中止
+    if (this.currentTrack !== track) {
       return;
     }
 
@@ -253,21 +253,34 @@ class BGMManager {
 
   public setMuted(muted: boolean) {
     this.muted = muted;
+    this.initCtx();
+
     if (this.ctx && this.masterGain) {
-      this.masterGain.gain.setValueAtTime(
-        this.getEffectiveVolume(),
-        this.ctx.currentTime,
-      );
-    }
-    if (muted) {
-      this.stopAll();
-    } else {
-      if (this.currentTrack) {
-        const track = this.currentTrack;
-        this.currentTrack = null;
-        this.play(track);
+      if (this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
+      const target = this.getEffectiveVolume();
+      const now = this.ctx.currentTime;
+      try {
+        this.masterGain.gain.cancelScheduledValues(now);
+        this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+        this.masterGain.gain.linearRampToValueAtTime(target, now + 0.15);
+      } catch {
+        this.masterGain.gain.setValueAtTime(target, now);
       }
     }
+
+    if (!muted) {
+      // ミュート解除時、もしアクティブな曲がないのに currentTrack または pendingTrack があれば再生
+      const trackToPlay = this.currentTrack || this.pendingTrack;
+      if (!this.activeTrack && trackToPlay) {
+        this.play(trackToPlay);
+      }
+    }
+  }
+
+  public isMuted(): boolean {
+    return this.muted;
   }
 
   public stop(fadeDurationSec = 0.25) {
