@@ -1,4 +1,4 @@
-import { sounds } from "../audio/soundSystem";
+import { sounds } from "../audio/soundSystem.ts";
 import type {
   Cell,
   CharacterPosition,
@@ -9,7 +9,7 @@ import type {
   StageData,
   Tetromino,
   TetrominoType,
-} from "../types/game";
+} from "../types/game.ts";
 import { recalculateCircuit } from "./circuitPathfinder.ts";
 import {
   GAME_RULES,

@@ -1,4 +1,4 @@
-import type { GameEngine } from "./engine";
+import type { GameEngine } from "./engine.ts";
 
 export type GameAction =
   | "moveLeft"
