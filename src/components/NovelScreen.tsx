@@ -169,10 +169,6 @@ export const NovelScreen = ({
   if (!currentDialogue) return null;
 
   const isMalware = currentDialogue.speaker === "マルウェア";
-  const currentImgSrc = isMalware
-    ? virusImage
-    : (ITHIEL_EXPRESSION_IMAGES[currentDialogue.expression] ??
-      ITHIEL_EXPRESSION_IMAGES.default);
 
   return (
     <div className="novel-wrapper">
@@ -248,31 +244,41 @@ export const NovelScreen = ({
         </div>
       </div>
 
-      {/* 3. キャラクター立ち絵表示エリア (ノベル・ギャルゲー風大迫力表示) */}
+      {/* 3. キャラクター立ち絵表示エリア (全表情重ね合わせ＋自然な0.2sクロスフェード) */}
       <div className="novel-char-stage">
-        <img
-          src={currentImgSrc}
-          alt={currentDialogue.speaker}
-          loading="eager"
-          decoding="sync"
-          className={`novel-char-img ${isMalware ? "novel-char-virus" : ""} ${isCharacterBumping ? "novel-char-bump" : ""}`}
-        />
-        {/* 会話進行時の表情変化でチラつき・白飛びが一切起きないよう全表情をGPUキャッシュ常駐 */}
         <div
-          style={{
-            position: "absolute",
-            width: 0,
-            height: 0,
-            overflow: "hidden",
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-          aria-hidden="true"
+          className={`novel-char-stage-inner ${
+            isCharacterBumping ? "novel-char-bump" : ""
+          }`}
         >
-          {Object.entries(ITHIEL_EXPRESSION_IMAGES).map(([expr, src]) => (
-            <img key={expr} src={src} alt="" loading="eager" decoding="sync" />
-          ))}
-          <img src={virusImage} alt="" loading="eager" decoding="sync" />
+          {/* イティエル各表情レイヤー (表情変化時に自然にディゾルブ/クロスフェード) */}
+          {Object.entries(ITHIEL_EXPRESSION_IMAGES).map(([expr, src]) => {
+            const isActive =
+              !isMalware &&
+              (currentDialogue.expression === expr ||
+                (!currentDialogue.expression && expr === "default"));
+            return (
+              <img
+                key={expr}
+                src={src}
+                alt={currentDialogue.speaker}
+                loading="eager"
+                decoding="sync"
+                className={`novel-char-layer ${isActive ? "active" : ""}`}
+              />
+            );
+          })}
+
+          {/* マルウェア (ウイルス敵キャラ) レイヤー */}
+          <img
+            src={virusImage}
+            alt="マルウェア"
+            loading="eager"
+            decoding="sync"
+            className={`novel-char-layer novel-char-virus ${
+              isMalware ? "active" : ""
+            }`}
+          />
         </div>
       </div>
 
