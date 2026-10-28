@@ -3356,26 +3356,22 @@ button:disabled {
   box-shadow: 0 0 4px rgba(255, 26, 75, 0.3);
 }
 
-/* システムバーの EXIT ボタン */
+/* システムバーの TiTLE ボタン */
 .game-hud-btn-danger {
   height: 28px;
   padding: 0 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
-    rgba(160, 15, 45, 0.9) 0%,
-    rgba(120, 10, 30, 0.95) 100%
-  );
-  border: 1px solid rgba(255, 70, 110, 0.65);
+  background: rgba(24, 6, 15, 0.9);
+  border: 1px solid rgba(255, 26, 75, 0.45);
   border-radius: 5px;
   color: #ffffff;
   font-family: var(--font-pixel, monospace);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  box-shadow: 0 0 8px rgba(255, 26, 75, 0.3);
+  box-shadow: 0 0 8px rgba(255, 26, 75, 0.25);
   cursor: var(--cursor-pointer);
   transition: all 0.15s ease;
   user-select: none;
@@ -3383,9 +3379,9 @@ button:disabled {
 }
 
 .game-hud-btn-danger:hover {
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
-  border-color: #ff2a55;
-  box-shadow: 0 0 14px rgba(255, 26, 75, 0.65);
+  background: rgba(52, 12, 32, 0.95);
+  border-color: #ff1a4b;
+  box-shadow: 0 0 12px rgba(255, 26, 75, 0.5);
   transform: translateY(-1px);
 }
 

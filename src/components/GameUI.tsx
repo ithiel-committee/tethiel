@@ -189,10 +189,12 @@ export const GameUI = ({
               <button
                 type="button"
                 onClick={onExitGame}
-                title={isKids ? "おわる" : "タイトルへ戻る"}
+                title={isKids ? "タイトルへもどる" : "タイトル画面へ戻る"}
                 className="game-hud-btn-danger"
               >
-                {t("exit")}
+                <span className="font-bold tracking-wider text-white">
+                  T<span style={{ color: "#ff1a4b" }}>i</span>TLE
+                </span>
               </button>
             </div>
           </div>

@@ -2,7 +2,6 @@ import {
   FastForward,
   History,
   Play,
-  RotateCcw,
   Sparkles,
   Terminal,
   Volume2,
@@ -236,9 +235,11 @@ export const NovelScreen = ({
               type="button"
               onClick={onBackToTitle}
               className="novel-ctrl-btn novel-ctrl-btn-title"
+              title={isKids ? "タイトルへもどる" : "タイトル画面へ戻る"}
             >
-              <RotateCcw size={12} />
-              <span className="hidden sm:inline">{t("title")}</span>
+              <span className="font-bold tracking-wider text-white">
+                T<span style={{ color: "#ff1a4b" }}>i</span>TLE
+              </span>
             </button>
           )}
         </div>
