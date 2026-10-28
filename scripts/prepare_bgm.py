@@ -41,6 +41,19 @@ for t in tracks:
     ]
     res = subprocess.run(cmd_dl)
     if res.returncode == 0:
+        # titleトラックの末尾ジングル・無音の除去 (84.0秒でカット＆スムーズフェードアウト)
+        if t["id"] == "title":
+            temp_clean = "public/audio/bgm/temp_clean_title.mp3"
+            cmd_trim = [
+                ffmpeg_exe, "-y",
+                "-i", out_file,
+                "-t", "84.0",
+                "-af", "afade=t=out:st=83.3:d=0.7",
+                "-b:a", "96k",
+                temp_clean
+            ]
+            if subprocess.run(cmd_trim).returncode == 0:
+                os.replace(temp_clean, out_file)
         sz = os.path.getsize(out_file)
         print(f"Successfully generated {out_file}: {sz / 1024:.1f} KB")
     else:
