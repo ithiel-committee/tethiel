@@ -405,6 +405,155 @@ export const GameCanvas = ({ engine }: GameCanvasProps) => {
         });
       }
 
+      // 10.6. ボム爆発エフェクト（トゲ接触時を遥かに凌駕する鮮烈なサイバー大爆発）
+      if (engine.bombExplosionEffects.length > 0) {
+        const now = performance.now();
+        engine.bombExplosionEffects = engine.bombExplosionEffects.filter((fx) => {
+          const age = now - fx.createdAt;
+          const duration = 750; // 0.75秒の鮮烈な大爆発
+          if (age > duration) return false;
+
+          const progress = age / duration; // 0 -> 1
+          const alpha = 1 - progress;
+          const easeProgress = 1 - (1 - progress) ** 3;
+          const px = fx.x * BLOCK_SIZE + BLOCK_SIZE / 2;
+          const py = fx.y * BLOCK_SIZE + BLOCK_SIZE / 2;
+
+          ctx.save();
+
+          // 1. 爆発中心のコアフラッシュ（初期0.25秒間の眩い光）
+          if (progress < 0.35) {
+            const flashAlpha = (1 - progress / 0.35) * 0.75;
+            const grad = ctx.createRadialGradient(
+              px,
+              py,
+              2,
+              px,
+              py,
+              BLOCK_SIZE * 3.8,
+            );
+            grad.addColorStop(0, `rgba(255, 255, 255, ${flashAlpha})`);
+            grad.addColorStop(0.3, `rgba(255, 26, 75, ${flashAlpha * 0.85})`);
+            grad.addColorStop(0.65, `rgba(0, 240, 255, ${flashAlpha * 0.4})`);
+            grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(px, py, BLOCK_SIZE * 3.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // 2. 二重サイバー衝撃波リング（急拡大する高輝度ネオン波面）
+          // 外側メインリング (マゼンタ/クリムゾン)
+          const outerRadius = easeProgress * BLOCK_SIZE * 3.8;
+          ctx.strokeStyle = `rgba(255, 26, 75, ${alpha * 0.95})`;
+          ctx.lineWidth = Math.max(1, 4.5 * (1 - progress));
+          ctx.shadowColor = "#ff1a4b";
+          ctx.shadowBlur = 16;
+          ctx.beginPath();
+          ctx.arc(px, py, outerRadius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 内側セカンダリリング (シアン/エレクトリックブルー)
+          const innerRadius = easeProgress * BLOCK_SIZE * 2.5;
+          ctx.strokeStyle = `rgba(0, 240, 255, ${alpha * 0.85})`;
+          ctx.lineWidth = Math.max(1, 3 * (1 - progress));
+          ctx.shadowColor = "#00f0ff";
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(px, py, innerRadius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 3. 放射状のサイバー電撃・スパーク線（初期0.45秒間）
+          if (progress < 0.5) {
+            const sparkAlpha = (1 - progress / 0.5) * 0.9;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${sparkAlpha})`;
+            ctx.lineWidth = 2 * (1 - progress / 0.5);
+            ctx.shadowColor = "#00f0ff";
+            ctx.shadowBlur = 8;
+            const rayCount = 10;
+            for (let i = 0; i < rayCount; i++) {
+              const angle =
+                (i * Math.PI * 2) / rayCount + (fx.createdAt % 100) * 0.05;
+              const rStart = outerRadius * 0.35;
+              const rEnd =
+                outerRadius * (1.15 + Math.sin(i * 3 + fx.createdAt) * 0.2);
+              ctx.beginPath();
+              ctx.moveTo(
+                px + Math.cos(angle) * rStart,
+                py + Math.sin(angle) * rStart,
+              );
+              ctx.lineTo(
+                px + Math.cos(angle) * rEnd,
+                py + Math.sin(angle) * rEnd,
+              );
+              ctx.stroke();
+            }
+          }
+
+          // 4. 大規模サイバー破片パーティクル（24個の高速キューブ）
+          const particleCount = 24;
+          const colors = [
+            "#ff1a4b",
+            "#00f0ff",
+            "#ffdd00",
+            "#ffffff",
+            "#ff4d79",
+          ];
+          for (let i = 0; i < particleCount; i++) {
+            const angle = (i * Math.PI * 2) / particleCount + i * 1.618;
+            const speed = 0.85 + ((i * 37) % 10) * 0.08;
+            const dist = easeProgress * BLOCK_SIZE * 4.0 * speed;
+            const pX = px + Math.cos(angle) * dist;
+            const pY = py + Math.sin(angle) * dist;
+            const pSize = Math.max(1.5, (1 - progress) * (4 + (i % 3)));
+
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.shadowColor = colors[i % colors.length];
+            ctx.shadowBlur = 6;
+            ctx.fillRect(pX - pSize / 2, pY - pSize / 2, pSize, pSize);
+          }
+
+          // 5. 破壊された各ブロックごとの個別爆散ミニバースト
+          for (const b of fx.brokenBlocks) {
+            const bX = b.x * BLOCK_SIZE + BLOCK_SIZE / 2;
+            const bY = b.y * BLOCK_SIZE + BLOCK_SIZE / 2;
+            const bCount = 4;
+            for (let j = 0; j < bCount; j++) {
+              const bAngle =
+                (j * Math.PI * 2) / bCount + fx.createdAt * 0.02;
+              const bDist = progress * BLOCK_SIZE * 1.6;
+              const bPx = bX + Math.cos(bAngle) * bDist;
+              const bPy = bY + Math.sin(bAngle) * bDist;
+              const bSize = Math.max(1, (1 - progress) * 3);
+              ctx.fillStyle = b.color || "#00f0ff";
+              ctx.shadowColor = b.color || "#00f0ff";
+              ctx.shadowBlur = 4;
+              ctx.fillRect(bPx - bSize / 2, bPy - bSize / 2, bSize, bSize);
+            }
+          }
+
+          // 6. "BOMB!" / "ボム！" ネオンテキストポップアップ
+          if (progress < 0.85) {
+            const textAlpha =
+              progress < 0.6 ? 1 : 1 - (progress - 0.6) / 0.25;
+            ctx.font = 'bold 13px "DotGothic16", monospace';
+            ctx.fillStyle = `rgba(255, 230, 0, ${textAlpha})`;
+            ctx.shadowColor = "#ff0055";
+            ctx.shadowBlur = 10;
+            ctx.textAlign = "center";
+            const textY = py - outerRadius * 0.7 - 6;
+            ctx.fillText(
+              isKidsRef.current ? "ボム！" : "BOMB!",
+              px,
+              textY,
+            );
+          }
+
+          ctx.restore();
+          return true;
+        });
+      }
+
       // 11. 一時停止画面
       if (engine.status === "paused") {
         ctx.fillStyle = "rgba(0, 0, 0, 0.8)";

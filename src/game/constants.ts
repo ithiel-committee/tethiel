@@ -157,7 +157,7 @@ export const STAGES: StageData[] = [
       [9, 5],
       [4, 6],
     ],
-    initialSkills: [],
+    initialSkills: ["bomb", "bomb"],
   },
   {
     id: 2,

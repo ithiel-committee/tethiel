@@ -107,6 +107,13 @@ export class GameEngine {
     color: string;
     createdAt: number;
   }[] = [];
+  // ボム爆発エフェクト情報 (大爆発衝撃波＋破片パーティクル)
+  public bombExplosionEffects: {
+    x: number;
+    y: number;
+    brokenBlocks: { x: number; y: number; color: string }[];
+    createdAt: number;
+  }[] = [];
 
   // せりあがり型ウイルス（横一列感染）の現在進行行（初期値は最下部の外側）
   public magmaRow: number = GRID_HEIGHT;
@@ -210,6 +217,7 @@ export class GameEngine {
     this.waypoints = [];
     this.circuitRoute = [];
     this.spikeHitEffects = [];
+    this.bombExplosionEffects = [];
     this.magmaRow = GRID_HEIGHT;
     this.timePenalty = 0;
     this.minoBonus = 0;
@@ -795,13 +803,15 @@ export class GameEngine {
     this.skills.pop();
     sounds.playBomb();
 
-    // イティエルの現在位置または操作ミノの周囲2マスを破壊
+    // イティエルの現在位置または操作ミノの周囲2マス（3x3マス）を破壊
     const cx = this.currentPiece
       ? this.currentPiece.x + 1
       : Math.round(this.characterPos.x);
     const cy = this.currentPiece
       ? this.currentPiece.y + 1
       : Math.round(this.characterPos.y);
+
+    const brokenBlocks: { x: number; y: number; color: string }[] = [];
 
     for (let dr = -1; dr <= 1; dr++) {
       for (let dc = -1; dc <= 1; dc++) {
@@ -814,11 +824,16 @@ export class GameEngine {
           tc < GRID_WIDTH &&
           !(tr === START_ROW && START_COLS.includes(tc))
         ) {
+          const cell = this.grid[tr][tc];
           if (
-            this.grid[tr][tc].type === "obstacle" ||
-            this.grid[tr][tc].type === "placed"
+            cell.type === "obstacle" ||
+            cell.type === "placed" ||
+            cell.isInfected
           ) {
-            const oldColor = this.grid[tr][tc].color || "#00f0ff";
+            const oldColor =
+              cell.color ||
+              (cell.type === "obstacle" ? "#ff1a4b" : "#00f0ff");
+            brokenBlocks.push({ x: tc, y: tr, color: oldColor });
             this.grid[tr][tc] = {
               type: "glitched",
               color: oldColor,
@@ -830,7 +845,17 @@ export class GameEngine {
       }
     }
 
+    // 鮮烈なサイバー大爆発エフェクトを登録（衝撃波＋破片パーティクル）
+    this.bombExplosionEffects.push({
+      x: cx,
+      y: cy,
+      brokenBlocks,
+      createdAt: performance.now(),
+    });
+
     this.recalculateCircuit();
+    // ★ボム使用時に残数カウントおよびスコアを即座にUIへ反映
+    this.updateStats();
   }
 
   private resetLockDelay() {
