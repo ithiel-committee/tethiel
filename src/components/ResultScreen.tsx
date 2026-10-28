@@ -266,14 +266,17 @@ export const ResultScreen = ({
           <span>{t("stageSelect")}</span>
         </button>
 
-        {/* 4. ホーム画面へ戻る */}
+        {/* 4. タイトル画面へ戻る */}
         <button
           type="button"
           onClick={onGoHome}
           className="result-action-btn result-action-btn-secondary"
+          title={isKids ? "タイトルへもどる" : "タイトル画面へ戻る"}
         >
           <Home size={14} className="shrink-0" />
-          <span>{t("home")}</span>
+          <span className="tracking-wider">
+            T<span style={{ color: "#ff1a4b" }}>i</span>TLE
+          </span>
         </button>
       </div>
     </div>
