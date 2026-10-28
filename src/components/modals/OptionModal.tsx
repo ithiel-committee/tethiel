@@ -144,13 +144,13 @@ export const OptionModal: React.FC<OptionModalProps> = ({
         <div className="p-3 bg-slate-900/80 rounded border border-rose-500/30 space-y-2.5">
           {/* BGM 音量 */}
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <Music size={15} className="text-rose-400 shrink-0" />
-              <span className="font-bold text-slate-200">
+              <span className="font-bold text-slate-200 truncate">
                 {isKids ? "BGM (おんがく)" : "BGM 音量"}
               </span>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0">
               <input
                 type="range"
                 min="0"
@@ -160,10 +160,10 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 onChange={(e) =>
                   handleBgmVolumeChange(Number.parseInt(e.target.value, 10))
                 }
-                className="cyber-slider cyber-slider-rose w-32 sm:w-44 shrink-0"
+                className="cyber-slider cyber-slider-rose w-24 sm:w-32 shrink-0"
                 aria-label="BGM Volume"
               />
-              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-12 tabular-nums text-right shrink-0 select-none">
+              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-9 tabular-nums text-right shrink-0 select-none">
                 {bgmVol}%
               </span>
             </div>
@@ -171,13 +171,13 @@ export const OptionModal: React.FC<OptionModalProps> = ({
 
           {/* SE 音量 */}
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <Volume2 size={15} className="text-rose-400 shrink-0" />
-              <span className="font-bold text-slate-200">
+              <span className="font-bold text-slate-200 truncate">
                 {isKids ? "SE (こうかおん)" : "SE 音量"}
               </span>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0">
               <input
                 type="range"
                 min="0"
@@ -187,10 +187,10 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 onChange={(e) =>
                   handleSeVolumeChange(Number.parseInt(e.target.value, 10))
                 }
-                className="cyber-slider cyber-slider-rose w-32 sm:w-44 shrink-0"
+                className="cyber-slider cyber-slider-rose w-24 sm:w-32 shrink-0"
                 aria-label="SE Volume"
               />
-              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-12 tabular-nums text-right shrink-0 select-none">
+              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-9 tabular-nums text-right shrink-0 select-none">
                 {seVol}%
               </span>
             </div>
