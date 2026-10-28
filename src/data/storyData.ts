@@ -60,17 +60,17 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       {
         speaker: "イティエル",
         expression: "surprised",
-        text: "ここに「サーバーコア直結成功の驚き・速報」が入る",
+        text: "すごい……！ もうファイアーウォールへの回路が繋がったんですか？！",
       },
       {
         speaker: "イティエル",
         expression: "smile",
-        text: "ここに「第1関門突破の喜び・プレイヤーへの感謝」が入る",
+        text: "あなたのブロック配置、迷いがなくて本当に的確でした！ ありがとうございます！",
       },
       {
         speaker: "イティエル",
         expression: "smug",
-        text: "ここに「次のステージへ向けた自信・意気込み」が入る",
+        text: "これで第1防衛ラインは確保完了です。この調子でどんどん進んじゃいましょう！",
       },
     ],
   },
@@ -117,18 +117,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
     dialogues: [
       {
         speaker: "イティエル",
-        expression: "surprised",
-        text: "ここに「危機一髪でのクリア・安堵の吐息」が入る",
+        expression: "troubled",
+        text: "ふぅ……！ ウイルスの浸食スピード、一時はどうなることかと思いました……！",
       },
       {
         speaker: "イティエル",
         expression: "smile",
-        text: "ここに「プレイヤーの操作を絶賛するセリフ」が入る",
+        text: "あんな狭い迂回ルートを切り拓いて先回りできるなんて……あなたの神業操作のおかげです！",
       },
       {
         speaker: "イティエル",
         expression: "thinking",
-        text: "ここに「奥のメインフレームから感じる不穏な予兆・最終決戦への警戒」が入る",
+        text: "でも、サーバー中枢の奥から……ものすごいトラフィックのノイズを感じます。",
+      },
+      {
+        speaker: "イティエル",
+        expression: "determined",
+        text: "次が本当の正念場ですね。中央大学のサーバーを守るため、最後まで一緒に戦ってください！",
       },
     ],
   },
@@ -191,17 +196,27 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       {
         speaker: "イティエル",
         expression: "surprised",
-        text: "ここに「ウイルスコア完全消滅を確認した瞬間の衝撃」が入る",
+        text: "見てください……！ 侵入していたウイルスコアが、完全に霧散していきます……！",
+      },
+      {
+        speaker: "防衛本部",
+        expression: "default",
+        text: "全セクターのウイルス消滅を確認。サーバーの正常稼働を再開します――",
       },
       {
         speaker: "イティエル",
         expression: "smile",
-        text: "ここに「サイバー空間完全防衛達成の最大級の喜び」が入る",
+        text: "やりました……！ ついに全サーバーの防衛に成功しましたよ、プレイヤー！",
       },
       {
         speaker: "イティエル",
         expression: "smug",
-        text: "ここに「最高のプレイヤーへの感謝と誇らしげな締めくくり」が入る",
+        text: "ふふっ、あなたという最高のオペレーターがいてくれて、私、本当に誇らしいです！",
+      },
+      {
+        speaker: "イティエル",
+        expression: "smile",
+        text: "これで学生の皆さんも安心してキャンパスライフを送れますね。本当に、ありがとうございました！",
       },
     ],
   },
@@ -243,13 +258,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
     dialogues: [
       {
         speaker: "イティエル",
+        expression: "surprised",
+        text: "こんな高度まで登りきるなんて……！ 信じられない記録が出ましたね！",
+      },
+      {
+        speaker: "イティエル",
         expression: "smile",
-        text: "ここに「前人未到の最高到達高度記録達成への称賛」が入る",
+        text: "迫り来るウイルスをものともしないステップ、隣で見ていて息を呑むほどでした！",
       },
       {
         speaker: "イティエル",
         expression: "smug",
-        text: "ここに「最高のパートナーとしての称賛セリフ」が入る",
+        text: "これだけの訓練をこなした私たちなら、どんなサイバー攻撃が来ても怖くありませんね！",
+      },
+      {
+        speaker: "イティエル",
+        expression: "smile",
+        text: "ふふっ、お疲れ様でした！ 次の限界突破も、楽しみにしていますね！",
       },
     ],
   },
