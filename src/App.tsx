@@ -47,6 +47,42 @@ export function App() {
     preloadGameAssets();
   }, []);
 
+  // UIボタンクリック時の効果音再生 (グローバルリスナー)
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      const btn = target.closest("button, [role='button'], a, .keycap, .title-menu-btn");
+      if (!btn) return;
+
+      // 除外判定: ノベルメッセージ送り、スライダー、disabled要素
+      if (
+        btn.classList.contains("novel-msg-container") ||
+        btn.getAttribute("disabled") !== null ||
+        btn.getAttribute("aria-disabled") === "true" ||
+        btn.hasAttribute("data-no-sound")
+      ) {
+        return;
+      }
+
+      // 閉じる系ボタン判定
+      if (
+        btn.classList.contains("title-modal-close-btn") ||
+        btn.classList.contains("ranking-close-btn")
+      ) {
+        sounds.playBtnClose();
+      } else {
+        sounds.playBtnClick();
+      }
+    };
+
+    window.addEventListener("click", handleGlobalClick, { capture: true });
+    return () => {
+      window.removeEventListener("click", handleGlobalClick, { capture: true });
+    };
+  }, []);
+
   // ゲームステート
   const [gameStatus, setGameStatus] = useState<GameStatus>("ready");
   const [hearts, setHearts] = useState<number>(5);
