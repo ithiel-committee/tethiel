@@ -150,7 +150,7 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 {isKids ? "BGM (おんがく)" : "BGM 音量"}
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <input
                 type="range"
                 min="0"
@@ -160,10 +160,10 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 onChange={(e) =>
                   handleBgmVolumeChange(Number.parseInt(e.target.value, 10))
                 }
-                className="cyber-slider cyber-slider-rose w-32 sm:w-44"
+                className="cyber-slider cyber-slider-rose w-32 sm:w-44 shrink-0"
                 aria-label="BGM Volume"
               />
-              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-8 text-right shrink-0">
+              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-12 tabular-nums text-right shrink-0 select-none">
                 {bgmVol}%
               </span>
             </div>
@@ -177,7 +177,7 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 {isKids ? "SE (こうかおん)" : "SE 音量"}
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <input
                 type="range"
                 min="0"
@@ -187,10 +187,10 @@ export const OptionModal: React.FC<OptionModalProps> = ({
                 onChange={(e) =>
                   handleSeVolumeChange(Number.parseInt(e.target.value, 10))
                 }
-                className="cyber-slider cyber-slider-rose w-32 sm:w-44"
+                className="cyber-slider cyber-slider-rose w-32 sm:w-44 shrink-0"
                 aria-label="SE Volume"
               />
-              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-8 text-right shrink-0">
+              <span className="font-pixel-en text-[11px] text-rose-300 font-bold tracking-wider w-12 tabular-nums text-right shrink-0 select-none">
                 {seVol}%
               </span>
             </div>
