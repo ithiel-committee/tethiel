@@ -7,10 +7,10 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { sounds } from "../audio/soundSystem";
-import ithielArmHp5 from "../assets/character/ithiel_arm_hp5_smile.png";
-import ithielStandingDefault from "../assets/character/ithiel_standing_default.png";
-import ithielStandingSmile from "../assets/character/ithiel_standing_smile.png";
-import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
+import ithielStanding from "../assets/character/ithiel_standing.png";
+import ithielStandingKira from "../assets/character/ithiel_standing_kira.png";
+import ithielStandingNiya from "../assets/character/ithiel_standing_niya.png";
+import ithielStandingWink from "../assets/character/ithiel_standing_wink.png";
 import titleKeyVisual from "../assets/visual/title_key_visual.png";
 import { ENDLESS_STAGE, STAGES } from "../game/constants";
 import { useUIText } from "../context/UIModeContext";
@@ -30,10 +30,10 @@ import { useOverflowCheck } from "../utils/overflowChecker";
 
 // ホーム画面イティエル長押し隠し機能ポーズリスト
 const ITHIEL_SECRET_POSES = [
-  { src: ithielStandingDefault, label: "DEFAULT" },
-  { src: ithielStandingSmile, label: "SMILE" },
-  { src: ithielStandingSmug, label: "SMUG" },
-  { src: ithielArmHp5, label: "ARM_RAISED" },
+  { src: ithielStanding, label: "DEFAULT" },
+  { src: ithielStandingWink, label: "WINK" },
+  { src: ithielStandingNiya, label: "NIYA" },
+  { src: ithielStandingKira, label: "KIRA" },
 ];
 
 interface TitleScreenProps {

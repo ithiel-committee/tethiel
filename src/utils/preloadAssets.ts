@@ -1,6 +1,7 @@
-import ithielStandingDefault from "../assets/character/ithiel_standing_default.png";
-import ithielStandingImg from "../assets/character/ithiel_standing_smile.png";
-import ithielStandingSmug from "../assets/character/ithiel_standing_smug.png";
+import ithielStanding from "../assets/character/ithiel_standing.png";
+import ithielStandingKira from "../assets/character/ithiel_standing_kira.png";
+import ithielStandingNiya from "../assets/character/ithiel_standing_niya.png";
+import ithielStandingWink from "../assets/character/ithiel_standing_wink.png";
 import ithielArmHp5 from "../assets/character/ithiel_arm_hp5_smile.png";
 import ithielArmHp4 from "../assets/character/ithiel_arm_hp4_default.png";
 import ithielArmHp3 from "../assets/character/ithiel_arm_hp3_determined.png";
@@ -25,9 +26,10 @@ export const STORY_ASSET_IMAGES = [
 // ゲームおよびストーリー画面で使用する全画像アセットリスト
 export const GAME_ASSET_IMAGES = [
   ...STORY_ASSET_IMAGES,
-  ithielStandingDefault,
-  ithielStandingImg,
-  ithielStandingSmug,
+  ithielStanding,
+  ithielStandingWink,
+  ithielStandingNiya,
+  ithielStandingKira,
   ithielArmHp5,
   ithielArmHp4,
   ithielArmHp3,
